@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a1628"/>
+      <stop offset="100%" stop-color="#1a3050"/>
+    </linearGradient>
+    <linearGradient id="boltGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4FC3F7"/>
+      <stop offset="100%" stop-color="#29B6F6"/>
+    </linearGradient>
+    <linearGradient id="flameGrad" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#0288D1"/>
+      <stop offset="40%" stop-color="#29B6F6"/>
+      <stop offset="100%" stop-color="#B3E5FC"/>
+    </linearGradient>
+    <linearGradient id="flameInner" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#0277BD"/>
+      <stop offset="100%" stop-color="#4FC3F7"/>
+    </linearGradient>
+    <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4FC3F7" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#81D4FA" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#4FC3F7" stop-opacity="0.4"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="lineGlow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#4FC3F7" stroke-width="1.5" opacity="0.25"/>
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#4FC3F7" stroke-width="1" opacity="0.15"/>
+
+  <!-- classic lightning bolt (electricity) -->
+  <g filter="url(#glow)" transform="translate(138, 183)">
+    <polygon points="28,0 98,72 50,72 80,144 0,64 42,64"
+             fill="url(#boltGrad)"/>
+  </g>
+
+  <line x1="256" y1="95" x2="256" y2="390" stroke="#4FC3F7" stroke-width="1" opacity="0.2"/>
+
+  <!-- Gazprom-style gas flame -->
+  <g filter="url(#glow)" transform="translate(291, 188)">
+    <path d="M52,140 Q80,112 84,78 Q86,40 72,18 Q62,0 50,-4 Q38,0 28,18 Q14,40 16,78 Q20,112 48,140 Z"
+          fill="url(#flameGrad)"/>
+    <path d="M50,128 Q64,104 65,78 Q66,52 56,32 Q50,20 50,16 Q50,20 44,32 Q34,52 35,78 Q36,104 50,128 Z"
+          fill="url(#flameInner)" opacity="0.7"/>
+    <path d="M50,120 Q58,102 59,78 Q60,56 54,40 Q51,32 50,28 Q49,32 46,40 Q40,56 41,78 Q42,102 50,120 Z"
+          fill="#B3E5FC" opacity="0.3"/>
+  </g>
+
+  <!-- price graph line -->
+  <g filter="url(#lineGlow)" transform="translate(256, 410)">
+    <polyline points="-150,12 -120,-12 -90,8 -55,-18 -20,5 15,-28 50,10 85,-14 120,12 150,0"
+              fill="none" stroke="url(#lineGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="-120" cy="-12" r="2.5" fill="#81D4FA" opacity="0.6"/>
+    <circle cx="-55" cy="-18" r="2.5" fill="#81D4FA" opacity="0.6"/>
+    <circle cx="15" cy="-28" r="3.5" fill="#4FC3F7"/>
+    <circle cx="85" cy="-14" r="2.5" fill="#81D4FA" opacity="0.6"/>
+  </g>
+</svg>
