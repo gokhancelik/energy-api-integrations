@@ -1,0 +1,103 @@
+{
+  "prices": [
+    {
+      "date": "2026-06-17",
+      "electricity": {
+        "energyType": "electricity",
+        "unitOfMeasurement": "kWh",
+        "vatPercentage": 21,
+        "tariffs": [
+          {
+            "startDateTime": "2026-06-17T00:00:00",
+            "endDateTime": "2026-06-17T01:00:00",
+            "totalAmount": 0.254,
+            "totalAmountEx": 0.20992,
+            "totalAmountVat": 0.04408,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.13613,
+                "amountEx": 0.1125
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-17T01:00:00",
+            "endDateTime": "2026-06-17T02:00:00",
+            "totalAmount": 0.231,
+            "totalAmountEx": 0.19091,
+            "totalAmountVat": 0.04009,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.11313,
+                "amountEx": 0.0935
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          }
+        ]
+      },
+      "gas": {
+        "energyType": "gas",
+        "unitOfMeasurement": "m\u00b3",
+        "vatPercentage": 21,
+        "tariffs": [
+          {
+            "startDateTime": "2026-06-17T07:00:00",
+            "endDateTime": "2026-06-17T08:00:00",
+            "totalAmount": 0.789,
+            "totalAmountEx": 0.65207,
+            "totalAmountVat": 0.13693,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.720,
+                "amountEx": 0.59504
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "currency": "EUR"
+}

@@ -1,0 +1,2299 @@
+{
+  "prices": [
+    {
+      "date": "2026-06-15",
+      "electricity": {
+        "energyType": "electricity",
+        "unitOfMeasurement": "kWh",
+        "vatPercentage": 21,
+        "tariffs": [
+          {
+            "startDateTime": "2026-06-15T00:00:00",
+            "endDateTime": "2026-06-15T01:00:00",
+            "totalAmount": 0.26579,
+            "totalAmountEx": 0.21966,
+            "totalAmountVat": 0.04613,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.12966,
+                "amountEx": 0.10716
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T01:00:00",
+            "endDateTime": "2026-06-15T02:00:00",
+            "totalAmount": 0.25193,
+            "totalAmountEx": 0.2082,
+            "totalAmountVat": 0.04373,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.1158,
+                "amountEx": 0.0957
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T02:00:00",
+            "endDateTime": "2026-06-15T03:00:00",
+            "totalAmount": 0.24449,
+            "totalAmountEx": 0.20205,
+            "totalAmountVat": 0.04244,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.10836,
+                "amountEx": 0.08955
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T03:00:00",
+            "endDateTime": "2026-06-15T04:00:00",
+            "totalAmount": 0.24733,
+            "totalAmountEx": 0.2044,
+            "totalAmountVat": 0.04293,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.1112,
+                "amountEx": 0.0919
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T04:00:00",
+            "endDateTime": "2026-06-15T05:00:00",
+            "totalAmount": 0.2443,
+            "totalAmountEx": 0.2019,
+            "totalAmountVat": 0.0424,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.10817,
+                "amountEx": 0.0894
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T05:00:00",
+            "endDateTime": "2026-06-15T06:00:00",
+            "totalAmount": 0.25108,
+            "totalAmountEx": 0.2075,
+            "totalAmountVat": 0.04358,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.11495,
+                "amountEx": 0.095
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T06:00:00",
+            "endDateTime": "2026-06-15T07:00:00",
+            "totalAmount": 0.26976,
+            "totalAmountEx": 0.22294,
+            "totalAmountVat": 0.04682,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.13363,
+                "amountEx": 0.11044
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T07:00:00",
+            "endDateTime": "2026-06-15T08:00:00",
+            "totalAmount": 0.27818,
+            "totalAmountEx": 0.2299,
+            "totalAmountVat": 0.04828,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.14205,
+                "amountEx": 0.1174
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T08:00:00",
+            "endDateTime": "2026-06-15T09:00:00",
+            "totalAmount": 0.28456,
+            "totalAmountEx": 0.23517,
+            "totalAmountVat": 0.04939,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.14843,
+                "amountEx": 0.12267
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T09:00:00",
+            "endDateTime": "2026-06-15T10:00:00",
+            "totalAmount": 0.26143,
+            "totalAmountEx": 0.21605,
+            "totalAmountVat": 0.04538,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.1253,
+                "amountEx": 0.10355
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T10:00:00",
+            "endDateTime": "2026-06-15T11:00:00",
+            "totalAmount": 0.18857,
+            "totalAmountEx": 0.15584,
+            "totalAmountVat": 0.03273,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.05244,
+                "amountEx": 0.04334
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T11:00:00",
+            "endDateTime": "2026-06-15T12:00:00",
+            "totalAmount": 0.14275,
+            "totalAmountEx": 0.11797,
+            "totalAmountVat": 0.02478,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.00662,
+                "amountEx": 0.00547
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T12:00:00",
+            "endDateTime": "2026-06-15T13:00:00",
+            "totalAmount": 0.13687,
+            "totalAmountEx": 0.11311,
+            "totalAmountVat": 0.02376,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.00074,
+                "amountEx": 0.00061
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T13:00:00",
+            "endDateTime": "2026-06-15T14:00:00",
+            "totalAmount": 0.1351,
+            "totalAmountEx": 0.11165,
+            "totalAmountVat": 0.02345,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": -0.00103,
+                "amountEx": -0.00085
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T14:00:00",
+            "endDateTime": "2026-06-15T15:00:00",
+            "totalAmount": 0.13419,
+            "totalAmountEx": 0.1109,
+            "totalAmountVat": 0.02329,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": -0.00194,
+                "amountEx": -0.0016
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T15:00:00",
+            "endDateTime": "2026-06-15T16:00:00",
+            "totalAmount": 0.13568,
+            "totalAmountEx": 0.11213,
+            "totalAmountVat": 0.02355,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": -0.00045,
+                "amountEx": -0.00037
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T16:00:00",
+            "endDateTime": "2026-06-15T17:00:00",
+            "totalAmount": 0.14153,
+            "totalAmountEx": 0.11696,
+            "totalAmountVat": 0.02457,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.0054,
+                "amountEx": 0.00446
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T17:00:00",
+            "endDateTime": "2026-06-15T18:00:00",
+            "totalAmount": 0.19295,
+            "totalAmountEx": 0.15946,
+            "totalAmountVat": 0.03349,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.05682,
+                "amountEx": 0.04696
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T18:00:00",
+            "endDateTime": "2026-06-15T19:00:00",
+            "totalAmount": 0.25426,
+            "totalAmountEx": 0.21013,
+            "totalAmountVat": 0.04413,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.11813,
+                "amountEx": 0.09763
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T19:00:00",
+            "endDateTime": "2026-06-15T20:00:00",
+            "totalAmount": 0.29525,
+            "totalAmountEx": 0.244,
+            "totalAmountVat": 0.05125,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.15912,
+                "amountEx": 0.1315
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T20:00:00",
+            "endDateTime": "2026-06-15T21:00:00",
+            "totalAmount": 0.31701,
+            "totalAmountEx": 0.26199,
+            "totalAmountVat": 0.05502,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.18088,
+                "amountEx": 0.14949
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T21:00:00",
+            "endDateTime": "2026-06-15T22:00:00",
+            "totalAmount": 0.32585,
+            "totalAmountEx": 0.26929,
+            "totalAmountVat": 0.05656,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.18972,
+                "amountEx": 0.15679
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T22:00:00",
+            "endDateTime": "2026-06-15T23:00:00",
+            "totalAmount": 0.32222,
+            "totalAmountEx": 0.26629,
+            "totalAmountVat": 0.05593,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.18609,
+                "amountEx": 0.15379
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T23:00:00",
+            "endDateTime": "2026-06-16T00:00:00",
+            "totalAmount": 0.29937,
+            "totalAmountEx": 0.24741,
+            "totalAmountVat": 0.05196,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.16324,
+                "amountEx": 0.13491
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          }
+        ],
+        "minAmount": 0.13419,
+        "averageAmount": 0.23418541666666662,
+        "maxAmount": 0.32585,
+        "minAmountEx": 0.1109,
+        "averageAmountEx": 0.1935375,
+        "maxAmountEx": 0.26929
+      },
+      "gas": {
+        "energyType": "gas",
+        "unitOfMeasurement": "m\u00b3",
+        "vatPercentage": 21,
+        "tariffs": [
+          {
+            "startDateTime": "2026-06-15T00:00:00",
+            "endDateTime": "2026-06-15T01:00:00",
+            "totalAmount": 1.35588,
+            "totalAmountEx": 1.12056,
+            "totalAmountVat": 0.23532,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55036,
+                "amountEx": 0.45484
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T01:00:00",
+            "endDateTime": "2026-06-15T02:00:00",
+            "totalAmount": 1.35588,
+            "totalAmountEx": 1.12056,
+            "totalAmountVat": 0.23532,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55036,
+                "amountEx": 0.45484
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T02:00:00",
+            "endDateTime": "2026-06-15T03:00:00",
+            "totalAmount": 1.35588,
+            "totalAmountEx": 1.12056,
+            "totalAmountVat": 0.23532,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55036,
+                "amountEx": 0.45484
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T03:00:00",
+            "endDateTime": "2026-06-15T04:00:00",
+            "totalAmount": 1.35588,
+            "totalAmountEx": 1.12056,
+            "totalAmountVat": 0.23532,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55036,
+                "amountEx": 0.45484
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T04:00:00",
+            "endDateTime": "2026-06-15T05:00:00",
+            "totalAmount": 1.35588,
+            "totalAmountEx": 1.12056,
+            "totalAmountVat": 0.23532,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55036,
+                "amountEx": 0.45484
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T05:00:00",
+            "endDateTime": "2026-06-15T06:00:00",
+            "totalAmount": 1.35588,
+            "totalAmountEx": 1.12056,
+            "totalAmountVat": 0.23532,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55036,
+                "amountEx": 0.45484
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T06:00:00",
+            "endDateTime": "2026-06-15T07:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T07:00:00",
+            "endDateTime": "2026-06-15T08:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T08:00:00",
+            "endDateTime": "2026-06-15T09:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T09:00:00",
+            "endDateTime": "2026-06-15T10:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T10:00:00",
+            "endDateTime": "2026-06-15T11:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T11:00:00",
+            "endDateTime": "2026-06-15T12:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T12:00:00",
+            "endDateTime": "2026-06-15T13:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T13:00:00",
+            "endDateTime": "2026-06-15T14:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T14:00:00",
+            "endDateTime": "2026-06-15T15:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T15:00:00",
+            "endDateTime": "2026-06-15T16:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T16:00:00",
+            "endDateTime": "2026-06-15T17:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T17:00:00",
+            "endDateTime": "2026-06-15T18:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T18:00:00",
+            "endDateTime": "2026-06-15T19:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T19:00:00",
+            "endDateTime": "2026-06-15T20:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T20:00:00",
+            "endDateTime": "2026-06-15T21:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T21:00:00",
+            "endDateTime": "2026-06-15T22:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T22:00:00",
+            "endDateTime": "2026-06-15T23:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-15T23:00:00",
+            "endDateTime": "2026-06-16T00:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          }
+        ],
+        "minAmount": 1.35588,
+        "averageAmount": 1.3568774999999993,
+        "maxAmount": 1.35721,
+        "minAmountEx": 1.12056,
+        "averageAmountEx": 1.1213849999999994,
+        "maxAmountEx": 1.12166
+      }
+    },
+    {
+      "date": "2026-06-16",
+      "electricity": {
+        "energyType": "electricity",
+        "unitOfMeasurement": "kWh",
+        "vatPercentage": 21,
+        "tariffs": [
+          {
+            "startDateTime": "2026-06-16T00:00:00",
+            "endDateTime": "2026-06-16T01:00:00",
+            "totalAmount": 0.28676,
+            "totalAmountEx": 0.23699,
+            "totalAmountVat": 0.04977,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.15063,
+                "amountEx": 0.12449
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T01:00:00",
+            "endDateTime": "2026-06-16T02:00:00",
+            "totalAmount": 0.27875,
+            "totalAmountEx": 0.23037,
+            "totalAmountVat": 0.04838,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.14262,
+                "amountEx": 0.11787
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T02:00:00",
+            "endDateTime": "2026-06-16T03:00:00",
+            "totalAmount": 0.2739,
+            "totalAmountEx": 0.22636,
+            "totalAmountVat": 0.04754,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.13777,
+                "amountEx": 0.11386
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T03:00:00",
+            "endDateTime": "2026-06-16T04:00:00",
+            "totalAmount": 0.26958,
+            "totalAmountEx": 0.22279,
+            "totalAmountVat": 0.04679,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.13345,
+                "amountEx": 0.11029
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T04:00:00",
+            "endDateTime": "2026-06-16T05:00:00",
+            "totalAmount": 0.26877,
+            "totalAmountEx": 0.22212,
+            "totalAmountVat": 0.04665,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.13264,
+                "amountEx": 0.10962
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T05:00:00",
+            "endDateTime": "2026-06-16T06:00:00",
+            "totalAmount": 0.27477,
+            "totalAmountEx": 0.22708,
+            "totalAmountVat": 0.04769,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.13864,
+                "amountEx": 0.11458
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T06:00:00",
+            "endDateTime": "2026-06-16T07:00:00",
+            "totalAmount": 0.291,
+            "totalAmountEx": 0.24049,
+            "totalAmountVat": 0.05051,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.15487,
+                "amountEx": 0.12799
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T07:00:00",
+            "endDateTime": "2026-06-16T08:00:00",
+            "totalAmount": 0.29549,
+            "totalAmountEx": 0.2442,
+            "totalAmountVat": 0.05129,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.15936,
+                "amountEx": 0.1317
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T08:00:00",
+            "endDateTime": "2026-06-16T09:00:00",
+            "totalAmount": 0.30315,
+            "totalAmountEx": 0.25053,
+            "totalAmountVat": 0.05262,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.16702,
+                "amountEx": 0.13803
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T09:00:00",
+            "endDateTime": "2026-06-16T10:00:00",
+            "totalAmount": 0.2852,
+            "totalAmountEx": 0.2357,
+            "totalAmountVat": 0.0495,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.14907,
+                "amountEx": 0.1232
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T10:00:00",
+            "endDateTime": "2026-06-16T11:00:00",
+            "totalAmount": 0.27701,
+            "totalAmountEx": 0.22893,
+            "totalAmountVat": 0.04808,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.14088,
+                "amountEx": 0.11643
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T11:00:00",
+            "endDateTime": "2026-06-16T12:00:00",
+            "totalAmount": 0.25748,
+            "totalAmountEx": 0.21279,
+            "totalAmountVat": 0.04469,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.12135,
+                "amountEx": 0.10029
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T12:00:00",
+            "endDateTime": "2026-06-16T13:00:00",
+            "totalAmount": 0.23235,
+            "totalAmountEx": 0.19202,
+            "totalAmountVat": 0.04033,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.09622,
+                "amountEx": 0.07952
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T13:00:00",
+            "endDateTime": "2026-06-16T14:00:00",
+            "totalAmount": 0.21852,
+            "totalAmountEx": 0.18059,
+            "totalAmountVat": 0.03793,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.08239,
+                "amountEx": 0.06809
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T14:00:00",
+            "endDateTime": "2026-06-16T15:00:00",
+            "totalAmount": 0.21247,
+            "totalAmountEx": 0.17559,
+            "totalAmountVat": 0.03688,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.07634,
+                "amountEx": 0.06309
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T15:00:00",
+            "endDateTime": "2026-06-16T16:00:00",
+            "totalAmount": 0.22507,
+            "totalAmountEx": 0.186,
+            "totalAmountVat": 0.03907,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.08894,
+                "amountEx": 0.0735
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T16:00:00",
+            "endDateTime": "2026-06-16T17:00:00",
+            "totalAmount": 0.24233,
+            "totalAmountEx": 0.20027,
+            "totalAmountVat": 0.04206,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.1062,
+                "amountEx": 0.08777
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T17:00:00",
+            "endDateTime": "2026-06-16T18:00:00",
+            "totalAmount": 0.26575,
+            "totalAmountEx": 0.21962,
+            "totalAmountVat": 0.04613,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.12962,
+                "amountEx": 0.10712
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T18:00:00",
+            "endDateTime": "2026-06-16T19:00:00",
+            "totalAmount": 0.28806,
+            "totalAmountEx": 0.23806,
+            "totalAmountVat": 0.05,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.15193,
+                "amountEx": 0.12556
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T19:00:00",
+            "endDateTime": "2026-06-16T20:00:00",
+            "totalAmount": 0.31492,
+            "totalAmountEx": 0.26026,
+            "totalAmountVat": 0.05466,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.17879,
+                "amountEx": 0.14776
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T20:00:00",
+            "endDateTime": "2026-06-16T21:00:00",
+            "totalAmount": 0.34864,
+            "totalAmountEx": 0.28813,
+            "totalAmountVat": 0.06051,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.21251,
+                "amountEx": 0.17563
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T21:00:00",
+            "endDateTime": "2026-06-16T22:00:00",
+            "totalAmount": 0.35843,
+            "totalAmountEx": 0.29622,
+            "totalAmountVat": 0.06221,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.2223,
+                "amountEx": 0.18372
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T22:00:00",
+            "endDateTime": "2026-06-16T23:00:00",
+            "totalAmount": 0.33554,
+            "totalAmountEx": 0.2773,
+            "totalAmountVat": 0.05824,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.19941,
+                "amountEx": 0.1648
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T23:00:00",
+            "endDateTime": "2026-06-17T00:00:00",
+            "totalAmount": 0.30979,
+            "totalAmountEx": 0.25602,
+            "totalAmountVat": 0.05377,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.17366,
+                "amountEx": 0.14352
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.02528,
+                "amountEx": 0.02089
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.11085,
+                "amountEx": 0.09161
+              }
+            ]
+          }
+        ],
+        "minAmount": 0.21247,
+        "averageAmount": 0.2797387499999999,
+        "maxAmount": 0.35843,
+        "minAmountEx": 0.17559,
+        "averageAmountEx": 0.23118458333333336,
+        "maxAmountEx": 0.29622
+      },
+      "gas": {
+        "energyType": "gas",
+        "unitOfMeasurement": "m\u00b3",
+        "vatPercentage": 21,
+        "tariffs": [
+          {
+            "startDateTime": "2026-06-16T00:00:00",
+            "endDateTime": "2026-06-16T01:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T01:00:00",
+            "endDateTime": "2026-06-16T02:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T02:00:00",
+            "endDateTime": "2026-06-16T03:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T03:00:00",
+            "endDateTime": "2026-06-16T04:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T04:00:00",
+            "endDateTime": "2026-06-16T05:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T05:00:00",
+            "endDateTime": "2026-06-16T06:00:00",
+            "totalAmount": 1.35721,
+            "totalAmountEx": 1.12166,
+            "totalAmountVat": 0.23555,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.55169,
+                "amountEx": 0.45594
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T06:00:00",
+            "endDateTime": "2026-06-16T07:00:00",
+            "totalAmount": 1.31356,
+            "totalAmountEx": 1.08559,
+            "totalAmountVat": 0.22797,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.50804,
+                "amountEx": 0.41987
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T07:00:00",
+            "endDateTime": "2026-06-16T08:00:00",
+            "totalAmount": 1.31356,
+            "totalAmountEx": 1.08559,
+            "totalAmountVat": 0.22797,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.50804,
+                "amountEx": 0.41987
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T08:00:00",
+            "endDateTime": "2026-06-16T09:00:00",
+            "totalAmount": 1.31356,
+            "totalAmountEx": 1.08559,
+            "totalAmountVat": 0.22797,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.50804,
+                "amountEx": 0.41987
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T09:00:00",
+            "endDateTime": "2026-06-16T10:00:00",
+            "totalAmount": 1.31356,
+            "totalAmountEx": 1.08559,
+            "totalAmountVat": 0.22797,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.50804,
+                "amountEx": 0.41987
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T10:00:00",
+            "endDateTime": "2026-06-16T11:00:00",
+            "totalAmount": 1.31356,
+            "totalAmountEx": 1.08559,
+            "totalAmountVat": 0.22797,
+            "groups": [
+              {
+                "description": "Beursprijs",
+                "type": "MARKET_PRICE",
+                "amount": 0.50804,
+                "amountEx": 0.41987
+              },
+              {
+                "description": "Inkoopvergoeding",
+                "type": "PURCHASING_FEE",
+                "amount": 0.07872,
+                "amountEx": 0.06506
+              },
+              {
+                "description": "Energiebelasting",
+                "type": "TAX",
+                "amount": 0.7268,
+                "amountEx": 0.60066
+              }
+            ]
+          },
+          {
+            "startDateTime": "2026-06-16T11:00:00",
+            "endDateTime": "2026-06-16T12:00:00",
+            "totalAmount": 1.31356,
+            "totalAmountEx": 1.08559,
+            "totalAmountVat": 0.22797,
+    

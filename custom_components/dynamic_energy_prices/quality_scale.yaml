@@ -1,0 +1,28 @@
+---
+# https://developers.home-assistant.io/docs/quality_scale
+golden:
+  # Config flow: implemented
+  # Tests: implemented
+  # No blocking I/O: uses async
+  pass: true
+  details:
+    - config_flow
+    - test_coverage
+    - async_io
+silver:
+  # Device info: TBD
+  # Services: TBD
+  # Reauth: N/A (no auth credentials)
+  pass: false
+  details:
+    - device_info
+    - services
+bronze:
+  # Config flow (single step, no creds)
+  # Tests for config flow, coordinator, sensor
+  # No blocking I/O
+  pass: true
+  details:
+    - config_flow
+    - tests
+    - no_blocking_io

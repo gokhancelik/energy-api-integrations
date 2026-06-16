@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "provider": "Energy provider"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the energy provider. Please check your connection and try again.",
+      "invalid_response": "Received an unexpected response from the energy provider. Please try again later."
+    },
+    "abort": {
+      "already_configured": "This provider is already configured."
+    }
+  },
+  "services": {
+    "update": {
+      "name": "Force update",
+      "description": "Force a refresh of energy price data."
+    }
+  }
+}
