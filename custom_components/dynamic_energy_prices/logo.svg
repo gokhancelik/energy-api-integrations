@@ -4,18 +4,9 @@
       <stop offset="0%" stop-color="#0a1628"/>
       <stop offset="100%" stop-color="#1a3050"/>
     </linearGradient>
-    <linearGradient id="boltGrad" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="iconGrad" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#4FC3F7"/>
       <stop offset="100%" stop-color="#29B6F6"/>
-    </linearGradient>
-    <linearGradient id="flameGrad" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0%" stop-color="#0288D1"/>
-      <stop offset="40%" stop-color="#29B6F6"/>
-      <stop offset="100%" stop-color="#B3E5FC"/>
-    </linearGradient>
-    <linearGradient id="flameInner" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0%" stop-color="#0277BD"/>
-      <stop offset="100%" stop-color="#4FC3F7"/>
     </linearGradient>
     <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#4FC3F7" stop-opacity="0.4"/>
@@ -43,26 +34,24 @@
   <circle cx="256" cy="256" r="170" fill="none" stroke="#4FC3F7" stroke-width="1.5" opacity="0.25"/>
   <circle cx="256" cy="256" r="160" fill="none" stroke="#4FC3F7" stroke-width="1" opacity="0.15"/>
 
-  <!-- classic lightning bolt (electricity) -->
-  <g filter="url(#glow)" transform="translate(138, 183)">
-    <polygon points="28,0 98,72 50,72 80,144 0,64 42,64"
-             fill="url(#boltGrad)"/>
-  </g>
-
   <line x1="256" y1="95" x2="256" y2="390" stroke="#4FC3F7" stroke-width="1" opacity="0.2"/>
 
-  <!-- Gazprom-style gas flame -->
-  <g filter="url(#glow)" transform="translate(291, 188)">
-    <path d="M52,140 Q80,112 84,78 Q86,40 72,18 Q62,0 50,-4 Q38,0 28,18 Q14,40 16,78 Q20,112 48,140 Z"
-          fill="url(#flameGrad)"/>
-    <path d="M50,128 Q64,104 65,78 Q66,52 56,32 Q50,20 50,16 Q50,20 44,32 Q34,52 35,78 Q36,104 50,128 Z"
-          fill="url(#flameInner)" opacity="0.7"/>
-    <path d="M50,120 Q58,102 59,78 Q60,56 54,40 Q51,32 50,28 Q49,32 46,40 Q40,56 41,78 Q42,102 50,120 Z"
-          fill="#B3E5FC" opacity="0.3"/>
+  <!-- mdi:lightning-bolt -->
+  <g filter="url(#glow)" transform="translate(102, 181)">
+    <svg viewBox="0 0 24 24" width="150" height="150">
+      <path d="M11 15H6L13 1V9H18L11 23V15Z" fill="url(#iconGrad)"/>
+    </svg>
+  </g>
+
+  <!-- mdi:fire -->
+  <g filter="url(#glow)" transform="translate(260, 181)">
+    <svg viewBox="0 0 24 24" width="150" height="150">
+      <path d="M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.85 10.07 9.07 13.22C9.11 13.32 9.15 13.42 9.15 13.55C9.15 13.77 9 13.97 8.8 14.05C8.57 14.15 8.33 14.09 8.14 13.93C8.08 13.88 8.04 13.83 8 13.76C6.87 12.33 6.69 10.28 7.45 8.64C5.78 10 4.87 12.3 5 14.47C5.06 14.97 5.12 15.47 5.29 15.97C5.43 16.57 5.7 17.17 6 17.7C7.08 19.43 8.95 20.67 10.96 20.92C13.1 21.19 15.39 20.8 17.03 19.32C18.86 17.66 19.5 15 18.56 12.72L18.43 12.46C18.22 12 17.66 11.2 17.66 11.2M14.5 17.5C14.22 17.74 13.76 18 13.4 18.1C12.28 18.5 11.16 17.94 10.5 17.28C11.69 17 12.4 16.12 12.61 15.23C12.78 14.43 12.46 13.77 12.33 13C12.21 12.26 12.23 11.63 12.5 10.94C12.69 11.32 12.89 11.7 13.13 12C13.9 13 15.11 13.44 15.37 14.8C15.41 14.94 15.43 15.08 15.43 15.23C15.46 16.05 15.1 16.95 14.5 17.5H14.5Z" fill="url(#iconGrad)"/>
+    </svg>
   </g>
 
   <!-- price graph line -->
-  <g filter="url(#lineGlow)" transform="translate(256, 410)">
+  <g filter="url(#lineGlow)" transform="translate(256, 350)">
     <polyline points="-150,12 -120,-12 -90,8 -55,-18 -20,5 15,-28 50,10 85,-14 120,12 150,0"
               fill="none" stroke="url(#lineGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
     <circle cx="-120" cy="-12" r="2.5" fill="#81D4FA" opacity="0.6"/>
