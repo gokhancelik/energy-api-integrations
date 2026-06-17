@@ -12,7 +12,17 @@ import pytest
 
 
 def _mock_homeassistant() -> None:
-    """Mock the homeassistant module to allow imports without full HA installation."""
+    """Mock the homeassistant module to allow imports without full HA installation.
+
+    Only mocks when pytest-homeassistant-custom-component is not installed,
+    so CI with real HA fixtures works properly.
+    """
+    try:
+        import pytest_homeassistant_custom_component  # noqa: F401
+        return  # real HA fixtures available, skip mocking
+    except ImportError:
+        pass
+
     if "homeassistant" not in sys.modules:
         from dataclasses import dataclass
 
