@@ -13,7 +13,6 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfEnergy
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
@@ -139,7 +138,6 @@ ELECTRICITY_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         name="Current electricity price",
         device_class=SensorDeviceClass.MONETARY,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         value_fn=_current_price_value,
         extra_attrs_fn=_current_price_extra_attrs,
     ),
@@ -149,7 +147,6 @@ ELECTRICITY_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         name="Next electricity price",
         device_class=SensorDeviceClass.MONETARY,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         value_fn=_next_price_value,
         extra_attrs_fn=_price_extra_attrs,
     ),
@@ -159,7 +156,6 @@ ELECTRICITY_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         name="Average electricity price",
         device_class=SensorDeviceClass.MONETARY,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         value_fn=_average_price_value,
         extra_attrs_fn=_price_extra_attrs,
     ),
@@ -169,7 +165,6 @@ ELECTRICITY_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         name="Lowest electricity price",
         device_class=SensorDeviceClass.MONETARY,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         value_fn=_lowest_price_value,
         extra_attrs_fn=_price_extra_attrs,
         entity_registry_enabled_default=False,
@@ -180,7 +175,6 @@ ELECTRICITY_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         name="Highest electricity price",
         device_class=SensorDeviceClass.MONETARY,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         value_fn=_highest_price_value,
         extra_attrs_fn=_price_extra_attrs,
         entity_registry_enabled_default=False,
@@ -194,7 +188,6 @@ GAS_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         name="Current gas price",
         device_class=SensorDeviceClass.MONETARY,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_unit_of_measurement="EUR/m\u00b3",
         value_fn=_current_gas_price_value,
         extra_attrs_fn=_current_price_extra_attrs,
         available_fn=_gas_available,
@@ -205,7 +198,6 @@ GAS_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         name="Next gas price",
         device_class=SensorDeviceClass.MONETARY,
         state_class=SensorStateClass.MEASUREMENT,
-        suggested_unit_of_measurement="EUR/m\u00b3",
         value_fn=_next_gas_price_value,
         extra_attrs_fn=_price_extra_attrs,
         available_fn=_gas_available,
