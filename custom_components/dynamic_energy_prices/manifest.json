@@ -8,6 +8,6 @@
   "single_config_entry": false,
   "documentation": "https://github.com/gokhancelik/energy-api-integrations",
   "issue_tracker": "https://github.com/gokhancelik/energy-api-integrations/issues",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "requirements": []
 }
