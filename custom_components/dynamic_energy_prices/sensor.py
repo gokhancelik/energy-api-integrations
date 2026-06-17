@@ -21,6 +21,7 @@ from .const import ATTR_PRICE_BREAKDOWN, ATTR_PROVIDER, DOMAIN
 from .coordinator import DynamicPriceCoordinator
 from .entity import DynamicPriceEntity
 from .providers import (
+    PROVIDER_REGISTRY,
     EnergyPriceSeries,
     ProviderPrices,
     calculate_average_price,
@@ -217,17 +218,19 @@ async def async_setup_entry(
     """Set up the sensor platform."""
     coordinator: DynamicPriceCoordinator = hass.data[DOMAIN][entry.entry_id]
     provider_id = entry.data.get("provider", "")
+    provider_cls = PROVIDER_REGISTRY.get(provider_id)
+    provider_display_name = provider_cls.display_name if provider_cls else provider_id
 
     entities: list[DynamicPriceSensor] = []
 
     for description in ELECTRICITY_SENSORS:
         entities.append(
-            DynamicPriceSensor(coordinator, description, provider_id)
+            DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
         )
 
     for description in GAS_SENSORS:
         entities.append(
-            DynamicPriceSensor(coordinator, description, provider_id)
+            DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
         )
 
     async_add_entities(entities)
@@ -243,10 +246,12 @@ class DynamicPriceSensor(DynamicPriceEntity, SensorEntity):
         coordinator: DynamicPriceCoordinator,
         description: DynamicEnergySensorDescription,
         provider_id: str,
+        provider_display_name: str = "",
     ) -> None:
         """Initialize the sensor."""
         self.entity_description = description
         self._provider_id = provider_id
+        self._attr_name = f"{provider_display_name} {description.name}"
         super().__init__(coordinator)
 
     @property
