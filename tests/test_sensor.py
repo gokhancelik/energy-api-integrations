@@ -6,7 +6,6 @@ from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from custom_components.dynamic_energy_prices.const import ATTR_PRICE_BREAKDOWN, ATTR_PROVIDER
 from custom_components.dynamic_energy_prices.sensor import (
@@ -21,7 +20,7 @@ from custom_components.dynamic_energy_prices.sensor import (
     _next_gas_price_value,
 )
 
-from .conftest import mock_provider_prices, mock_provider_prices_electricity_only
+
 
 
 class TestSensorValueFunctions:

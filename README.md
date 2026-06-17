@@ -1,25 +1,27 @@
 # Dynamic Energy Prices
 
-A Home Assistant custom integration for dynamic/real-time energy prices, with a
-provider-pluggable architecture. **Essent** is the first supported provider.
-
-## Why this integration?
-
-The official Home Assistant Essent integration has been broken since 2026-06-03
-because Essent's public pricing API now requires a `x-request-origin: client`
-header. The fix exists upstream but has not been merged or released.
-
-This integration:
-
-- Ships the header fix **today** without waiting for upstream.
-- Is **provider-pluggable** so other energy providers can be added as peers.
-- Is maintained independently via HACS, not tied to HA core's release cadence.
+A Home Assistant custom integration for dynamic/real-time energy prices in the
+Netherlands, with a provider-pluggable architecture.
 
 ## Supported providers
 
-| Provider | Status |
-|---|---|
-| Essent (NL) | ✅ Working |
+| Provider | API Type | Auth | Electricity | Gas | Belgium |
+|---|---|---|---|---|---|
+| Essent (NL) | REST | None (header fix) | ✅ | ✅ | ❌ |
+| EnergyZero (NL) | REST | None | ✅ | ✅ | ❌ |
+| Frank Energie (NL) | GraphQL | None | ✅ | ✅ | ✅ |
+
+### Provider details
+
+- **Essent** — Uses the `essent.nl` public pricing API. Requires a
+  `x-request-origin: client` header (the official HA integration has been broken
+  since 2026-06-03 because this header was not sent).
+- **EnergyZero** — Uses the `api.energyzero.nl` public REST API. No
+  authentication required. Also serves as the backend for Eneco NL's dynamic
+  pricing (Eneco alias provider coming soon).
+- **Frank Energie** — Uses the `graphql.frankenergie.nl` public GraphQL API.
+  No authentication required. Supports Netherlands (default) and Belgium
+  (add `x-country: BE` header).
 
 ## Installation
 
@@ -42,9 +44,13 @@ This integration:
 
 1. Go to **Settings > Devices & Services > Add Integration**.
 2. Search for "Dynamic Energy Prices".
-3. Select your provider (e.g., **Essent**).
+3. Select your provider (Essent, EnergyZero, or Frank Energie).
 4. The integration will create sensors for current, next, average, lowest,
    and highest electricity prices, plus gas prices if available.
+
+No configuration is needed for providers that use public APIs. Provider-specific
+options (e.g., Belgium region for Frank Energie) may be added in a future
+release.
 
 ## Sensors
 
@@ -63,25 +69,48 @@ Each sensor includes extra attributes: provider name, price breakdown
 
 ## Adding a new provider
 
-See [custom_components/dynamic_energy_prices/providers/base.py](custom_components/dynamic_energy_prices/providers/base.py).
+See [`providers/base.py`](custom_components/dynamic_energy_prices/providers/base.py)
+for the `PriceProvider` ABC and dataclasses.
 
-1. Create a new file `custom_components/dynamic_energy_prices/providers/<name>.py`.
+1. Create `custom_components/dynamic_energy_prices/providers/<name>.py`.
 2. Subclass `PriceProvider`, set `provider_id` and `display_name`.
 3. Implement `async_fetch_prices()` returning `ProviderPrices`.
-4. The provider is auto-registered; no other files need changes.
+4. Import the module in
+   [`providers/__init__.py`](custom_components/dynamic_energy_prices/providers/__init__.py)
+   for auto-registration. No other files need changes.
 
 ## Development
 
 ```bash
-# Install test dependencies
+# Install test dependencies (Windows: pip install tzdata as well)
 pip install -r requirements_test.txt
 
-# Run tests
+# Run all tests
 pytest --asyncio-mode=auto -v
 
-# Smoke-test the Essent provider against the live API
+# Run tests for a specific provider
+pytest tests/test_essent_provider.py -v
+pytest tests/test_energyzero_provider.py -v
+pytest tests/test_frank_energie_provider.py -v
+
+# Smoke-test against live APIs
 python scripts/smoke_test_essent.py
+python scripts/smoke_test_energyzero.py
+python scripts/smoke_test_frank_energie.py
 ```
+
+## Roadmap
+
+- [x] Essent provider
+- [x] EnergyZero provider
+- [x] Frank Energie provider (NL + BE)
+- [x] Pluggable provider architecture
+- [x] 42+ unit tests with CI (pytest, hassfest, HACS validation)
+- [ ] Eneco NL (EnergyZero alias provider)
+- [ ] Vattenfall NL (TijdPrijs — time-of-use, no real-time API available)
+- [ ] Config flow with provider-specific options (Belgium toggle, etc.)
+- [ ] Belgium (BE) support toggle in Frank Energie config
+- [ ] Release v0.2.0
 
 ## Credits
 

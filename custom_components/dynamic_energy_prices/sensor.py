@@ -41,11 +41,15 @@ class DynamicEnergySensorDescription(SensorEntityDescription):
     energy_type: str = "electricity"
 
 
-def _electricity_series(prices: ProviderPrices) -> EnergyPriceSeries | None:
+def _electricity_series(prices: ProviderPrices | None) -> EnergyPriceSeries | None:
+    if prices is None:
+        return None
     return prices.electricity
 
 
-def _gas_series(prices: ProviderPrices) -> EnergyPriceSeries | None:
+def _gas_series(prices: ProviderPrices | None) -> EnergyPriceSeries | None:
+    if prices is None:
+        return None
     return prices.gas
 
 

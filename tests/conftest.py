@@ -14,6 +14,8 @@ import pytest
 def _mock_homeassistant() -> None:
     """Mock the homeassistant module to allow imports without full HA installation."""
     if "homeassistant" not in sys.modules:
+        from dataclasses import dataclass
+
         ha_mock = MagicMock()
         ha_mock.config_entries = MagicMock()
         ha_mock.const = MagicMock()
@@ -35,7 +37,54 @@ def _mock_homeassistant() -> None:
         )
         sys.modules["homeassistant.data_entry_flow"] = ha_mock.data_entry_flow
         sys.modules["homeassistant.components"] = MagicMock()
-        sys.modules["homeassistant.components.sensor"] = MagicMock()
+
+        # Provide real dataclass bases so DynamicEnergySensorDescription can inherit
+        class SensorDeviceClass:
+            MONETARY = "monetary"
+
+        class SensorStateClass:
+            MEASUREMENT = "measurement"
+
+        @dataclass(frozen=True, kw_only=True)
+        class SensorEntityDescription:
+            key: str = ""
+            name: str = ""
+            translation_key: str | None = None
+            device_class: str | None = None
+            state_class: str | None = None
+            entity_registry_enabled_default: bool = True
+
+        class SensorEntity:
+            pass
+
+        sensor_module = MagicMock()
+        sensor_module.SensorDeviceClass = SensorDeviceClass
+        sensor_module.SensorStateClass = SensorStateClass
+        sensor_module.SensorEntityDescription = SensorEntityDescription
+        sensor_module.SensorEntity = SensorEntity
+        sys.modules["homeassistant.components.sensor"] = sensor_module
+
+        # Provide real base classes for entity hierarchy (no metaclass conflicts)
+        class CoordinatorEntity:
+            def __init__(self, coordinator=None):
+                self.coordinator = coordinator
+                self._attr_unique_id = ""
+                self._attr_has_entity_name = True
+                self.entity_description = None
+
+            def __class_getitem__(cls, item):  # type: ignore[misc]
+                return cls
+
+            @property
+            def available(self) -> bool:
+                return True
+
+        class ConfigEntry:
+            entry_id: str = "test_entry"
+
+        ha_mock.helpers.update_coordinator.CoordinatorEntity = CoordinatorEntity
+        ha_mock.helpers.update_coordinator.DataUpdateCoordinator = CoordinatorEntity
+        ha_mock.config_entries.ConfigEntry = ConfigEntry
         sys.modules["homeassistant.helpers.device_registry"] = MagicMock()
         sys.modules["homeassistant.helpers.typing"] = MagicMock()
         sys.modules["homeassistant.loader"] = MagicMock()
@@ -149,7 +198,11 @@ MOCK_ESSENT_RESPONSE: dict[str, Any] = {
 }
 
 
-from custom_components.dynamic_energy_prices.providers import PricePoint  # noqa: E402
+from custom_components.dynamic_energy_prices.providers import (  # noqa: E402
+    EnergyPriceSeries,
+    PricePoint,
+    ProviderPrices,
+)
 
 
 def _make_pricepoint(
@@ -158,10 +211,13 @@ def _make_pricepoint(
     energy_type: str = "ELECTRICITY",
 ) -> Any:
     """Create a mock PricePoint with the given parameters."""
-    today = datetime.now().astimezone().date()
+    from datetime import timedelta
+    today = datetime.now().astimezone()
+    start = today.replace(hour=hour, minute=0, second=0, microsecond=0)
+    end = today.replace(hour=hour, minute=0, second=0, microsecond=0) + timedelta(hours=1)
     return PricePoint(
-        start=datetime(today.year, today.month, today.day, hour, 0, 0).astimezone(),
-        end=datetime(today.year, today.month, today.day, hour + 1, 0, 0).astimezone(),
+        start=start,
+        end=end,
         total_price=total_price,
         currency="EUR",
         breakdown={
@@ -169,4 +225,34 @@ def _make_pricepoint(
             "purchasing_fee": 0.010,
             "tax": 0.059,
         },
+    )
+
+
+MOCK_ELECTRICITY_PRICES = [
+    _make_pricepoint(h, p)
+    for h, p in enumerate([0.250, 0.231, 0.220, 0.210, 0.200, 0.198, 0.205, 0.215,
+                           0.230, 0.250, 0.280, 0.320, 0.350, 0.370, 0.380, 0.390,
+                           0.400, 0.390, 0.370, 0.340, 0.310, 0.290, 0.270, 0.255])
+]
+
+MOCK_GAS_PRICES = [
+    _make_pricepoint(h, p, energy_type="GAS")
+    for h, p in enumerate([0.720, 0.710, 0.700, 0.690, 0.680, 0.670, 0.660, 0.650,
+                           0.640, 0.630, 0.620, 0.610, 0.600, 0.590, 0.580, 0.570,
+                           0.560, 0.550, 0.540, 0.530, 0.520, 0.510, 0.500, 0.490])
+]
+
+@pytest.fixture
+def mock_provider_prices() -> ProviderPrices:
+    return ProviderPrices(
+        electricity=EnergyPriceSeries(unit="EUR/kWh", prices=MOCK_ELECTRICITY_PRICES),
+        gas=EnergyPriceSeries(unit="EUR/m³", prices=MOCK_GAS_PRICES),
+    )
+
+
+@pytest.fixture
+def mock_provider_prices_electricity_only() -> ProviderPrices:
+    return ProviderPrices(
+        electricity=EnergyPriceSeries(unit="EUR/kWh", prices=MOCK_ELECTRICITY_PRICES),
+        gas=None,
     )
