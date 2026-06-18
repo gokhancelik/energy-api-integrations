@@ -1,0 +1,7 @@
+force_update:
+  name: Force update
+  description: Force refresh energy price data from the provider.
+  target:
+    entity:
+      integration: dynamic_energy_prices
+      domain: sensor

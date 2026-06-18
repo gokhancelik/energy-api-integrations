@@ -10,6 +10,8 @@ DEFAULT_CURRENCY = "EUR"
 DEFAULT_UNIT_ELECTRICITY = "EUR/kWh"
 DEFAULT_UNIT_GAS = "EUR/m³"
 
+SERVICE_FORCE_UPDATE = "force_update"
+
 ATTR_CURRENT_PRICE = "current_price"
 ATTR_NEXT_PRICE = "next_price"
 ATTR_AVERAGE_PRICE = "average_price"

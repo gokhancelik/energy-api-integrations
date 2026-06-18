@@ -14,10 +14,11 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
-from .const import ATTR_PRICE_BREAKDOWN, ATTR_PROVIDER, DOMAIN
+from .const import ATTR_PRICE_BREAKDOWN, ATTR_PROVIDER, DOMAIN, SERVICE_FORCE_UPDATE
 from .coordinator import DynamicPriceCoordinator
 from .entity import DynamicPriceEntity
 from .providers import (
@@ -233,6 +234,13 @@ async def async_setup_entry(
             DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
         )
 
+    platform = entity_platform.async_get_current_platform()
+    platform.async_register_entity_service(
+        SERVICE_FORCE_UPDATE,
+        {},
+        "async_force_update",
+    )
+
     async_add_entities(entities)
 
 
@@ -293,3 +301,7 @@ class DynamicPriceSensor(DynamicPriceEntity, SensorEntity):
         if self.entity_description.available_fn:
             return self.entity_description.available_fn(prices)
         return True
+
+    async def async_force_update(self) -> None:
+        """Force refresh price data from the provider."""
+        await self.coordinator.async_request_refresh()

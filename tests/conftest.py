@@ -80,7 +80,6 @@ def _mock_homeassistant() -> None:
                 self.coordinator = coordinator
                 self._attr_unique_id = ""
                 self._attr_has_entity_name = True
-                self.entity_description = None
 
             def __class_getitem__(cls, item):  # type: ignore[misc]
                 return cls

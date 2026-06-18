@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -18,6 +18,7 @@ from custom_components.dynamic_energy_prices.sensor import (
     _next_price_value,
     _current_gas_price_value,
     _next_gas_price_value,
+    ELECTRICITY_SENSORS,
 )
 
 
@@ -88,3 +89,25 @@ class TestSensorDescription:
         )
         assert description.key == "test"
         assert description.value_fn(None) == 1.0  # type: ignore[arg-type]
+
+
+class TestForceUpdate:
+    """Test the force update service."""
+
+    @pytest.mark.asyncio
+    async def test_async_force_update_calls_coordinator(self) -> None:
+        coordinator = AsyncMock()
+        coordinator.async_request_refresh = AsyncMock()
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+
+        sensor = DynamicPriceSensor(
+            coordinator,
+            ELECTRICITY_SENSORS[0],
+            "test_provider",
+            "Test Provider",
+        )
+
+        await sensor.async_force_update()
+
+        coordinator.async_request_refresh.assert_called_once()
