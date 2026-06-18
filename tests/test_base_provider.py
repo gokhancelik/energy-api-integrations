@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
+import pytest
+
 from custom_components.dynamic_energy_prices.providers.base import (
     EnergyPriceSeries,
     PricePoint,
@@ -205,3 +207,18 @@ class TestPriceProviderDefaultSchema:
         )
 
         assert EssentPriceProvider.config_schema() is None
+
+
+class TestPriceProviderDateFetch:
+    """Test async_fetch_prices_for_date default."""
+
+    @pytest.mark.asyncio
+    async def test_default_returns_none(self) -> None:
+        """Test that base class returns None by default."""
+        from custom_components.dynamic_energy_prices.providers.essent import (
+            EssentPriceProvider,
+        )
+
+        provider = EssentPriceProvider()
+        result = await provider.async_fetch_prices_for_date("2026-06-19")
+        assert result is None

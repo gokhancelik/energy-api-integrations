@@ -150,6 +150,13 @@ async def test_header_fix_applied(provider: EssentPriceProvider) -> None:
 
 
 @pytest.mark.asyncio
+async def test_fetch_for_date_not_supported(provider: EssentPriceProvider) -> None:
+    """Verify Essent does not support date-specific fetching."""
+    result = await provider.async_fetch_prices_for_date("2026-06-19")
+    assert result is None
+
+
+@pytest.mark.asyncio
 async def test_breakdown_fields(provider: EssentPriceProvider) -> None:
     """Verify breakdown includes the correct field names from live API."""
     with patch("aiohttp.ClientSession.get") as mock_get:

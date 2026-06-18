@@ -19,6 +19,8 @@ from custom_components.dynamic_energy_prices.sensor import (
     _current_gas_price_value,
     _next_gas_price_value,
     ELECTRICITY_SENSORS,
+    TOMORROW_ELECTRICITY_SENSORS,
+    TOMORROW_GAS_SENSORS,
 )
 
 
@@ -89,6 +91,26 @@ class TestSensorDescription:
         )
         assert description.key == "test"
         assert description.value_fn(None) == 1.0  # type: ignore[arg-type]
+
+
+class TestTomorrowSensorDescriptions:
+    """Test the tomorrow sensor description definitions."""
+
+    def test_tomorrow_electricity_sensors_have_tomorrow_flag(self) -> None:
+        for desc in TOMORROW_ELECTRICITY_SENSORS:
+            assert desc.use_tomorrow_data is True
+            assert desc.energy_type == "electricity"
+
+    def test_tomorrow_gas_sensors_have_tomorrow_flag(self) -> None:
+        for desc in TOMORROW_GAS_SENSORS:
+            assert desc.use_tomorrow_data is True
+            assert desc.energy_type == "gas"
+
+    def test_tomorrow_electricity_sensor_count(self) -> None:
+        assert len(TOMORROW_ELECTRICITY_SENSORS) == 3
+
+    def test_tomorrow_gas_sensor_count(self) -> None:
+        assert len(TOMORROW_GAS_SENSORS) == 3
 
 
 class TestForceUpdate:

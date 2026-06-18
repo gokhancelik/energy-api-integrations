@@ -66,6 +66,10 @@ class PriceProvider(ABC):
     async def async_fetch_prices(self) -> ProviderPrices:
         """Fetch current energy prices from the provider."""
 
+    async def async_fetch_prices_for_date(self, date: str) -> ProviderPrices | None:
+        """Fetch prices for a specific date (YYYY-MM-DD). Return None if not supported."""
+        return None
+
     @classmethod
     def config_schema(cls) -> vol.Schema | None:
         """Return the config schema for this provider, or None if no extra config needed."""

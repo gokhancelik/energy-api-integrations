@@ -5,6 +5,11 @@
         "data": {
           "provider": "Energy provider"
         }
+      },
+      "provider_options": {
+        "data": {
+          "country": "Country"
+        }
       }
     },
     "error": {
@@ -16,9 +21,50 @@
     }
   },
   "services": {
-    "update": {
+    "force_update": {
       "name": "Force update",
       "description": "Force a refresh of energy price data."
+    }
+  },
+  "sensor": {
+    "current_electricity_price": {
+      "name": "Current electricity price"
+    },
+    "next_electricity_price": {
+      "name": "Next electricity price"
+    },
+    "average_electricity_price": {
+      "name": "Average electricity price"
+    },
+    "lowest_electricity_price": {
+      "name": "Lowest electricity price"
+    },
+    "highest_electricity_price": {
+      "name": "Highest electricity price"
+    },
+    "current_gas_price": {
+      "name": "Current gas price"
+    },
+    "next_gas_price": {
+      "name": "Next gas price"
+    },
+    "tomorrow_average_electricity_price": {
+      "name": "Tomorrow average electricity price"
+    },
+    "tomorrow_lowest_electricity_price": {
+      "name": "Tomorrow lowest electricity price"
+    },
+    "tomorrow_highest_electricity_price": {
+      "name": "Tomorrow highest electricity price"
+    },
+    "tomorrow_average_gas_price": {
+      "name": "Tomorrow average gas price"
+    },
+    "tomorrow_lowest_gas_price": {
+      "name": "Tomorrow lowest gas price"
+    },
+    "tomorrow_highest_gas_price": {
+      "name": "Tomorrow highest gas price"
     }
   }
 }

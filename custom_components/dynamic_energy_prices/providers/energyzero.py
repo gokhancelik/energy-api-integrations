@@ -18,6 +18,7 @@ from .base import (
 
 API_ENDPOINT = "https://api.energyzero.nl/v1/energyprices"
 REQUEST_TIMEOUT = 10
+AMSTERDAM_TZ = ZoneInfo("Europe/Amsterdam")
 
 
 class EnergyZeroPriceProvider(PriceProvider):
@@ -26,19 +27,61 @@ class EnergyZeroPriceProvider(PriceProvider):
     provider_id = "energyzero"
     display_name = "EnergyZero"
 
-    async def async_fetch_prices(self) -> ProviderPrices:
-        """Fetch dynamic energy prices from the EnergyZero public API."""
-        amsterdam_tz = ZoneInfo("Europe/Amsterdam")
-        now_local = datetime.now(amsterdam_tz)
-        today_start = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
-        today_end = now_local.replace(hour=23, minute=59, second=59, microsecond=999999)
+    @staticmethod
+    def _date_range_from_date(
+        date_str: str,
+    ) -> tuple[str, str]:
+        """Convert a YYYY-MM-DD date to EnergyZero fromDate/tillDate strings."""
+        date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=AMSTERDAM_TZ)
+        day_start = date.replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = date.replace(hour=23, minute=59, second=59, microsecond=999999)
+        from_date = day_start.astimezone(timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%S.000Z"
+        )
+        till_date = day_end.astimezone(timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%S.999Z"
+        )
+        return from_date, till_date
 
+    @staticmethod
+    def _today_date_range() -> tuple[str, str]:
+        """Get the fromDate/tillDate for today."""
+        now_local = datetime.now(AMSTERDAM_TZ)
+        today_start = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = now_local.replace(
+            hour=23, minute=59, second=59, microsecond=999999
+        )
         from_date = today_start.astimezone(timezone.utc).strftime(
             "%Y-%m-%dT%H:%M:%S.000Z"
         )
         till_date = today_end.astimezone(timezone.utc).strftime(
             "%Y-%m-%dT%H:%M:%S.999Z"
         )
+        return from_date, till_date
+
+    async def async_fetch_prices(self) -> ProviderPrices:
+        """Fetch dynamic energy prices from the EnergyZero public API."""
+        from_date, till_date = self._today_date_range()
+
+        try:
+            timeout = aiohttp.ClientTimeout(total=REQUEST_TIMEOUT)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                electricity_data = await self._fetch_type(
+                    session, from_date, till_date, usage_type=1
+                )
+                gas_data = await self._fetch_type(
+                    session, from_date, till_date, usage_type=3
+                )
+        except aiohttp.ClientError as err:
+            raise ProviderConnectionError(
+                f"Failed to connect to EnergyZero API: {err}"
+            ) from err
+
+        return self._parse_response(electricity_data, gas_data)
+
+    async def async_fetch_prices_for_date(self, date: str) -> ProviderPrices | None:
+        """Fetch prices for a specific date (YYYY-MM-DD)."""
+        from_date, till_date = self._date_range_from_date(date)
 
         try:
             timeout = aiohttp.ClientTimeout(total=REQUEST_TIMEOUT)

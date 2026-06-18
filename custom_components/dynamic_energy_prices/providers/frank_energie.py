@@ -66,13 +66,11 @@ class FrankEnergiePriceProvider(PriceProvider):
             }
         )
 
-    async def async_fetch_prices(self) -> ProviderPrices:
-        """Fetch dynamic energy prices from Frank Energie's public GraphQL API."""
-        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
+    async def _fetch_for_date(self, date_str: str) -> ProviderPrices:
+        """Fetch prices for a given date string from the Frank Energie API."""
         payload = {
             "query": MARKET_PRICES_QUERY,
-            "variables": {"date": today_str},
+            "variables": {"date": date_str},
         }
 
         headers = {
@@ -105,6 +103,15 @@ class FrankEnergiePriceProvider(PriceProvider):
             ) from err
 
         return self._parse_response(data)
+
+    async def async_fetch_prices(self) -> ProviderPrices:
+        """Fetch dynamic energy prices from Frank Energie's public GraphQL API."""
+        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        return await self._fetch_for_date(today_str)
+
+    async def async_fetch_prices_for_date(self, date: str) -> ProviderPrices | None:
+        """Fetch prices for a specific date (YYYY-MM-DD)."""
+        return await self._fetch_for_date(date)
 
     def _parse_response(self, data: dict[str, Any]) -> ProviderPrices:
         """Parse the Frank Energie GraphQL response into ProviderPrices."""

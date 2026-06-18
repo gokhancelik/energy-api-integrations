@@ -147,3 +147,20 @@ async def test_non_dict_response(
 
     with pytest.raises(ProviderResponseError, match="non-dict"):
         await provider.async_fetch_prices()
+
+
+@pytest.mark.asyncio
+async def test_fetch_for_date(
+    provider: EnergyZeroPriceProvider, mock_session: MagicMock
+) -> None:
+    """Test fetching prices for a specific date."""
+    elec_resp = _make_mock_response(json_data=MOCK_ELECTRICITY_RESPONSE)
+    gas_resp = _make_mock_response(json_data=MOCK_GAS_RESPONSE)
+    mock_session.get.side_effect = [elec_resp, gas_resp]
+
+    prices = await provider.async_fetch_prices_for_date("2026-06-19")
+
+    assert prices is not None
+    assert len(prices.electricity.prices) == 3
+    assert prices.gas is not None
+    assert len(prices.gas.prices) == 2

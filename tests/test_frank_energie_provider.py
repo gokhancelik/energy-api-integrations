@@ -223,6 +223,23 @@ async def test_breakdown_fields(provider: FrankEnergiePriceProvider) -> None:
 
 
 @pytest.mark.asyncio
+async def test_fetch_for_date(provider: FrankEnergiePriceProvider) -> None:
+    """Test fetching prices for a specific date."""
+    with patch("aiohttp.ClientSession.post") as mock_post:
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value=MOCK_MARKET_PRICES_RESPONSE)
+        mock_post.return_value.__aenter__.return_value = mock_response
+
+        prices = await provider.async_fetch_prices_for_date("2026-06-19")
+
+        assert prices is not None
+        assert len(prices.electricity.prices) == 2
+        assert prices.gas is not None
+        assert len(prices.gas.prices) == 1
+
+
+@pytest.mark.asyncio
 async def test_registration() -> None:
     """Verify the provider is registered in the registry."""
     from custom_components.dynamic_energy_prices.providers import PROVIDER_REGISTRY

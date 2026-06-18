@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 from random import randrange
 
@@ -37,6 +37,7 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
 
         self.provider: PriceProvider = provider_cls(entry.data)
         self._last_successful_data: ProviderPrices | None = None
+        self._tomorrow_data: ProviderPrices | None = None
 
         randomized_minute = randrange(0, 60)
         now = datetime.now()
@@ -67,9 +68,26 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
             raise UpdateFailed(f"Response error: {err}") from err
 
         self._last_successful_data = data
+
+        tomorrow_str = (
+            datetime.now(timezone.utc) + timedelta(days=1)
+        ).strftime("%Y-%m-%d")
+        try:
+            async with asyncio.timeout(15):
+                self._tomorrow_data = await self.provider.async_fetch_prices_for_date(
+                    tomorrow_str
+                )
+        except (ProviderConnectionError, ProviderResponseError):
+            self._tomorrow_data = None
+
         return data
 
     @property
     def last_successful_data(self) -> ProviderPrices | None:
         """Return the last successfully fetched data."""
         return self._last_successful_data
+
+    @property
+    def tomorrow_data(self) -> ProviderPrices | None:
+        """Return tomorrow's price data, if available."""
+        return self._tomorrow_data

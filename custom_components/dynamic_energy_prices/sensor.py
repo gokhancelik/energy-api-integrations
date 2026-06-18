@@ -41,6 +41,7 @@ class DynamicEnergySensorDescription(SensorEntityDescription):
     extra_attrs_fn: Callable[[ProviderPrices, str], dict[str, Any] | None] | None = None
     available_fn: Callable[[ProviderPrices], bool] | None = None
     energy_type: str = "electricity"
+    use_tomorrow_data: bool = False
 
 
 def _electricity_series(prices: ProviderPrices | None) -> EnergyPriceSeries | None:
@@ -187,6 +188,82 @@ ELECTRICITY_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
     ),
 )
 
+TOMORROW_ELECTRICITY_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
+    DynamicEnergySensorDescription(
+        key="tomorrow_average_electricity_price",
+        translation_key="tomorrow_average_electricity_price",
+        name="Tomorrow average electricity price",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_average_price_value,
+        extra_attrs_fn=_price_extra_attrs,
+        use_tomorrow_data=True,
+    ),
+    DynamicEnergySensorDescription(
+        key="tomorrow_lowest_electricity_price",
+        translation_key="tomorrow_lowest_electricity_price",
+        name="Tomorrow lowest electricity price",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_lowest_price_value,
+        extra_attrs_fn=_price_extra_attrs,
+        entity_registry_enabled_default=False,
+        use_tomorrow_data=True,
+    ),
+    DynamicEnergySensorDescription(
+        key="tomorrow_highest_electricity_price",
+        translation_key="tomorrow_highest_electricity_price",
+        name="Tomorrow highest electricity price",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_highest_price_value,
+        extra_attrs_fn=_price_extra_attrs,
+        entity_registry_enabled_default=False,
+        use_tomorrow_data=True,
+    ),
+)
+
+TOMORROW_GAS_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
+    DynamicEnergySensorDescription(
+        key="tomorrow_average_gas_price",
+        translation_key="tomorrow_average_gas_price",
+        name="Tomorrow average gas price",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_average_price_value,
+        extra_attrs_fn=_price_extra_attrs,
+        available_fn=_gas_available,
+        energy_type="gas",
+        use_tomorrow_data=True,
+    ),
+    DynamicEnergySensorDescription(
+        key="tomorrow_lowest_gas_price",
+        translation_key="tomorrow_lowest_gas_price",
+        name="Tomorrow lowest gas price",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_lowest_price_value,
+        extra_attrs_fn=_price_extra_attrs,
+        available_fn=_gas_available,
+        entity_registry_enabled_default=False,
+        energy_type="gas",
+        use_tomorrow_data=True,
+    ),
+    DynamicEnergySensorDescription(
+        key="tomorrow_highest_gas_price",
+        translation_key="tomorrow_highest_gas_price",
+        name="Tomorrow highest gas price",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_highest_price_value,
+        extra_attrs_fn=_price_extra_attrs,
+        available_fn=_gas_available,
+        entity_registry_enabled_default=False,
+        energy_type="gas",
+        use_tomorrow_data=True,
+    ),
+)
+
 GAS_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
     DynamicEnergySensorDescription(
         key="current_gas_price",
@@ -234,6 +311,16 @@ async def async_setup_entry(
             DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
         )
 
+    for description in TOMORROW_ELECTRICITY_SENSORS:
+        entities.append(
+            DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
+        )
+
+    for description in TOMORROW_GAS_SENSORS:
+        entities.append(
+            DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
+        )
+
     platform = entity_platform.async_get_current_platform()
     platform.async_register_entity_service(
         SERVICE_FORCE_UPDATE,
@@ -262,10 +349,16 @@ class DynamicPriceSensor(DynamicPriceEntity, SensorEntity):
         self._attr_name = f"{provider_display_name} {description.name}"
         super().__init__(coordinator)
 
+    def _get_prices(self) -> ProviderPrices | None:
+        """Return the appropriate price data source."""
+        if self.entity_description.use_tomorrow_data:
+            return self.coordinator.tomorrow_data
+        return self.coordinator.data
+
     @property
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit of measurement."""
-        prices = self.coordinator.data
+        prices = self._get_prices()
         if prices is None:
             return None
         if self.entity_description.energy_type == "gas" and prices.gas:
@@ -275,7 +368,7 @@ class DynamicPriceSensor(DynamicPriceEntity, SensorEntity):
     @property
     def native_value(self) -> StateType:
         """Return the state of the sensor."""
-        prices = self.coordinator.data
+        prices = self._get_prices()
         if prices is None:
             return None
         return self.entity_description.value_fn(prices)
@@ -283,7 +376,7 @@ class DynamicPriceSensor(DynamicPriceEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
         """Return the state attributes."""
-        prices = self.coordinator.data
+        prices = self._get_prices()
         if prices is None:
             return None
         if self.entity_description.extra_attrs_fn:
@@ -295,7 +388,7 @@ class DynamicPriceSensor(DynamicPriceEntity, SensorEntity):
         """Return if entity is available."""
         if not super().available:
             return False
-        prices = self.coordinator.data
+        prices = self._get_prices()
         if prices is None:
             return False
         if self.entity_description.available_fn:
