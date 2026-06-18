@@ -5,7 +5,14 @@ from __future__ import annotations
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
+import importlib.util
+
 import pytest
+
+pytestmark = pytest.mark.skipif(
+    importlib.util.find_spec("pytest_homeassistant_custom_component") is None,
+    reason="requires pytest-homeassistant-custom-component",
+)
 
 from homeassistant import config_entries, data_entry_flow
 from homeassistant.core import HomeAssistant

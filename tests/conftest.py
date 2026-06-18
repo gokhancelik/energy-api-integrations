@@ -89,11 +89,29 @@ def _mock_homeassistant() -> None:
             def available(self) -> bool:
                 return True
 
+        class UpdateFailed(Exception):
+            pass
+
+        class MockDataUpdateCoordinator:
+            def __init__(self, hass, logger, **kwargs: Any):
+                self.hass = hass
+                self.logger = logger
+                self.data = None
+
+            def __class_getitem__(cls, item):  # type: ignore[misc]
+                return cls
+
+            @property
+            def available(self) -> bool:
+                return True
+
+        ha_mock.helpers.update_coordinator.UpdateFailed = UpdateFailed
+
         class ConfigEntry:
             entry_id: str = "test_entry"
 
         ha_mock.helpers.update_coordinator.CoordinatorEntity = CoordinatorEntity
-        ha_mock.helpers.update_coordinator.DataUpdateCoordinator = CoordinatorEntity
+        ha_mock.helpers.update_coordinator.DataUpdateCoordinator = MockDataUpdateCoordinator
         ha_mock.config_entries.ConfigEntry = ConfigEntry
         sys.modules["homeassistant.helpers.device_registry"] = MagicMock()
         sys.modules["homeassistant.helpers.typing"] = MagicMock()
@@ -101,6 +119,32 @@ def _mock_homeassistant() -> None:
 
 
 _mock_homeassistant()
+
+_HAS_HA_FIXTURES: bool
+try:
+    import pytest_homeassistant_custom_component  # noqa: F401
+    _HAS_HA_FIXTURES = True
+except ImportError:
+    _HAS_HA_FIXTURES = False
+
+
+if _HAS_HA_FIXTURES:
+
+    @pytest.fixture(autouse=True)
+    def auto_enable_custom_integrations(  # type: ignore[misc]
+        enable_custom_integrations,  # type: ignore[name-defined]
+    ) -> None:
+        """Enable custom component discovery for HA test fixtures."""
+else:
+
+    @pytest.fixture(autouse=True)
+    def auto_enable_custom_integrations() -> None:
+        """No-op when pytest-homeassistant-custom-component is not installed."""
+
+    @pytest.fixture
+    def hass() -> MagicMock:
+        """Provide a mock hass when pytest-homeassistant-custom-component is not available."""
+        return MagicMock()
 
 
 MOCK_ESSENT_RESPONSE: dict[str, Any] = {

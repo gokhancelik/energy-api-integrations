@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import importlib.util
 from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+
+pytestmark = pytest.mark.skipif(
+    importlib.util.find_spec("pytest_homeassistant_custom_component") is None,
+    reason="requires pytest-homeassistant-custom-component",
+)
 
 from homeassistant.core import HomeAssistant
 
