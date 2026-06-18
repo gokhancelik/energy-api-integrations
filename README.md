@@ -9,7 +9,8 @@ Netherlands, with a provider-pluggable architecture.
 |---|---|---|---|---|---|
 | Essent (NL) | REST | None (header fix) | ✅ | ✅ | ❌ |
 | EnergyZero (NL) | REST | None | ✅ | ✅ | ❌ |
-| Frank Energie (NL) | GraphQL | None | ✅ | ✅ | ✅ |
+| Eneco (NL) | REST (EnergyZero alias) | None | ✅ | ✅ | ❌ |
+| Frank Energie (NL/BE) | GraphQL | None | ✅ | ✅ | ✅ |
 
 ### Provider details
 
@@ -17,8 +18,9 @@ Netherlands, with a provider-pluggable architecture.
   `x-request-origin: client` header (the official HA integration has been broken
   since 2026-06-03 because this header was not sent).
 - **EnergyZero** — Uses the `api.energyzero.nl` public REST API. No
-  authentication required. Also serves as the backend for Eneco NL's dynamic
-  pricing (Eneco alias provider coming soon).
+  authentication required.
+- **Eneco** — Reuses the EnergyZero public API (white-label backend). Same
+  features, listed separately for clarity.
 - **Frank Energie** — Uses the `graphql.frankenergie.nl` public GraphQL API.
   No authentication required. Supports Netherlands (default) and Belgium
   (add `x-country: BE` header).
@@ -106,7 +108,7 @@ python scripts/smoke_test_frank_energie.py
 - [x] Frank Energie provider (NL + BE)
 - [x] Pluggable provider architecture
 - [x] 42+ unit tests with CI (pytest, hassfest, HACS validation)
-- [ ] Eneco NL (EnergyZero alias provider)
+- [x] Eneco NL (EnergyZero alias provider)
 - [ ] Vattenfall NL (TijdPrijs — time-of-use, no real-time API available)
 - [ ] Config flow with provider-specific options (Belgium toggle, etc.)
 - [ ] Belgium (BE) support toggle in Frank Energie config

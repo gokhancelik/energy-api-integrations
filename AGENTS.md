@@ -14,6 +14,7 @@
 |---|---|---|
 | Essent | REST GET `essent.nl/.../dynamic-prices/v1` | Header `x-request-origin: client` (401 without it) |
 | EnergyZero | REST GET `api.energyzero.nl/v1/energyprices` | None — params: `fromDate`, `tillDate`, `interval=4`, `usageType=1\|3`, `inclBtw=true` |
+| Eneco | REST (EnergyZero alias) | Same as EnergyZero (white-label backend) |
 | Frank Energie | GraphQL POST `graphql.frankenergie.nl/` | None — query: `MarketPrices($date: String!)` |
 
 ## Tests

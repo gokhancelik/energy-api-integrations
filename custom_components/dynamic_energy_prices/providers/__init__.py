@@ -14,6 +14,7 @@ from .base import (
 from . import essent  # noqa: F401 - register the Essent provider
 from . import energyzero  # noqa: F401 - register the EnergyZero provider
 from . import frank_energie  # noqa: F401 - register the Frank Energie provider
+from . import eneco  # noqa: F401 - register the Eneco provider
 
 __all__ = [
     "PriceProvider",
