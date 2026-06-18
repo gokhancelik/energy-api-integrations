@@ -57,148 +57,80 @@ def _make_mock_response(status: int = 200, json_data: dict | None = None) -> Asy
     return mock_response
 
 
-@patch("aiohttp.ClientSession.get")
-@patch("aiohttp.ClientSession.__aenter__")
-@patch("aiohttp.ClientSession.__aexit__")
 @pytest.mark.asyncio
-async def test_successful_fetch(
-    mock_session_exit: AsyncMock,
-    mock_session_enter: AsyncMock,
-    mock_get: AsyncMock,
-    provider: EnergyZeroPriceProvider,
-) -> None:
+async def test_successful_fetch(provider: EnergyZeroPriceProvider) -> None:
     """Test successful price fetch."""
-    mock_session = AsyncMock()
-    mock_session.get = mock_get
-    mock_session_enter.return_value = mock_session
-    mock_session_exit.return_value = None
+    with patch("aiohttp.ClientSession.get") as mock_get:
+        elec_resp = _make_mock_response(json_data=MOCK_ELECTRICITY_RESPONSE)
+        gas_resp = _make_mock_response(json_data=MOCK_GAS_RESPONSE)
+        mock_get.side_effect = [elec_resp, gas_resp]
 
-    elec_resp = _make_mock_response(json_data=MOCK_ELECTRICITY_RESPONSE)
-    gas_resp = _make_mock_response(json_data=MOCK_GAS_RESPONSE)
-    mock_get.side_effect = [elec_resp, gas_resp]
+        prices = await provider.async_fetch_prices()
 
-    prices = await provider.async_fetch_prices()
-
-    assert prices.electricity.unit == "EUR/kWh"
-    assert len(prices.electricity.prices) == 3
-    assert prices.gas is not None
-    assert len(prices.gas.prices) == 2
-    assert prices.electricity.prices[0].total_price == 0.08234
-    assert prices.gas.prices[0].total_price == 0.78912
+        assert prices.electricity.unit == "EUR/kWh"
+        assert len(prices.electricity.prices) == 3
+        assert prices.gas is not None
+        assert len(prices.gas.prices) == 2
+        assert prices.electricity.prices[0].total_price == 0.08234
+        assert prices.gas.prices[0].total_price == 0.78912
 
 
-@patch("aiohttp.ClientSession.get")
-@patch("aiohttp.ClientSession.__aenter__")
-@patch("aiohttp.ClientSession.__aexit__")
 @pytest.mark.asyncio
 async def test_successful_fetch_electricity_only(
-    mock_session_exit: AsyncMock,
-    mock_session_enter: AsyncMock,
-    mock_get: AsyncMock,
     provider: EnergyZeroPriceProvider,
 ) -> None:
     """Test successful fetch with only electricity prices."""
-    mock_session = AsyncMock()
-    mock_session.get = mock_get
-    mock_session_enter.return_value = mock_session
-    mock_session_exit.return_value = None
+    with patch("aiohttp.ClientSession.get") as mock_get:
+        elec_resp = _make_mock_response(json_data=MOCK_ELECTRICITY_RESPONSE)
+        gas_resp = _make_mock_response(json_data={"Prices": []})
+        mock_get.side_effect = [elec_resp, gas_resp]
 
-    elec_resp = _make_mock_response(json_data=MOCK_ELECTRICITY_RESPONSE)
-    gas_resp = _make_mock_response(json_data={"Prices": []})
-    mock_get.side_effect = [elec_resp, gas_resp]
+        prices = await provider.async_fetch_prices()
 
-    prices = await provider.async_fetch_prices()
-
-    assert prices.electricity is not None
-    assert prices.gas is None
+        assert prices.electricity is not None
+        assert prices.gas is None
 
 
-@patch("aiohttp.ClientSession.get")
-@patch("aiohttp.ClientSession.__aenter__")
-@patch("aiohttp.ClientSession.__aexit__")
 @pytest.mark.asyncio
-async def test_http_error(
-    mock_session_exit: AsyncMock,
-    mock_session_enter: AsyncMock,
-    mock_get: AsyncMock,
-    provider: EnergyZeroPriceProvider,
-) -> None:
+async def test_http_error(provider: EnergyZeroPriceProvider) -> None:
     """Test HTTP error handling."""
-    mock_session = AsyncMock()
-    mock_session.get = mock_get
-    mock_session_enter.return_value = mock_session
-    mock_session_exit.return_value = None
+    with patch("aiohttp.ClientSession.get") as mock_get:
+        elec_resp = _make_mock_response(status=500)
+        mock_get.return_value = elec_resp
 
-    elec_resp = _make_mock_response(status=500)
-    mock_get.return_value = elec_resp
-
-    with pytest.raises(ProviderConnectionError, match="500"):
-        await provider.async_fetch_prices()
+        with pytest.raises(ProviderConnectionError, match="500"):
+            await provider.async_fetch_prices()
 
 
-@patch("aiohttp.ClientSession.get")
-@patch("aiohttp.ClientSession.__aenter__")
-@patch("aiohttp.ClientSession.__aexit__")
 @pytest.mark.asyncio
-async def test_connection_error(
-    mock_session_exit: AsyncMock,
-    mock_session_enter: AsyncMock,
-    mock_get: AsyncMock,
-    provider: EnergyZeroPriceProvider,
-) -> None:
+async def test_connection_error(provider: EnergyZeroPriceProvider) -> None:
     """Test connection error handling."""
-    mock_session = AsyncMock()
-    mock_session.get = mock_get
-    mock_session_enter.return_value = mock_session
-    mock_session_exit.return_value = None
+    with patch("aiohttp.ClientSession.get") as mock_get:
+        mock_get.side_effect = aiohttp.ClientError("Connection refused")
 
-    mock_get.side_effect = aiohttp.ClientError("Connection refused")
-
-    with pytest.raises(ProviderConnectionError, match="Failed to connect"):
-        await provider.async_fetch_prices()
+        with pytest.raises(ProviderConnectionError, match="Failed to connect"):
+            await provider.async_fetch_prices()
 
 
-@patch("aiohttp.ClientSession.get")
-@patch("aiohttp.ClientSession.__aenter__")
-@patch("aiohttp.ClientSession.__aexit__")
 @pytest.mark.asyncio
 async def test_empty_electricity_prices(
-    mock_session_exit: AsyncMock,
-    mock_session_enter: AsyncMock,
-    mock_get: AsyncMock,
     provider: EnergyZeroPriceProvider,
 ) -> None:
     """Test response with empty electricity prices list."""
-    mock_session = AsyncMock()
-    mock_session.get = mock_get
-    mock_session_enter.return_value = mock_session
-    mock_session_exit.return_value = None
+    with patch("aiohttp.ClientSession.get") as mock_get:
+        empty_resp = _make_mock_response(json_data={"Prices": []})
+        mock_get.side_effect = [empty_resp, empty_resp]
 
-    empty_resp = _make_mock_response(json_data={"Prices": []})
-    mock_get.side_effect = [empty_resp, empty_resp]
-
-    with pytest.raises(ProviderResponseError, match="no electricity prices"):
-        await provider.async_fetch_prices()
+        with pytest.raises(ProviderResponseError, match="no electricity prices"):
+            await provider.async_fetch_prices()
 
 
-@patch("aiohttp.ClientSession.get")
-@patch("aiohttp.ClientSession.__aenter__")
-@patch("aiohttp.ClientSession.__aexit__")
 @pytest.mark.asyncio
-async def test_non_dict_response(
-    mock_session_exit: AsyncMock,
-    mock_session_enter: AsyncMock,
-    mock_get: AsyncMock,
-    provider: EnergyZeroPriceProvider,
-) -> None:
+async def test_non_dict_response(provider: EnergyZeroPriceProvider) -> None:
     """Test non-dict response handling."""
-    mock_session = AsyncMock()
-    mock_session.get = mock_get
-    mock_session_enter.return_value = mock_session
-    mock_session_exit.return_value = None
+    with patch("aiohttp.ClientSession.get") as mock_get:
+        elec_resp = _make_mock_response(json_data=["not", "a", "dict"])
+        mock_get.return_value = elec_resp
 
-    elec_resp = _make_mock_response(json_data=["not", "a", "dict"])
-    mock_get.return_value = elec_resp
-
-    with pytest.raises(ProviderResponseError, match="non-dict"):
-        await provider.async_fetch_prices()
+        with pytest.raises(ProviderResponseError, match="non-dict"):
+            await provider.async_fetch_prices()
