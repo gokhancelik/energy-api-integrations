@@ -59,8 +59,10 @@ def _make_mock_response(status: int = 200, json_data: dict | None = None) -> Asy
 
 @patch("aiohttp.ClientSession.get")
 @patch("aiohttp.ClientSession.__aenter__")
+@patch("aiohttp.ClientSession.__aexit__")
 @pytest.mark.asyncio
 async def test_successful_fetch(
+    mock_session_exit: AsyncMock,
     mock_session_enter: AsyncMock,
     mock_get: AsyncMock,
     provider: EnergyZeroPriceProvider,
@@ -69,6 +71,7 @@ async def test_successful_fetch(
     mock_session = AsyncMock()
     mock_session.get = mock_get
     mock_session_enter.return_value = mock_session
+    mock_session_exit.return_value = None
 
     elec_resp = _make_mock_response(json_data=MOCK_ELECTRICITY_RESPONSE)
     gas_resp = _make_mock_response(json_data=MOCK_GAS_RESPONSE)
@@ -86,8 +89,10 @@ async def test_successful_fetch(
 
 @patch("aiohttp.ClientSession.get")
 @patch("aiohttp.ClientSession.__aenter__")
+@patch("aiohttp.ClientSession.__aexit__")
 @pytest.mark.asyncio
 async def test_successful_fetch_electricity_only(
+    mock_session_exit: AsyncMock,
     mock_session_enter: AsyncMock,
     mock_get: AsyncMock,
     provider: EnergyZeroPriceProvider,
@@ -96,6 +101,7 @@ async def test_successful_fetch_electricity_only(
     mock_session = AsyncMock()
     mock_session.get = mock_get
     mock_session_enter.return_value = mock_session
+    mock_session_exit.return_value = None
 
     elec_resp = _make_mock_response(json_data=MOCK_ELECTRICITY_RESPONSE)
     gas_resp = _make_mock_response(json_data={"Prices": []})
@@ -109,8 +115,10 @@ async def test_successful_fetch_electricity_only(
 
 @patch("aiohttp.ClientSession.get")
 @patch("aiohttp.ClientSession.__aenter__")
+@patch("aiohttp.ClientSession.__aexit__")
 @pytest.mark.asyncio
 async def test_http_error(
+    mock_session_exit: AsyncMock,
     mock_session_enter: AsyncMock,
     mock_get: AsyncMock,
     provider: EnergyZeroPriceProvider,
@@ -119,6 +127,7 @@ async def test_http_error(
     mock_session = AsyncMock()
     mock_session.get = mock_get
     mock_session_enter.return_value = mock_session
+    mock_session_exit.return_value = None
 
     elec_resp = _make_mock_response(status=500)
     mock_get.return_value = elec_resp
@@ -129,8 +138,10 @@ async def test_http_error(
 
 @patch("aiohttp.ClientSession.get")
 @patch("aiohttp.ClientSession.__aenter__")
+@patch("aiohttp.ClientSession.__aexit__")
 @pytest.mark.asyncio
 async def test_connection_error(
+    mock_session_exit: AsyncMock,
     mock_session_enter: AsyncMock,
     mock_get: AsyncMock,
     provider: EnergyZeroPriceProvider,
@@ -139,6 +150,7 @@ async def test_connection_error(
     mock_session = AsyncMock()
     mock_session.get = mock_get
     mock_session_enter.return_value = mock_session
+    mock_session_exit.return_value = None
 
     mock_get.side_effect = aiohttp.ClientError("Connection refused")
 
@@ -148,8 +160,10 @@ async def test_connection_error(
 
 @patch("aiohttp.ClientSession.get")
 @patch("aiohttp.ClientSession.__aenter__")
+@patch("aiohttp.ClientSession.__aexit__")
 @pytest.mark.asyncio
 async def test_empty_electricity_prices(
+    mock_session_exit: AsyncMock,
     mock_session_enter: AsyncMock,
     mock_get: AsyncMock,
     provider: EnergyZeroPriceProvider,
@@ -158,6 +172,7 @@ async def test_empty_electricity_prices(
     mock_session = AsyncMock()
     mock_session.get = mock_get
     mock_session_enter.return_value = mock_session
+    mock_session_exit.return_value = None
 
     empty_resp = _make_mock_response(json_data={"Prices": []})
     mock_get.side_effect = [empty_resp, empty_resp]
@@ -168,8 +183,10 @@ async def test_empty_electricity_prices(
 
 @patch("aiohttp.ClientSession.get")
 @patch("aiohttp.ClientSession.__aenter__")
+@patch("aiohttp.ClientSession.__aexit__")
 @pytest.mark.asyncio
 async def test_non_dict_response(
+    mock_session_exit: AsyncMock,
     mock_session_enter: AsyncMock,
     mock_get: AsyncMock,
     provider: EnergyZeroPriceProvider,
@@ -178,6 +195,7 @@ async def test_non_dict_response(
     mock_session = AsyncMock()
     mock_session.get = mock_get
     mock_session_enter.return_value = mock_session
+    mock_session_exit.return_value = None
 
     elec_resp = _make_mock_response(json_data=["not", "a", "dict"])
     mock_get.return_value = elec_resp
