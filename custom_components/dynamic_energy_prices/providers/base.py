@@ -54,6 +54,9 @@ class PriceProvider(ABC):
     provider_id: str = ""
     display_name: str = ""
 
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
+        self.config = config or {}
+
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         if cls.provider_id and cls.display_name:

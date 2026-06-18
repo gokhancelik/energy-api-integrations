@@ -6,7 +6,9 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiohttp
+import voluptuous as vol
 
+from ..const import CONF_COUNTRY
 from .base import (
     EnergyPriceSeries,
     PricePoint,
@@ -18,6 +20,8 @@ from .base import (
 
 API_ENDPOINT = "https://graphql.frankenergie.nl/"
 REQUEST_TIMEOUT = 10
+COUNTRY_NL = "NL"
+COUNTRY_BE = "BE"
 
 MARKET_PRICES_QUERY = """
 query MarketPrices($date: String!) {
@@ -51,6 +55,17 @@ class FrankEnergiePriceProvider(PriceProvider):
     provider_id = "frank_energie"
     display_name = "Frank Energie"
 
+    @classmethod
+    def config_schema(cls) -> vol.Schema | None:
+        """Return the config schema for Frank Energie options."""
+        return vol.Schema(
+            {
+                vol.Required(CONF_COUNTRY, default=COUNTRY_NL): vol.In(
+                    [COUNTRY_NL, COUNTRY_BE]
+                ),
+            }
+        )
+
     async def async_fetch_prices(self) -> ProviderPrices:
         """Fetch dynamic energy prices from Frank Energie's public GraphQL API."""
         today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -64,6 +79,10 @@ class FrankEnergiePriceProvider(PriceProvider):
             "Content-Type": "application/json",
             "Accept": "application/json",
         }
+
+        country = self.config.get(CONF_COUNTRY, COUNTRY_NL)
+        if country == COUNTRY_BE:
+            headers["x-country"] = COUNTRY_BE
 
         try:
             timeout = aiohttp.ClientTimeout(total=REQUEST_TIMEOUT)

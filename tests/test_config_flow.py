@@ -17,7 +17,7 @@ pytestmark = pytest.mark.skipif(
 from homeassistant import config_entries, data_entry_flow
 from homeassistant.core import HomeAssistant
 
-from custom_components.dynamic_energy_prices.const import CONF_PROVIDER, DOMAIN
+from custom_components.dynamic_energy_prices.const import CONF_COUNTRY, CONF_PROVIDER, DOMAIN
 from custom_components.dynamic_energy_prices.providers.base import (
     PROVIDER_REGISTRY,
     ProviderConnectionError,
@@ -157,3 +157,114 @@ async def test_unknown_provider(hass: HomeAssistant) -> None:
     )
     assert result["type"] == data_entry_flow.FlowResultType.FORM
     assert result["errors"]["base"] == "unknown_provider"
+
+
+@pytest.mark.asyncio
+async def test_frank_energie_shows_provider_options(hass: HomeAssistant) -> None:
+    """Test that selecting Frank Energie goes to provider_options step."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": config_entries.SOURCE_USER},
+        data={CONF_PROVIDER: "frank_energie"},
+    )
+    assert result["type"] == data_entry_flow.FlowResultType.FORM
+    assert result["step_id"] == "provider_options"
+
+
+@pytest.mark.asyncio
+async def test_frank_energie_create_with_be(hass: HomeAssistant) -> None:
+    """Test creating a Frank Energie entry with Belgium selected."""
+    with patch(
+        "custom_components.dynamic_energy_prices.providers.frank_energie.FrankEnergiePriceProvider.async_fetch_prices"
+    ) as mock_fetch:
+        mock_fetch.return_value = type(
+            "ProviderPrices",
+            (),
+            {
+                "electricity": type(
+                    "EnergyPriceSeries",
+                    (),
+                    {"prices": [], "unit": "EUR/kWh"},
+                )(),
+                "gas": None,
+            },
+        )()
+
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN,
+            context={"source": config_entries.SOURCE_USER},
+            data={CONF_PROVIDER: "frank_energie"},
+        )
+        assert result["type"] == data_entry_flow.FlowResultType.FORM
+        assert result["step_id"] == "provider_options"
+
+        result2 = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {CONF_COUNTRY: "BE"},
+        )
+        assert result2["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
+        assert result2["title"] == "Frank Energie"
+        assert result2["data"][CONF_PROVIDER] == "frank_energie"
+        assert result2["data"][CONF_COUNTRY] == "BE"
+
+
+@pytest.mark.asyncio
+async def test_frank_energie_create_with_nl_default(hass: HomeAssistant) -> None:
+    """Test creating a Frank Energie entry with default NL."""
+    with patch(
+        "custom_components.dynamic_energy_prices.providers.frank_energie.FrankEnergiePriceProvider.async_fetch_prices"
+    ) as mock_fetch:
+        mock_fetch.return_value = type(
+            "ProviderPrices",
+            (),
+            {
+                "electricity": type(
+                    "EnergyPriceSeries",
+                    (),
+                    {"prices": [], "unit": "EUR/kWh"},
+                )(),
+                "gas": None,
+            },
+        )()
+
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN,
+            context={"source": config_entries.SOURCE_USER},
+            data={CONF_PROVIDER: "frank_energie"},
+        )
+        assert result["type"] == data_entry_flow.FlowResultType.FORM
+        assert result["step_id"] == "provider_options"
+
+        result2 = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {CONF_COUNTRY: "NL"},
+        )
+        assert result2["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
+        assert result2["title"] == "Frank Energie"
+        assert result2["data"][CONF_PROVIDER] == "frank_energie"
+        assert result2["data"][CONF_COUNTRY] == "NL"
+
+
+@pytest.mark.asyncio
+async def test_frank_energie_provider_options_error(hass: HomeAssistant) -> None:
+    """Test connection error in provider_options step."""
+    with patch(
+        "custom_components.dynamic_energy_prices.providers.frank_energie.FrankEnergiePriceProvider.async_fetch_prices"
+    ) as mock_fetch:
+        mock_fetch.side_effect = ProviderConnectionError("Cannot connect")
+
+        result = await hass.config_entries.flow.async_init(
+            DOMAIN,
+            context={"source": config_entries.SOURCE_USER},
+            data={CONF_PROVIDER: "frank_energie"},
+        )
+        assert result["type"] == data_entry_flow.FlowResultType.FORM
+        assert result["step_id"] == "provider_options"
+
+        result2 = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {CONF_COUNTRY: "NL"},
+        )
+        assert result2["type"] == data_entry_flow.FlowResultType.FORM
+        assert result2["step_id"] == "provider_options"
+        assert result2["errors"]["base"] == "cannot_connect"

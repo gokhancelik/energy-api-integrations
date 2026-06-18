@@ -8,7 +8,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
 
-from .const import CONF_PROVIDER, DOMAIN
+from .const import CONF_COUNTRY, CONF_PROVIDER, DOMAIN
 from .providers import PROVIDER_REGISTRY, ProviderConnectionError, ProviderResponseError
 
 
@@ -16,6 +16,8 @@ class DynamicEnergyPricesConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Dynamic Energy Prices."""
 
     VERSION = 1
+
+    _selected_provider: str | None = None
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -34,6 +36,11 @@ class DynamicEnergyPricesConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(unique_id)
                 self._abort_if_unique_id_configured()
 
+                schema = provider_cls.config_schema()
+                if schema is not None:
+                    self._selected_provider = provider_id
+                    return await self.async_step_provider_options()
+
                 provider = provider_cls()
                 try:
                     await provider.async_fetch_prices()
@@ -46,9 +53,7 @@ class DynamicEnergyPricesConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 else:
                     return self.async_create_entry(
                         title=provider_cls.display_name,
-                        data={
-                            CONF_PROVIDER: provider_id,
-                        },
+                        data={CONF_PROVIDER: provider_id},
                     )
 
         schema = vol.Schema(
@@ -64,6 +69,50 @@ class DynamicEnergyPricesConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
+            data_schema=schema,
+            errors=errors,
+        )
+
+    async def async_step_provider_options(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle provider-specific configuration options."""
+        errors: dict[str, str] = {}
+        provider_id = self._selected_provider
+
+        if provider_id is None:
+            return self.async_abort(reason="missing_provider")
+
+        provider_cls = PROVIDER_REGISTRY.get(provider_id)
+        if provider_cls is None:
+            return self.async_abort(reason="unknown_provider")
+
+        schema = provider_cls.config_schema()
+        if schema is None:
+            return self.async_create_entry(
+                title=provider_cls.display_name,
+                data={CONF_PROVIDER: provider_id},
+            )
+
+        if user_input is not None:
+            data = {CONF_PROVIDER: provider_id, **user_input}
+            provider = provider_cls(data)
+            try:
+                await provider.async_fetch_prices()
+            except ProviderConnectionError:
+                errors["base"] = "cannot_connect"
+            except ProviderResponseError:
+                errors["base"] = "invalid_response"
+            except Exception:
+                errors["base"] = "unknown"
+            else:
+                return self.async_create_entry(
+                    title=provider_cls.display_name,
+                    data=data,
+                )
+
+        return self.async_show_form(
+            step_id="provider_options",
             data_schema=schema,
             errors=errors,
         )

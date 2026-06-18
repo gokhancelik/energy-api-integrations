@@ -6,13 +6,17 @@ from unittest.mock import AsyncMock, patch
 
 import aiohttp
 import pytest
+import voluptuous as vol
 
+from custom_components.dynamic_energy_prices.const import CONF_COUNTRY
 from custom_components.dynamic_energy_prices.providers.base import (
     ProviderConnectionError,
     ProviderResponseError,
 )
 from custom_components.dynamic_energy_prices.providers.frank_energie import (
     API_ENDPOINT,
+    COUNTRY_BE,
+    COUNTRY_NL,
     FrankEnergiePriceProvider,
 )
 
@@ -225,3 +229,53 @@ async def test_registration() -> None:
 
     assert "frank_energie" in PROVIDER_REGISTRY
     assert PROVIDER_REGISTRY["frank_energie"] is FrankEnergiePriceProvider
+
+
+def test_config_schema() -> None:
+    """Verify config_schema returns the expected schema."""
+    schema = FrankEnergiePriceProvider.config_schema()
+    assert schema is not None
+    assert CONF_COUNTRY in schema.schema
+    assert isinstance(schema.schema[CONF_COUNTRY], vol.In)
+
+
+def test_config_schema_values() -> None:
+    """Verify config_schema allows NL and BE values."""
+    schema = FrankEnergiePriceProvider.config_schema()
+    country_schema = schema.schema[CONF_COUNTRY]
+    assert COUNTRY_NL in country_schema.container
+    assert COUNTRY_BE in country_schema.container
+
+
+@pytest.mark.asyncio
+async def test_belgium_header_sent() -> None:
+    """Test that x-country: BE header is sent when BE is configured."""
+    provider = FrankEnergiePriceProvider({CONF_COUNTRY: COUNTRY_BE})
+    with patch("aiohttp.ClientSession.post") as mock_post:
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value=MOCK_MARKET_PRICES_RESPONSE)
+        mock_post.return_value.__aenter__.return_value = mock_response
+
+        await provider.async_fetch_prices()
+
+        _, kwargs = mock_post.call_args
+        assert "headers" in kwargs
+        assert kwargs["headers"].get("x-country") == COUNTRY_BE
+
+
+@pytest.mark.asyncio
+async def test_nl_default_no_country_header() -> None:
+    """Test that no x-country header is sent for NL (default)."""
+    provider = FrankEnergiePriceProvider()
+    with patch("aiohttp.ClientSession.post") as mock_post:
+        mock_response = AsyncMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value=MOCK_MARKET_PRICES_RESPONSE)
+        mock_post.return_value.__aenter__.return_value = mock_response
+
+        await provider.async_fetch_prices()
+
+        _, kwargs = mock_post.call_args
+        headers = kwargs.get("headers", {})
+        assert "x-country" not in headers

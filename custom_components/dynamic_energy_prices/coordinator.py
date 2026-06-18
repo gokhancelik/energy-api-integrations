@@ -35,7 +35,7 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
         if provider_cls is None:
             raise ValueError(f"Unknown provider: {provider_id}")
 
-        self.provider: PriceProvider = provider_cls()
+        self.provider: PriceProvider = provider_cls(entry.data)
         self._last_successful_data: ProviderPrices | None = None
 
         randomized_minute = randrange(0, 60)
