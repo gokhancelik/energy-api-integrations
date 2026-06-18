@@ -3,11 +3,11 @@
   "name": "Dynamic Energy Prices",
   "codeowners": ["@gokhancelik"],
   "config_flow": true,
+  "documentation": "https://github.com/gokhancelik/energy-api-integrations",
   "integration_type": "service",
   "iot_class": "cloud_polling",
-  "single_config_entry": false,
-  "documentation": "https://github.com/gokhancelik/energy-api-integrations",
   "issue_tracker": "https://github.com/gokhancelik/energy-api-integrations/issues",
-  "version": "0.4.0",
-  "requirements": []
+  "requirements": [],
+  "single_config_entry": false,
+  "version": "0.4.0"
 }
