@@ -22,6 +22,9 @@ from .const import ATTR_PRICE_BREAKDOWN, ATTR_PROVIDER, DOMAIN, SERVICE_FORCE_UP
 from .coordinator import DynamicPriceCoordinator
 from .entity import DynamicPriceEntity
 from .providers import (
+    BREAKDOWN_ENERGY_TAX,
+    BREAKDOWN_MARKET_PRICE,
+    BREAKDOWN_SUPPLIER_MARKUP,
     PROVIDER_REGISTRY,
     EnergyPriceSeries,
     ProviderPrices,
@@ -109,6 +112,31 @@ def _next_gas_price_value(prices: ProviderPrices) -> float | None:
     return next_price.total_price if next_price else None
 
 
+def _current_breakdown_value(
+    prices: ProviderPrices, key: str
+) -> float | None:
+    """Extract a breakdown value from the current hour's price point."""
+    series = _electricity_series(prices)
+    if series is None:
+        return None
+    current = find_current_price(series.prices)
+    if current is None:
+        return None
+    return current.breakdown.get(key)
+
+
+def _current_market_price_value(prices: ProviderPrices) -> float | None:
+    return _current_breakdown_value(prices, BREAKDOWN_MARKET_PRICE)
+
+
+def _current_supplier_markup_value(prices: ProviderPrices) -> float | None:
+    return _current_breakdown_value(prices, BREAKDOWN_SUPPLIER_MARKUP)
+
+
+def _current_energy_tax_value(prices: ProviderPrices) -> float | None:
+    return _current_breakdown_value(prices, BREAKDOWN_ENERGY_TAX)
+
+
 def _price_extra_attrs(
     prices: ProviderPrices, provider_id: str
 ) -> dict[str, Any] | None:
@@ -183,6 +211,39 @@ ELECTRICITY_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         device_class=SensorDeviceClass.MONETARY,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=_highest_price_value,
+        extra_attrs_fn=_price_extra_attrs,
+        entity_registry_enabled_default=False,
+    ),
+)
+
+BREAKDOWN_ELECTRICITY_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
+    DynamicEnergySensorDescription(
+        key="current_electricity_market_price",
+        translation_key="current_electricity_market_price",
+        name="Current electricity market price",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_current_market_price_value,
+        extra_attrs_fn=_price_extra_attrs,
+        entity_registry_enabled_default=False,
+    ),
+    DynamicEnergySensorDescription(
+        key="current_electricity_supplier_markup",
+        translation_key="current_electricity_supplier_markup",
+        name="Current electricity supplier markup",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_current_supplier_markup_value,
+        extra_attrs_fn=_price_extra_attrs,
+        entity_registry_enabled_default=False,
+    ),
+    DynamicEnergySensorDescription(
+        key="current_electricity_energy_tax",
+        translation_key="current_electricity_energy_tax",
+        name="Current electricity energy tax",
+        device_class=SensorDeviceClass.MONETARY,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_current_energy_tax_value,
         extra_attrs_fn=_price_extra_attrs,
         entity_registry_enabled_default=False,
     ),
@@ -307,6 +368,11 @@ async def async_setup_entry(
         )
 
     for description in GAS_SENSORS:
+        entities.append(
+            DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
+        )
+
+    for description in BREAKDOWN_ELECTRICITY_SENSORS:
         entities.append(
             DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
         )

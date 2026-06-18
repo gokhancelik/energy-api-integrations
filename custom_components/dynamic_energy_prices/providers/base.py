@@ -45,6 +45,10 @@ class ProviderResponseError(Exception):
     """Raised when the provider returns an unexpected response."""
 
 
+BREAKDOWN_MARKET_PRICE = "market_price"
+BREAKDOWN_SUPPLIER_MARKUP = "supplier_markup"
+BREAKDOWN_ENERGY_TAX = "energy_tax"
+
 PROVIDER_REGISTRY: dict[str, type[PriceProvider]] = {}
 
 

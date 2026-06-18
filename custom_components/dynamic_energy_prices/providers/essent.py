@@ -8,6 +8,9 @@ from typing import Any
 import aiohttp
 
 from .base import (
+    BREAKDOWN_MARKET_PRICE,
+    BREAKDOWN_SUPPLIER_MARKUP,
+    BREAKDOWN_ENERGY_TAX,
     EnergyPriceSeries,
     PricePoint,
     PriceProvider,
@@ -20,9 +23,9 @@ API_ENDPOINT = "https://www.essent.nl/api/public/dynamicpricing/dynamic-prices/v
 REQUEST_TIMEOUT = 10
 
 GROUP_TYPE_MAP = {
-    "MARKET_PRICE": "market_price",
-    "PURCHASING_FEE": "purchasing_fee",
-    "TAX": "tax",
+    "MARKET_PRICE": BREAKDOWN_MARKET_PRICE,
+    "PURCHASING_FEE": BREAKDOWN_SUPPLIER_MARKUP,
+    "TAX": BREAKDOWN_ENERGY_TAX,
 }
 
 

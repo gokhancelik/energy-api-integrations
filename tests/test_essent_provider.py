@@ -169,5 +169,5 @@ async def test_breakdown_fields(provider: EssentPriceProvider) -> None:
 
         for point in prices.electricity.prices:
             assert "market_price" in point.breakdown
-            assert "purchasing_fee" in point.breakdown
-            assert "tax" in point.breakdown
+            assert "supplier_markup" in point.breakdown
+            assert "energy_tax" in point.breakdown

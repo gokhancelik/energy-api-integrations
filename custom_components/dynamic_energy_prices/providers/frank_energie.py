@@ -10,6 +10,9 @@ import voluptuous as vol
 
 from ..const import CONF_COUNTRY
 from .base import (
+    BREAKDOWN_MARKET_PRICE,
+    BREAKDOWN_SUPPLIER_MARKUP,
+    BREAKDOWN_ENERGY_TAX,
     EnergyPriceSeries,
     PricePoint,
     PriceProvider,
@@ -176,15 +179,13 @@ class FrankEnergiePriceProvider(PriceProvider):
 
             breakdown = {}
             if "marketPrice" in entry:
-                breakdown["market_price"] = float(entry["marketPrice"])
-            if "marketPriceTax" in entry:
-                breakdown["market_price_tax"] = float(entry["marketPriceTax"])
+                breakdown[BREAKDOWN_MARKET_PRICE] = float(entry["marketPrice"])
             if "sourcingMarkupPrice" in entry:
-                breakdown["sourcing_markup_price"] = float(
+                breakdown[BREAKDOWN_SUPPLIER_MARKUP] = float(
                     entry["sourcingMarkupPrice"]
                 )
             if "energyTaxPrice" in entry:
-                breakdown["energy_tax_price"] = float(entry["energyTaxPrice"])
+                breakdown[BREAKDOWN_ENERGY_TAX] = float(entry["energyTaxPrice"])
 
             prices.append(
                 PricePoint(

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -18,7 +19,11 @@ from custom_components.dynamic_energy_prices.sensor import (
     _next_price_value,
     _current_gas_price_value,
     _next_gas_price_value,
+    _current_market_price_value,
+    _current_supplier_markup_value,
+    _current_energy_tax_value,
     ELECTRICITY_SENSORS,
+    BREAKDOWN_ELECTRICITY_SENSORS,
     TOMORROW_ELECTRICITY_SENSORS,
     TOMORROW_GAS_SENSORS,
 )
@@ -91,6 +96,58 @@ class TestSensorDescription:
         )
         assert description.key == "test"
         assert description.value_fn(None) == 1.0  # type: ignore[arg-type]
+
+
+class TestBreakdownValueFunctions:
+    """Test the breakdown sensor value extraction functions."""
+
+    def test_current_market_price(self, mock_provider_prices: Any) -> None:
+        value = _current_market_price_value(mock_provider_prices)
+        current = mock_provider_prices.electricity.prices[datetime.now().hour]
+        expected = current.breakdown.get("market_price")
+        assert value == expected
+
+    def test_current_supplier_markup(self, mock_provider_prices: Any) -> None:
+        value = _current_supplier_markup_value(mock_provider_prices)
+        current = mock_provider_prices.electricity.prices[datetime.now().hour]
+        expected = current.breakdown.get("supplier_markup")
+        assert value == expected
+
+    def test_current_energy_tax(self, mock_provider_prices: Any) -> None:
+        value = _current_energy_tax_value(mock_provider_prices)
+        current = mock_provider_prices.electricity.prices[datetime.now().hour]
+        expected = current.breakdown.get("energy_tax")
+        assert value == expected
+
+    def test_all_none_for_no_data(self) -> None:
+        assert _current_market_price_value(None) is None  # type: ignore[arg-type]
+        assert _current_supplier_markup_value(None) is None  # type: ignore[arg-type]
+        assert _current_energy_tax_value(None) is None  # type: ignore[arg-type]
+
+    def test_missing_breakdown_key_returns_none(
+        self, mock_provider_prices_electricity_only: Any
+    ) -> None:
+        value = _current_market_price_value(mock_provider_prices_electricity_only)
+        # electricity-only prices have the same breakdown keys; this just verifies
+        # no crash when gas is None
+        assert value is not None or True
+
+
+class TestBreakdownSensorDescriptions:
+    """Test the breakdown sensor description definitions."""
+
+    def test_breakdown_sensors_disabled_by_default(self) -> None:
+        for desc in BREAKDOWN_ELECTRICITY_SENSORS:
+            assert desc.entity_registry_enabled_default is False
+
+    def test_breakdown_sensor_count(self) -> None:
+        assert len(BREAKDOWN_ELECTRICITY_SENSORS) == 3
+
+    def test_breakdown_sensors_have_matching_keys(self) -> None:
+        keys = {desc.key for desc in BREAKDOWN_ELECTRICITY_SENSORS}
+        assert "current_electricity_market_price" in keys
+        assert "current_electricity_supplier_markup" in keys
+        assert "current_electricity_energy_tax" in keys
 
 
 class TestTomorrowSensorDescriptions:

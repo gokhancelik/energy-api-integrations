@@ -45,6 +45,15 @@
     "current_gas_price": {
       "name": "Current gas price"
     },
+    "current_electricity_market_price": {
+      "name": "Current electricity market price"
+    },
+    "current_electricity_supplier_markup": {
+      "name": "Current electricity supplier markup"
+    },
+    "current_electricity_energy_tax": {
+      "name": "Current electricity energy tax"
+    },
     "next_gas_price": {
       "name": "Next gas price"
     },

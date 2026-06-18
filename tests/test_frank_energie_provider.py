@@ -82,7 +82,7 @@ async def test_successful_fetch(provider: FrankEnergiePriceProvider) -> None:
         assert len(prices.gas.prices) == 1
         assert prices.electricity.prices[0].total_price == 0.18448
         assert prices.electricity.prices[0].breakdown["market_price"] == 0.05012
-        assert prices.electricity.prices[0].breakdown["energy_tax_price"] == 0.11533
+        assert prices.electricity.prices[0].breakdown["energy_tax"] == 0.11533
         assert prices.gas.prices[0].total_price == 1.02527
 
 
@@ -217,9 +217,8 @@ async def test_breakdown_fields(provider: FrankEnergiePriceProvider) -> None:
 
         for point in prices.electricity.prices:
             assert "market_price" in point.breakdown
-            assert "market_price_tax" in point.breakdown
-            assert "sourcing_markup_price" in point.breakdown
-            assert "energy_tax_price" in point.breakdown
+            assert "supplier_markup" in point.breakdown
+            assert "energy_tax" in point.breakdown
 
 
 @pytest.mark.asyncio

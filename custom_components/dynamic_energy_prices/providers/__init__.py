@@ -4,6 +4,11 @@ from .base import PriceProvider, PricePoint, EnergyPriceSeries, ProviderPrices
 from .base import ProviderConnectionError, ProviderResponseError
 from .base import PROVIDER_REGISTRY
 from .base import (
+    BREAKDOWN_MARKET_PRICE,
+    BREAKDOWN_SUPPLIER_MARKUP,
+    BREAKDOWN_ENERGY_TAX,
+)
+from .base import (
     calculate_average_price,
     calculate_max_price,
     calculate_min_price,
@@ -17,6 +22,9 @@ from . import frank_energie  # noqa: F401 - register the Frank Energie provider
 from . import eneco  # noqa: F401 - register the Eneco provider
 
 __all__ = [
+    "BREAKDOWN_MARKET_PRICE",
+    "BREAKDOWN_SUPPLIER_MARKUP",
+    "BREAKDOWN_ENERGY_TAX",
     "PriceProvider",
     "PricePoint",
     "EnergyPriceSeries",
