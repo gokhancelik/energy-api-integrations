@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 import aiohttp
+from zoneinfo import ZoneInfo
 
 from .base import (
     BREAKDOWN_MARKET_PRICE,
@@ -21,6 +22,7 @@ from .base import (
 
 API_ENDPOINT = "https://www.essent.nl/api/public/dynamicpricing/dynamic-prices/v1"
 REQUEST_TIMEOUT = 10
+AMSTERDAM_TZ = ZoneInfo("Europe/Amsterdam")
 
 GROUP_TYPE_MAP = {
     "MARKET_PRICE": BREAKDOWN_MARKET_PRICE,
@@ -130,10 +132,10 @@ class EssentPriceProvider(PriceProvider):
     ) -> PricePoint:
         """Parse a single tariff entry into a PricePoint."""
         start = datetime.fromisoformat(tariff["startDateTime"]).replace(
-            tzinfo=timezone.utc
+            tzinfo=AMSTERDAM_TZ
         )
         end = datetime.fromisoformat(tariff["endDateTime"]).replace(
-            tzinfo=timezone.utc
+            tzinfo=AMSTERDAM_TZ
         )
 
         total_price: float = tariff["totalAmount"]
