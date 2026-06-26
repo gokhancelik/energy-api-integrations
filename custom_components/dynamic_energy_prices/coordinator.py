@@ -99,22 +99,26 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
         """Handle a fetch failure and raise a repair issue if threshold exceeded."""
         self._consecutive_failures += 1
         if self._consecutive_failures >= CONSECUTIVE_FAILURE_LIMIT:
-            translation_placeholders = {
-                "provider": self.provider.display_name,
-                "error": str(err),
-            }
-            self.hass.issues.async_create_issue(
-                DOMAIN,
-                ISSUE_ID_PROVIDER_UNREACHABLE,
-                is_fixable=False,
-                severity="error",
-                translation_key="provider_unreachable",
-                translation_placeholders=translation_placeholders,
-            )
+            issues = getattr(self.hass, "issues", None)
+            if issues is not None:
+                translation_placeholders = {
+                    "provider": self.provider.display_name,
+                    "error": str(err),
+                }
+                issues.async_create_issue(
+                    DOMAIN,
+                    ISSUE_ID_PROVIDER_UNREACHABLE,
+                    is_fixable=False,
+                    severity="error",
+                    translation_key="provider_unreachable",
+                    translation_placeholders=translation_placeholders,
+                )
 
     async def _clear_issue(self) -> None:
         """Clear the repair issue if one was raised."""
-        self.hass.issues.async_delete_issue(DOMAIN, ISSUE_ID_PROVIDER_UNREACHABLE)
+        issues = getattr(self.hass, "issues", None)
+        if issues is not None:
+            issues.async_delete_issue(DOMAIN, ISSUE_ID_PROVIDER_UNREACHABLE)
 
     @property
     def last_successful_data(self) -> ProviderPrices | None:
