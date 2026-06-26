@@ -343,6 +343,9 @@ def mock_essent_config_entry(hass: HomeAssistant) -> config_entries.ConfigEntry:
         pref_disable_new_entities=False,
         pref_disable_polling=False,
         unique_id=f"{DOMAIN}_essent",
+        discovery_keys={},
+        minor_version=1,
+        subentries_data={},
     )
     entry.add_to_hass(hass)
     return entry
