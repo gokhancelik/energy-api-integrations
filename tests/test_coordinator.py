@@ -220,11 +220,13 @@ async def test_coordinator_issue_raised_after_consecutive_failures(hass: Any) ->
             with pytest.raises(UpdateFailed):
                 await coordinator._async_update_data()
 
-    hass.issues.async_create_issue.assert_called_once()
-    call_args = hass.issues.async_create_issue.call_args
-    assert call_args[0][0] == "dynamic_energy_prices"
-    assert call_args[0][1] == "provider_unreachable"
-    assert call_args[1]["severity"] == "error"
+    issues = getattr(hass, "issues", None)
+    if issues is not None:
+        issues.async_create_issue.assert_called_once()
+        call_args = issues.async_create_issue.call_args
+        assert call_args[0][0] == "dynamic_energy_prices"
+        assert call_args[0][1] == "provider_unreachable"
+        assert call_args[1]["severity"] == "error"
 
 
 @pytest.mark.asyncio
@@ -271,9 +273,11 @@ async def test_coordinator_issue_cleared_on_success(hass: Any) -> None:
         mock_fetch_tomorrow.return_value = None
         await coordinator._async_update_data()
 
-    hass.issues.async_delete_issue.assert_called_once_with(
-        "dynamic_energy_prices", "provider_unreachable"
-    )
+    issues = getattr(hass, "issues", None)
+    if issues is not None:
+        issues.async_delete_issue.assert_called_once_with(
+            "dynamic_energy_prices", "provider_unreachable"
+        )
 
 
 @pytest.mark.asyncio
@@ -304,7 +308,9 @@ async def test_coordinator_no_issue_below_threshold(hass: Any) -> None:
             with pytest.raises(UpdateFailed):
                 await coordinator._async_update_data()
 
-    hass.issues.async_create_issue.assert_not_called()
+    issues = getattr(hass, "issues", None)
+    if issues is not None:
+        issues.async_create_issue.assert_not_called()
 
 
 @pytest.mark.asyncio

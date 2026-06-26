@@ -151,7 +151,14 @@ class TestCheapElectricityDisabledByDefault:
     """Test that the cheap electricity binary sensor is disabled by default."""
 
     def test_disabled_by_default(self) -> None:
-        assert CheapElectricityBinarySensor._attr_entity_registry_enabled_default is False
+        coordinator = MagicMock()
+        coordinator.data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.entry.options = {}
+        coordinator.tomorrow_data = None
+        sensor = CheapElectricityBinarySensor(coordinator, "test_provider", "Test Provider")
+        assert sensor._attr_entity_registry_enabled_default is False
 
 
 class TestCheapElectricityAvailable:
