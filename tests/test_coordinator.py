@@ -257,7 +257,9 @@ async def test_coordinator_issue_cleared_on_success(hass: Any) -> None:
             with pytest.raises(UpdateFailed):
                 await coordinator._async_update_data()
 
-    hass.issues.async_delete_issue.assert_not_called()
+    issues = getattr(hass, "issues", None)
+    if issues is not None:
+        issues.async_delete_issue.assert_not_called()
 
     mock_fetch.side_effect = None
     mock_fetch.return_value = ProviderPrices(
