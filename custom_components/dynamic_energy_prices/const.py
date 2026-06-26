@@ -4,6 +4,7 @@ DOMAIN = "dynamic_energy_prices"
 
 CONF_PROVIDER = "provider"
 CONF_COUNTRY = "country"
+CONF_THRESHOLD = "threshold"
 
 DEFAULT_SCAN_INTERVAL_MINUTES = 60
 DEFAULT_CURRENCY = "EUR"

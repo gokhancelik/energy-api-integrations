@@ -17,7 +17,7 @@ pytestmark = pytest.mark.skipif(
 from homeassistant import config_entries, data_entry_flow
 from homeassistant.core import HomeAssistant
 
-from custom_components.dynamic_energy_prices.const import CONF_COUNTRY, CONF_PROVIDER, DOMAIN
+from custom_components.dynamic_energy_prices.const import CONF_COUNTRY, CONF_PROVIDER, CONF_THRESHOLD, DOMAIN
 from custom_components.dynamic_energy_prices.providers.base import (
     PROVIDER_REGISTRY,
     ProviderConnectionError,
@@ -268,3 +268,81 @@ async def test_frank_energie_provider_options_error(hass: HomeAssistant) -> None
         assert result2["type"] == data_entry_flow.FlowResultType.FORM
         assert result2["step_id"] == "provider_options"
         assert result2["errors"]["base"] == "cannot_connect"
+
+
+@pytest.mark.asyncio
+async def test_options_flow_init(
+    hass: HomeAssistant,
+    mock_essent_config_entry: config_entries.ConfigEntry,
+) -> None:
+    """Test that options flow shows the init form."""
+    result = await hass.config_entries.options.async_init(
+        mock_essent_config_entry.entry_id,
+    )
+    assert result["type"] == data_entry_flow.FlowResultType.FORM
+    assert result["step_id"] == "init"
+
+
+@pytest.mark.asyncio
+async def test_options_flow_set_threshold(
+    hass: HomeAssistant,
+    mock_essent_config_entry: config_entries.ConfigEntry,
+) -> None:
+    """Test setting a custom price threshold via options flow."""
+    result = await hass.config_entries.options.async_init(
+        mock_essent_config_entry.entry_id,
+    )
+    assert result["type"] == data_entry_flow.FlowResultType.FORM
+
+    result2 = await hass.config_entries.options.async_configure(
+        result["flow_id"],
+        user_input={CONF_THRESHOLD: 0.20},
+    )
+    assert result2["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
+    assert result2["data"][CONF_THRESHOLD] == 0.20
+
+
+@pytest.mark.asyncio
+async def test_options_flow_clear_threshold(
+    hass: HomeAssistant,
+    mock_essent_config_entry: config_entries.ConfigEntry,
+) -> None:
+    """Test clearing the threshold (set to None) removes it from options."""
+    # Set threshold first
+    result = await hass.config_entries.options.async_init(
+        mock_essent_config_entry.entry_id,
+    )
+    await hass.config_entries.options.async_configure(
+        result["flow_id"],
+        user_input={CONF_THRESHOLD: 0.20},
+    )
+
+    # Clear it
+    result2 = await hass.config_entries.options.async_init(
+        mock_essent_config_entry.entry_id,
+    )
+    result3 = await hass.config_entries.options.async_configure(
+        result2["flow_id"],
+        user_input={CONF_THRESHOLD: None},
+    )
+    assert result3["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
+    assert CONF_THRESHOLD not in result3["data"]
+
+
+@pytest.fixture
+def mock_essent_config_entry(hass: HomeAssistant) -> config_entries.ConfigEntry:
+    """Create a mock Essent config entry."""
+    entry = config_entries.ConfigEntry(
+        version=1,
+        domain=DOMAIN,
+        title="Essent",
+        data={CONF_PROVIDER: "essent"},
+        source="user",
+        options={},
+        entry_id="test_essent",
+        pref_disable_new_entities=False,
+        pref_disable_polling=False,
+        unique_id=f"{DOMAIN}_essent",
+    )
+    entry.add_to_hass(hass)
+    return entry

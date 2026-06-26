@@ -13,18 +13,20 @@ from custom_components.dynamic_energy_prices.const import (
     ATTR_AVERAGE_PRICE,
     ATTR_CURRENT_PRICE,
     ATTR_THRESHOLD,
+    CONF_THRESHOLD,
 )
 
 
 def _make_sensor(
     mock_provider_prices: Any,
-    find_price_index: int | None = None,
+    options: dict[str, Any] | None = None,
 ) -> CheapElectricityBinarySensor:
     """Create a CheapElectricityBinarySensor with a mock coordinator."""
     coordinator = MagicMock()
     coordinator.data = mock_provider_prices
     coordinator.entry = MagicMock()
     coordinator.entry.entry_id = "test_entry"
+    coordinator.entry.options = options or {}
     coordinator.tomorrow_data = None
     return CheapElectricityBinarySensor(coordinator, "test_provider", "Test Provider")
 
@@ -57,6 +59,7 @@ class TestCheapElectricityIsOn:
         coordinator.data = None
         coordinator.entry = MagicMock()
         coordinator.entry.entry_id = "test_entry"
+        coordinator.entry.options = {}
         coordinator.tomorrow_data = None
         sensor = CheapElectricityBinarySensor(coordinator, "test_provider", "Test Provider")
         assert sensor.is_on is None
@@ -69,9 +72,33 @@ class TestCheapElectricityIsOn:
         coordinator.data = mock_provider_prices_electricity_only
         coordinator.entry = MagicMock()
         coordinator.entry.entry_id = "test_entry"
+        coordinator.entry.options = {}
         coordinator.tomorrow_data = None
         sensor = CheapElectricityBinarySensor(coordinator, "test_provider", "Test Provider")
         assert sensor.is_on is None
+
+    def test_custom_threshold_overrides_average(self, mock_provider_prices: Any) -> None:
+        """Threshold=0.15, current=0.198 -> OFF (0.198 < 0.15 is False)."""
+        target = mock_provider_prices.electricity.prices[5]
+        with patch(
+            "custom_components.dynamic_energy_prices.binary_sensor.find_current_price",
+            return_value=target,
+        ):
+            sensor = _make_sensor(mock_provider_prices, options={CONF_THRESHOLD: 0.15})
+            assert sensor.is_on is False
+            attrs = sensor.extra_state_attributes
+            assert attrs is not None
+            assert attrs[ATTR_THRESHOLD] == 0.15
+
+    def test_custom_threshold_higher_than_current(self, mock_provider_prices: Any) -> None:
+        """Threshold=0.30, current=0.198 -> ON (0.198 < 0.30)."""
+        target = mock_provider_prices.electricity.prices[5]
+        with patch(
+            "custom_components.dynamic_energy_prices.binary_sensor.find_current_price",
+            return_value=target,
+        ):
+            sensor = _make_sensor(mock_provider_prices, options={CONF_THRESHOLD: 0.30})
+            assert sensor.is_on is True
 
 
 class TestCheapElectricityAttributes:
@@ -96,6 +123,7 @@ class TestCheapElectricityAttributes:
         coordinator.data = None
         coordinator.entry = MagicMock()
         coordinator.entry.entry_id = "test_entry"
+        coordinator.entry.options = {}
         coordinator.tomorrow_data = None
         sensor = CheapElectricityBinarySensor(coordinator, "test_provider", "Test Provider")
         assert sensor.extra_state_attributes is None
@@ -111,6 +139,7 @@ class TestCheapElectricityForceUpdate:
         coordinator.data = None
         coordinator.entry = MagicMock()
         coordinator.entry.entry_id = "test_entry"
+        coordinator.entry.options = {}
         coordinator.tomorrow_data = None
 
         sensor = CheapElectricityBinarySensor(coordinator, "test_provider", "Test Provider")

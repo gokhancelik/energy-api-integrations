@@ -52,7 +52,9 @@ pricing API — it cannot be implemented as a dynamic price provider.
 2. Search for "Dynamic Energy Prices".
 3. Select your provider (Essent, EnergyZero, Eneco, or Frank Energie).
 4. For Frank Energie: optionally toggle the Belgium region.
-5. The integration will create sensors for current, next, average, lowest,
+5. After setup, go to **Options** to configure a custom price threshold for
+   the cheap electricity binary sensor (optional — defaults to today's average).
+6. The integration will create sensors for current, next, average, lowest,
    and highest electricity prices, plus gas prices if available.
 
 ## Sensors
@@ -111,7 +113,9 @@ sensor includes a `price_breakdown` attribute with `market_price`,
 `supplier_markup`, and `energy_tax` components.
 
 The `cheap_electricity` binary sensor includes `current_price`,
-`average_price`, and `threshold` attributes.
+`average_price`, and `threshold` attributes. The threshold can be set to a
+custom value via **Configure** on the integration entry. When no custom
+threshold is set, today's average price is used.
 
 ### Services
 
@@ -166,7 +170,8 @@ python scripts/smoke_test_frank_energie.py
 - [x] Standardised breakdown sensors (market price, supplier markup, energy tax)
 - [x] Cheap electricity binary sensor (current < average)
 - [x] Cheapest 3-hour block sensor (sliding window)
-- [ ] Options flow with custom threshold
+- [x] Options flow with custom threshold
+- [ ] Diagnostics sensors (last updated, next update)
 - [ ] Diagnostics sensors (last updated, next update)
 - [ ] Repair/issue flow for API errors
 

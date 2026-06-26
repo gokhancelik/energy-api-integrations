@@ -1,4 +1,13 @@
 {
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "threshold": "Price threshold (EUR/kWh, leave empty to use today's average)"
+        }
+      }
+    }
+  },
   "config": {
     "step": {
       "user": {

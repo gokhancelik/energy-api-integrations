@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import ATTR_AVERAGE_PRICE, ATTR_CURRENT_PRICE, ATTR_THRESHOLD, DOMAIN, SERVICE_FORCE_UPDATE
+from .const import ATTR_AVERAGE_PRICE, ATTR_CURRENT_PRICE, ATTR_THRESHOLD, CONF_THRESHOLD, DOMAIN, SERVICE_FORCE_UPDATE
 from .coordinator import DynamicPriceCoordinator
 from .entity import DynamicPriceEntity
 from .providers import PROVIDER_REGISTRY, ProviderPrices, calculate_average_price, find_current_price
@@ -63,9 +63,21 @@ class CheapElectricityBinarySensor(DynamicPriceEntity, BinarySensorEntity):
         self._attr_name = f"{provider_display_name} Cheap electricity"
         super().__init__(coordinator)
 
-    @property
-    def is_on(self) -> bool | None:
-        """Return true if the current price is below the threshold."""
+    def _get_threshold(self) -> float | None:
+        """Return the threshold from options, or today's average price as default."""
+        custom = self.coordinator.entry.options.get(CONF_THRESHOLD)
+        if custom is not None:
+            return float(custom)
+        prices = self.coordinator.data
+        if prices is None:
+            return None
+        series = prices.electricity
+        if series is None:
+            return None
+        return calculate_average_price(series.prices)
+
+    def _get_current_price(self) -> float | None:
+        """Return the current electricity price."""
         prices = self.coordinator.data
         if prices is None:
             return None
@@ -73,30 +85,39 @@ class CheapElectricityBinarySensor(DynamicPriceEntity, BinarySensorEntity):
         if series is None:
             return None
         current = find_current_price(series.prices)
-        if current is None:
+        return current.total_price if current else None
+
+    def _get_average_price(self) -> float | None:
+        """Return today's average electricity price."""
+        prices = self.coordinator.data
+        if prices is None:
             return None
-        avg = calculate_average_price(series.prices)
-        if avg is None:
+        series = prices.electricity
+        if series is None:
             return None
-        return current.total_price < avg
+        return calculate_average_price(series.prices)
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the current price is below the threshold."""
+        current = self._get_current_price()
+        threshold = self._get_threshold()
+        if current is None or threshold is None:
+            return None
+        return current < threshold
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
         """Return the state attributes."""
-        prices = self.coordinator.data
-        if prices is None:
-            return None
-        series = prices.electricity
-        if series is None:
-            return None
-        current = find_current_price(series.prices)
-        avg = calculate_average_price(series.prices)
-        if current is None or avg is None:
+        current = self._get_current_price()
+        avg = self._get_average_price()
+        threshold = self._get_threshold()
+        if current is None or avg is None or threshold is None:
             return None
         return {
-            ATTR_CURRENT_PRICE: current.total_price,
+            ATTR_CURRENT_PRICE: current,
             ATTR_AVERAGE_PRICE: avg,
-            ATTR_THRESHOLD: avg,
+            ATTR_THRESHOLD: threshold,
         }
 
     async def async_force_update(self) -> None:
