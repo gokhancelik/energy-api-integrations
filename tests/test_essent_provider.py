@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
+import importlib
+
 import aiohttp
 import pytest
 
@@ -30,6 +32,8 @@ def provider() -> EssentPriceProvider:
 @pytest.mark.asyncio
 async def test_successful_fetch(provider: EssentPriceProvider) -> None:
     """Test successful price fetch."""
+    if importlib.util.find_spec("pytest_homeassistant_custom_component") is not None:
+        pytest.skip("aiohttp cleanup thread leaks on real HA instance")
     with patch("aiohttp.ClientSession.get") as mock_get:
         mock_response = AsyncMock()
         mock_response.status = 200
