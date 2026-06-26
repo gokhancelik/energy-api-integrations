@@ -561,6 +561,8 @@ class DynamicPriceSensor(DynamicPriceEntity, SensorEntity):
         """Return the unit of measurement."""
         if self.entity_description.coordinator_value_fn:
             return None
+        if self.entity_description.device_class is None:
+            return None
         prices = self._get_prices()
         if prices is None:
             return None
