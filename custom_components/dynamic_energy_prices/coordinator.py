@@ -38,6 +38,7 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
         self.provider: PriceProvider = provider_cls(entry.data)
         self._last_successful_data: ProviderPrices | None = None
         self._tomorrow_data: ProviderPrices | None = None
+        self._last_update_time: datetime | None = None
 
         randomized_minute = randrange(0, 60)
         now = datetime.now()
@@ -68,6 +69,7 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
             raise UpdateFailed(f"Response error: {err}") from err
 
         self._last_successful_data = data
+        self._last_update_time = datetime.now(timezone.utc)
 
         tomorrow_str = (
             datetime.now(timezone.utc) + timedelta(days=1)
@@ -91,3 +93,8 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
     def tomorrow_data(self) -> ProviderPrices | None:
         """Return tomorrow's price data, if available."""
         return self._tomorrow_data
+
+    @property
+    def last_update_time(self) -> datetime | None:
+        """Return the timestamp of the last successful update."""
+        return self._last_update_time

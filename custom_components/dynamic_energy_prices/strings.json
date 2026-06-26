@@ -56,6 +56,12 @@
     "highest_electricity_price": {
       "name": "Highest electricity price"
     },
+    "last_updated": {
+      "name": "Last updated"
+    },
+    "next_update": {
+      "name": "Next update"
+    },
     "cheapest_3h_block_electricity": {
       "name": "Cheapest 3h block electricity"
     },

@@ -13,6 +13,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -43,6 +44,7 @@ class DynamicEnergySensorDescription(SensorEntityDescription):
     """Description for dynamic energy price sensors."""
 
     value_fn: Callable[[ProviderPrices], StateType | None]
+    coordinator_value_fn: Callable[[DynamicPriceCoordinator], StateType | None] | None = None
     extra_attrs_fn: Callable[[ProviderPrices, str], dict[str, Any] | None] | None = None
     available_fn: Callable[[ProviderPrices], bool] | None = None
     energy_type: str = "electricity"
@@ -168,6 +170,21 @@ def _cheapest_block_extra_attrs(
     }
 
 
+def _last_update_value(coordinator: DynamicPriceCoordinator) -> str | None:
+    """Return the last update time as an ISO datetime string."""
+    if coordinator.last_update_time is None:
+        return None
+    return coordinator.last_update_time.isoformat()
+
+
+def _next_update_value(coordinator: DynamicPriceCoordinator) -> str | None:
+    """Return the next scheduled update time as an ISO datetime string."""
+    if coordinator.last_update_time is None or coordinator.update_interval is None:
+        return None
+    next_time = coordinator.last_update_time + coordinator.update_interval
+    return next_time.isoformat()
+
+
 def _price_extra_attrs(
     prices: ProviderPrices, provider_id: str
 ) -> dict[str, Any] | None:
@@ -254,6 +271,27 @@ CHEAPEST_BLOCK_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         name="Cheapest 3h block electricity",
         value_fn=_cheapest_block_value,
         extra_attrs_fn=_cheapest_block_extra_attrs,
+        entity_registry_enabled_default=False,
+    ),
+)
+
+DIAGNOSTIC_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
+    DynamicEnergySensorDescription(
+        key="last_updated",
+        translation_key="last_updated",
+        name="Last updated",
+        value_fn=lambda _: None,
+        coordinator_value_fn=_last_update_value,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+    ),
+    DynamicEnergySensorDescription(
+        key="next_update",
+        translation_key="next_update",
+        name="Next update",
+        value_fn=lambda _: None,
+        coordinator_value_fn=_next_update_value,
+        entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
     ),
 )
@@ -414,6 +452,11 @@ async def async_setup_entry(
             DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
         )
 
+    for description in DIAGNOSTIC_SENSORS:
+        entities.append(
+            DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
+        )
+
     for description in GAS_SENSORS:
         entities.append(
             DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
@@ -471,6 +514,8 @@ class DynamicPriceSensor(DynamicPriceEntity, SensorEntity):
     @property
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit of measurement."""
+        if self.entity_description.coordinator_value_fn:
+            return None
         prices = self._get_prices()
         if prices is None:
             return None
@@ -481,6 +526,8 @@ class DynamicPriceSensor(DynamicPriceEntity, SensorEntity):
     @property
     def native_value(self) -> StateType:
         """Return the state of the sensor."""
+        if self.entity_description.coordinator_value_fn:
+            return self.entity_description.coordinator_value_fn(self.coordinator)
         prices = self._get_prices()
         if prices is None:
             return None

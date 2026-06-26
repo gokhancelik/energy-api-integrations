@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -24,9 +24,12 @@ from custom_components.dynamic_energy_prices.sensor import (
     _current_energy_tax_value,
     _cheapest_block_value,
     _cheapest_block_extra_attrs,
+    _last_update_value,
+    _next_update_value,
     ELECTRICITY_SENSORS,
     BREAKDOWN_ELECTRICITY_SENSORS,
     CHEAPEST_BLOCK_SENSORS,
+    DIAGNOSTIC_SENSORS,
     TOMORROW_ELECTRICITY_SENSORS,
     TOMORROW_GAS_SENSORS,
 )
@@ -204,6 +207,51 @@ class TestCheapestBlockSensor:
 
     def test_sensor_count(self) -> None:
         assert len(CHEAPEST_BLOCK_SENSORS) == 1
+
+
+class TestDiagnosticSensors:
+    """Test the diagnostic sensor value functions."""
+
+    def test_last_update_value(self) -> None:
+        coordinator = MagicMock()
+        coordinator.last_update_time = datetime(2026, 6, 26, 12, 0, 0)
+        value = _last_update_value(coordinator)
+        assert value == "2026-06-26T12:00:00"
+
+    def test_last_update_value_none(self) -> None:
+        coordinator = MagicMock()
+        coordinator.last_update_time = None
+        assert _last_update_value(coordinator) is None
+
+    def test_next_update_value(self) -> None:
+        coordinator = MagicMock()
+        coordinator.last_update_time = datetime(2026, 6, 26, 12, 0, 0, tzinfo=timezone.utc)
+        coordinator.update_interval = timedelta(hours=1)
+        value = _next_update_value(coordinator)
+        assert value == "2026-06-26T13:00:00+00:00"
+
+    def test_next_update_value_none(self) -> None:
+        coordinator = MagicMock()
+        coordinator.last_update_time = None
+        coordinator.update_interval = timedelta(hours=1)
+        assert _next_update_value(coordinator) is None
+
+    def test_next_update_value_no_interval(self) -> None:
+        coordinator = MagicMock()
+        coordinator.last_update_time = datetime(2026, 6, 26, 12, 0, 0)
+        coordinator.update_interval = None
+        assert _next_update_value(coordinator) is None
+
+    def test_diagnostic_sensor_count(self) -> None:
+        assert len(DIAGNOSTIC_SENSORS) == 2
+
+    def test_diagnostic_sensors_have_diagnostic_category(self) -> None:
+        for desc in DIAGNOSTIC_SENSORS:
+            assert desc.entity_category is not None
+
+    def test_diagnostic_sensors_disabled_by_default(self) -> None:
+        for desc in DIAGNOSTIC_SENSORS:
+            assert desc.entity_registry_enabled_default is False
 
 
 class TestForceUpdate:
