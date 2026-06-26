@@ -31,4 +31,4 @@ jobs:
 
       - name: Run pytest
         run: |
-          pytest --asyncio-mode=auto -v
+          pytest -v --cov=custom_components/dynamic_energy_prices --cov-report=term-missing --cov-report=xml:coverage.xml
