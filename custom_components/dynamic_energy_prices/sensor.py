@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -145,11 +146,33 @@ def _current_energy_tax_value(prices: ProviderPrices) -> float | None:
     return _current_breakdown_value(prices, BREAKDOWN_ENERGY_TAX)
 
 
+def _future_prices(prices: list[PricePoint]) -> list[PricePoint]:
+    """Filter to only price points that are still in the future."""
+    now = datetime.now().astimezone()
+    return [p for p in prices if p.end > now]
+
+
+def _hourly_prices_extra(prices: ProviderPrices) -> list[dict[str, Any]] | None:
+    """Extract hourly electricity prices as a list of {time, price} dicts."""
+    series = _electricity_series(prices)
+    if series is None:
+        return None
+    return [
+        {
+            "start": p.start.strftime("%H:%M"),
+            "end": p.end.strftime("%H:%M"),
+            "price": p.total_price,
+        }
+        for p in series.prices
+    ]
+
+
 def _cheapest_block_value(prices: ProviderPrices) -> str | None:
     series = _electricity_series(prices)
     if series is None:
         return None
-    block = find_cheapest_block(series.prices)
+    remaining = _future_prices(series.prices)
+    block = find_cheapest_block(remaining)
     if block is None:
         return None
     return f"{block.start.strftime('%H:%M')} - {block.end.strftime('%H:%M')}"
@@ -161,7 +184,8 @@ def _cheapest_block_extra_attrs(
     series = _electricity_series(prices)
     if series is None:
         return None
-    block = find_cheapest_block(series.prices)
+    remaining = _future_prices(series.prices)
+    block = find_cheapest_block(remaining)
     if block is None:
         return None
     return {
@@ -210,6 +234,14 @@ def _current_price_extra_attrs(
     data: dict[str, Any] = {
         ATTR_PROVIDER: provider_id,
         ATTR_PRICE_BREAKDOWN: current.breakdown,
+        "hourly_prices": [
+            {
+                "start": p.start.strftime("%H:%M"),
+                "end": p.end.strftime("%H:%M"),
+                "price": p.total_price,
+            }
+            for p in series.prices
+        ],
     }
     return data
 

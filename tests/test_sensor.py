@@ -180,6 +180,7 @@ class TestTomorrowSensorDescriptions:
 class TestCheapestBlockSensor:
     """Test the cheapest 3h block sensor value and attribute functions."""
 
+    @pytest.mark.freeze_time("2026-06-26 00:00:00")
     def test_value_returns_formatted_time_range(self, mock_provider_prices: Any) -> None:
         value = _cheapest_block_value(mock_provider_prices)
         assert value is not None
@@ -189,6 +190,7 @@ class TestCheapestBlockSensor:
     def test_value_none_for_no_data(self) -> None:
         assert _cheapest_block_value(None) is None  # type: ignore[arg-type]
 
+    @pytest.mark.freeze_time("2026-06-26 00:00:00")
     def test_extra_attrs(self, mock_provider_prices: Any) -> None:
         attrs = _cheapest_block_extra_attrs(mock_provider_prices, "test_provider")
         assert attrs is not None
@@ -455,6 +457,11 @@ class TestDynamicPriceSensorClass:
         attrs = sensor.extra_state_attributes
         assert attrs is not None
         assert "provider" in attrs
+        assert "hourly_prices" in attrs
+        assert len(attrs["hourly_prices"]) == 24
+        assert "start" in attrs["hourly_prices"][0]
+        assert "end" in attrs["hourly_prices"][0]
+        assert "price" in attrs["hourly_prices"][0]
 
     def test_available_false_when_coordinator_unavailable(self) -> None:
         coordinator = MagicMock()
@@ -685,6 +692,73 @@ class TestNextGasPriceEdgeCase:
             assert value is None
 
 
+class TestFuturePrices:
+    """Test the _future_prices filtering function."""
+
+    @pytest.mark.freeze_time("2026-06-26 12:00:00")
+    def test_filters_past_hours(self, mock_provider_prices: Any) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _future_prices
+        series = mock_provider_prices.electricity
+        remaining = _future_prices(series.prices)
+        for p in remaining:
+            assert p.end > datetime.now().astimezone()
+        assert len(remaining) < 24
+
+    @pytest.mark.freeze_time("2026-06-26 00:00:00")
+    def test_all_future_at_midnight(self, mock_provider_prices: Any) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _future_prices
+        series = mock_provider_prices.electricity
+        remaining = _future_prices(series.prices)
+        assert len(remaining) == 24
+
+    @pytest.mark.freeze_time("2026-06-26 23:30:00")
+    def test_none_future_late_night(self) -> None:
+        from datetime import timedelta
+        from custom_components.dynamic_energy_prices.sensor import _future_prices
+        from custom_components.dynamic_energy_prices.providers import PricePoint
+
+        now = datetime.now().astimezone()
+        past_prices = [
+            PricePoint(
+                start=now - timedelta(hours=2),
+                end=now - timedelta(hours=1),
+                total_price=0.25,
+            )
+        ]
+        remaining = _future_prices(past_prices)
+        assert len(remaining) == 0
+
+    def test_empty_list(self) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _future_prices
+        assert _future_prices([]) == []
+
+
+class TestHourlyPricesExtra:
+    """Test the _hourly_prices_extra helper."""
+
+    @pytest.mark.freeze_time("2026-06-26 00:00:00")
+    def test_returns_all_hours(self, mock_provider_prices: Any) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _hourly_prices_extra
+        result = _hourly_prices_extra(mock_provider_prices)
+        assert result is not None
+        assert len(result) == 24
+        assert "start" in result[0]
+        assert "end" in result[0]
+        assert "price" in result[0]
+        assert isinstance(result[0]["price"], float)
+
+    def test_none_for_no_data(self) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _hourly_prices_extra
+        assert _hourly_prices_extra(None) is None  # type: ignore[arg-type]
+
+    def test_none_for_no_electricity(
+        self, mock_provider_prices_electricity_only: Any
+    ) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _hourly_prices_extra
+        mock_provider_prices_electricity_only.electricity = None
+        assert _hourly_prices_extra(mock_provider_prices_electricity_only) is None
+
+
 class TestCheapestBlockEdgeCases:
     """Test cheapest block function edge cases."""
 
@@ -694,15 +768,15 @@ class TestCheapestBlockEdgeCases:
     def test_cheapest_block_attrs_none_when_no_series(self) -> None:
         assert _cheapest_block_extra_attrs(None, "test") is None  # type: ignore[arg-type]
 
+    @pytest.mark.freeze_time("2026-06-26 06:00:00")
     def test_cheapest_block_value_none_when_no_block_found(self) -> None:
         from custom_components.dynamic_energy_prices.providers import (
             EnergyPriceSeries,
             PricePoint,
             ProviderPrices,
         )
-        from datetime import datetime
 
-        now = datetime.now()
+        now = datetime.now().astimezone()
         prices = ProviderPrices(
             electricity=EnergyPriceSeries(
                 unit="EUR/kWh",
@@ -713,15 +787,15 @@ class TestCheapestBlockEdgeCases:
         value = _cheapest_block_value(prices)
         assert value is None
 
+    @pytest.mark.freeze_time("2026-06-26 06:00:00")
     def test_cheapest_block_attrs_none_when_no_block_found(self) -> None:
         from custom_components.dynamic_energy_prices.providers import (
             EnergyPriceSeries,
             PricePoint,
             ProviderPrices,
         )
-        from datetime import datetime
 
-        now = datetime.now()
+        now = datetime.now().astimezone()
         prices = ProviderPrices(
             electricity=EnergyPriceSeries(
                 unit="EUR/kWh",
