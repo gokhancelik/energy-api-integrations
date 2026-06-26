@@ -1,16 +1,20 @@
 # Dynamic Energy Prices
 
 A Home Assistant custom integration for dynamic/real-time energy prices in the
-Netherlands, with a provider-pluggable architecture.
+Netherlands and Belgium, with a provider-pluggable architecture.
 
 ## Supported providers
 
 | Provider | API Type | Auth | Electricity | Gas | Belgium |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | Essent (NL) | REST | None (header fix) | ✅ | ✅ | ❌ |
 | EnergyZero (NL) | REST | None | ✅ | ✅ | ❌ |
 | Eneco (NL) | REST (EnergyZero alias) | None | ✅ | ✅ | ❌ |
 | Frank Energie (NL/BE) | GraphQL | None | ✅ | ✅ | ✅ |
+| Vattenfall (NL) | — | — | ❌* | ❌ | ❌ |
+
+\* Vattenfall TijdPrijs uses fixed time-of-use tariffs, not a real-time dynamic
+pricing API — cannot be implemented as a dynamic price provider.
 
 ### Provider details
 
@@ -46,28 +50,73 @@ Netherlands, with a provider-pluggable architecture.
 
 1. Go to **Settings > Devices & Services > Add Integration**.
 2. Search for "Dynamic Energy Prices".
-3. Select your provider (Essent, EnergyZero, or Frank Energie).
-4. The integration will create sensors for current, next, average, lowest,
+3. Select your provider (Essent, EnergyZero, Eneco, or Frank Energie).
+4. For Frank Energie: optionally toggle the Belgium region.
+5. The integration will create sensors for current, next, average, lowest,
    and highest electricity prices, plus gas prices if available.
-
-No configuration is needed for providers that use public APIs. Provider-specific
-options (e.g., Belgium region for Frank Energie) may be added in a future
-release.
 
 ## Sensors
 
+### Today's electricity prices
+
 | Sensor | Description | Enabled by default |
 |---|---|---|
-| Current electricity price | Current hourly price | ✅ |
-| Next electricity price | Next upcoming hourly price | ✅ |
-| Average electricity price | Average of all today's prices | ✅ |
-| Lowest electricity price | Lowest price today | ❌ |
-| Highest electricity price | Highest price today | ❌ |
-| Current gas price | Current hourly gas price (if available) | ✅ |
-| Next gas price | Next upcoming gas price (if available) | ✅ |
+| `current_electricity_price` | Current hourly electricity price | ✅ |
+| `next_electricity_price` | Next upcoming hourly price | ✅ |
+| `average_electricity_price` | Average of all 24 hourly prices today | ✅ |
+| `lowest_electricity_price` | Lowest price today | ❌ |
+| `highest_electricity_price` | Highest price today | ❌ |
 
-Each sensor includes extra attributes: provider name, price breakdown
-(market price, tax, surcharge, energy tax reduction).
+### Today's gas prices
+
+| Sensor | Description | Enabled by default |
+|---|---|---|
+| `current_gas_price` | Current hourly gas price (if available) | ✅ |
+| `next_gas_price` | Next upcoming gas price (if available) | ✅ |
+
+### Tomorrow's prices
+
+| Sensor | Description | Enabled by default |
+|---|---|---|
+| `tomorrow_average_electricity_price` | Average electricity price for tomorrow | ✅ |
+| `tomorrow_lowest_electricity_price` | Lowest electricity price tomorrow | ❌ |
+| `tomorrow_highest_electricity_price` | Highest electricity price tomorrow | ❌ |
+| `tomorrow_average_gas_price` | Average gas price for tomorrow (if available) | ✅ |
+| `tomorrow_lowest_gas_price` | Lowest gas price tomorrow (if available) | ❌ |
+| `tomorrow_highest_gas_price` | Highest gas price tomorrow (if available) | ❌ |
+
+### Breakdown sensors (disabled by default)
+
+These sensors expose the components that make up the current electricity price.
+The `current_electricity_market_price` sensor can be used as the
+**Energy Dashboard Export Compensation** price entity.
+
+| Sensor | Description |
+|---|---|
+| `current_electricity_market_price` | Raw market price component |
+| `current_electricity_supplier_markup` | Supplier surcharge component |
+| `current_electricity_energy_tax` | Energy tax component |
+
+### Binary sensor
+
+| Sensor | Description | Enabled by default |
+|---|---|---|
+| `cheap_electricity` | ON when the current price is below today's average price | ❌ |
+
+### Extra attributes
+
+Each sensor includes provider-specific attributes. The `current_electricity_price`
+sensor includes a `price_breakdown` attribute with `market_price`,
+`supplier_markup`, and `energy_tax` components.
+
+The `cheap_electricity` binary sensor includes `current_price`,
+`average_price`, and `threshold` attributes.
+
+### Services
+
+| Service | Target | Description |
+|---|---|---|
+| `force_update` | `sensor`, `binary_sensor` | Force refresh price data from the provider |
 
 ## Adding a new provider
 
@@ -90,7 +139,8 @@ pip install -r requirements_test.txt
 # Run all tests
 pytest --asyncio-mode=auto -v
 
-# Run tests for a specific provider
+# Run tests for a specific module
+pytest tests/test_sensor.py tests/test_binary_sensor.py -v
 pytest tests/test_essent_provider.py -v
 pytest tests/test_energyzero_provider.py -v
 pytest tests/test_frank_energie_provider.py -v
@@ -107,12 +157,16 @@ python scripts/smoke_test_frank_energie.py
 - [x] EnergyZero provider
 - [x] Frank Energie provider (NL + BE)
 - [x] Pluggable provider architecture
-- [x] 42+ unit tests with CI (pytest, hassfest, HACS validation)
 - [x] Eneco NL (EnergyZero alias provider)
-- [ ] Vattenfall NL (TijdPrijs — time-of-use, no real-time API available)
-- [ ] Config flow with provider-specific options (Belgium toggle, etc.)
-- [ ] Belgium (BE) support toggle in Frank Energie config
-- [ ] Release v0.2.0
+- [x] Config flow with provider-specific options (Belgium toggle)
+- [x] Belgium (BE) support toggle in Frank Energie config
+- [x] Force-update service
+- [x] Tomorrow's prices sensors
+- [x] Standardised breakdown sensors (market price, supplier markup, energy tax)
+- [x] Cheap electricity binary sensor (current < average)
+- [ ] Options flow with custom threshold
+- [ ] Diagnostics sensors (last updated, next update)
+- [ ] Repair/issue flow for API errors
 
 ## Credits
 
