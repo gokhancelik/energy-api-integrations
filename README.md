@@ -11,10 +11,10 @@ Netherlands and Belgium, with a provider-pluggable architecture.
 | EnergyZero (NL) | REST | None | ✅ | ✅ | ❌ |
 | Eneco (NL) | REST (EnergyZero alias) | None | ✅ | ✅ | ❌ |
 | Frank Energie (NL/BE) | GraphQL | None | ✅ | ✅ | ✅ |
-| Vattenfall (NL) | — | — | ❌* | ❌ | ❌ |
+| Vattenfall (NL) | — | — | ❌ | ❌ | ❌ |
 
-\* Vattenfall TijdPrijs uses fixed time-of-use tariffs, not a real-time dynamic
-pricing API — cannot be implemented as a dynamic price provider.
+Vattenfall TijdPrijs uses fixed time-of-use tariffs, not a real-time dynamic
+pricing API — it cannot be implemented as a dynamic price provider.
 
 ### Provider details
 
