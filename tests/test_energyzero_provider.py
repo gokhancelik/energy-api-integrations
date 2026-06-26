@@ -4,9 +4,17 @@ from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import importlib
+
 import aiohttp
 import pytest
 from zoneinfo import ZoneInfo
+
+
+pytestmark = pytest.mark.skipif(
+    importlib.util.find_spec("pytest_homeassistant_custom_component") is not None,
+    reason="aiohttp cleanup thread leaks on real HA instance",
+)
 
 from custom_components.dynamic_energy_prices.providers.base import (
     ProviderConnectionError,
