@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
@@ -22,6 +23,8 @@ from homeassistant.helpers.typing import StateType
 from .const import ATTR_PRICE_BREAKDOWN, ATTR_PROVIDER, DOMAIN, SERVICE_FORCE_UPDATE
 from .coordinator import DynamicPriceCoordinator
 from .entity import DynamicPriceEntity
+_LOGGER = logging.getLogger(__name__)
+
 from .providers import (
     BREAKDOWN_ENERGY_TAX,
     BREAKDOWN_MARKET_PRICE,
@@ -416,6 +419,7 @@ GAS_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         value_fn=_current_gas_price_value,
         extra_attrs_fn=_current_price_extra_attrs,
         available_fn=_gas_available,
+        energy_type="gas",
     ),
     DynamicEnergySensorDescription(
         key="next_gas_price",
@@ -426,6 +430,7 @@ GAS_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         value_fn=_next_gas_price_value,
         extra_attrs_fn=_price_extra_attrs,
         available_fn=_gas_available,
+        energy_type="gas",
     ),
 )
 
@@ -555,12 +560,26 @@ class DynamicPriceSensor(DynamicPriceEntity, SensorEntity):
     def available(self) -> bool:
         """Return if entity is available."""
         if not super().available:
+            _LOGGER.warning(
+                "Sensor %s is unavailable: coordinator fetch failed",
+                getattr(self, "entity_id", None) or self.name,
+            )
             return False
         prices = self._get_prices()
         if prices is None:
+            _LOGGER.warning(
+                "Sensor %s is unavailable: no price data",
+                getattr(self, "entity_id", None) or self.name,
+            )
             return False
         if self.entity_description.available_fn:
-            return self.entity_description.available_fn(prices)
+            available = self.entity_description.available_fn(prices)
+            if not available:
+                _LOGGER.warning(
+                    "Sensor %s is unavailable: availability check failed",
+                    getattr(self, "entity_id", None) or self.name,
+                )
+            return available
         return True
 
     async def async_force_update(self) -> None:

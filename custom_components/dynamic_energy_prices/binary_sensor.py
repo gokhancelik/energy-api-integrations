@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from homeassistant.components.binary_sensor import (
@@ -17,6 +18,8 @@ from .const import ATTR_AVERAGE_PRICE, ATTR_CURRENT_PRICE, ATTR_THRESHOLD, CONF_
 from .coordinator import DynamicPriceCoordinator
 from .entity import DynamicPriceEntity
 from .providers import PROVIDER_REGISTRY, ProviderPrices, calculate_average_price, find_current_price
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
@@ -105,6 +108,23 @@ class CheapElectricityBinarySensor(DynamicPriceEntity, BinarySensorEntity):
         if current is None or threshold is None:
             return None
         return current < threshold
+
+    @property
+    def available(self) -> bool:
+        """Return if entity is available."""
+        if not super().available:
+            _LOGGER.warning(
+                "Binary sensor %s is unavailable: coordinator fetch failed",
+                getattr(self, "entity_id", None) or self.name,
+            )
+            return False
+        if self.coordinator.data is None:
+            _LOGGER.warning(
+                "Binary sensor %s is unavailable: no price data",
+                getattr(self, "entity_id", None) or self.name,
+            )
+            return False
+        return True
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:

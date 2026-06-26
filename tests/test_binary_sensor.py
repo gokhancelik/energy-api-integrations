@@ -152,3 +152,46 @@ class TestCheapElectricityDisabledByDefault:
 
     def test_disabled_by_default(self) -> None:
         assert CheapElectricityBinarySensor._attr_entity_registry_enabled_default is False
+
+
+class TestCheapElectricityAvailable:
+    """Test the available property of CheapElectricityBinarySensor."""
+
+    def test_available_true_with_data(self, mock_provider_prices: Any) -> None:
+        sensor = _make_sensor(mock_provider_prices)
+        assert sensor.available is True
+
+    def test_available_false_when_no_data(self) -> None:
+        coordinator = MagicMock()
+        coordinator.data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.entry.options = {}
+        coordinator.tomorrow_data = None
+        sensor = CheapElectricityBinarySensor(coordinator, "test_provider", "Test Provider")
+        sensor.entity_id = "binary_sensor.test_cheap_electricity"
+        assert sensor.available is False
+
+    def test_is_on_none_when_threshold_cannot_compute(
+        self, mock_provider_prices: Any
+    ) -> None:
+        mock_provider_prices.electricity = None
+        coordinator = MagicMock()
+        coordinator.data = mock_provider_prices
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.entry.options = {}
+        coordinator.tomorrow_data = None
+        sensor = CheapElectricityBinarySensor(coordinator, "test_provider", "Test Provider")
+        assert sensor.is_on is None
+        assert sensor.extra_state_attributes is None
+
+    def test_extra_state_attributes_all_none_when_missing_data(self) -> None:
+        coordinator = MagicMock()
+        coordinator.data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.entry.options = {}
+        coordinator.tomorrow_data = None
+        sensor = CheapElectricityBinarySensor(coordinator, "test_provider", "Test Provider")
+        assert sensor.extra_state_attributes is None

@@ -1,28 +1,54 @@
----
-# https://developers.home-assistant.io/docs/quality_scale
-golden:
-  # Config flow: implemented
-  # Tests: implemented
-  # No blocking I/O: uses async
-  pass: true
-  details:
-    - config_flow
-    - test_coverage
-    - async_io
-silver:
-  # Device info: TBD
-  # Services: TBD
-  # Reauth: N/A (no auth credentials)
-  pass: false
-  details:
-    - device_info
-    - services
-bronze:
-  # Config flow (single step, no creds)
-  # Tests for config flow, coordinator, sensor
-  # No blocking I/O
-  pass: true
-  details:
-    - config_flow
-    - tests
-    - no_blocking_io
+rules:
+  # Bronze
+  action-setup:
+    status: exempt
+    comment: Integration does not register custom actions.
+  appropriate-polling: done
+  brands: done
+  common-modules: done
+  config-flow-test-coverage: done
+  config-flow: done
+  dependency-transparency: done
+  docs-actions:
+    status: exempt
+    comment: Integration does not register custom actions.
+  docs-conditions:
+    status: exempt
+    comment: This integration does not have any conditions.
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  docs-triggers:
+    status: exempt
+    comment: This integration does not have any triggers.
+  entity-event-setup:
+    status: exempt
+    comment: Entities do not explicitly subscribe to events in async_added_to_hass.
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure:
+    status: exempt
+    comment: Integration does not use test-before-configure pattern.
+  test-before-setup:
+    status: exempt
+    comment: Integration does not use test-before-setup pattern.
+  unique-config-entry:
+    status: exempt
+    comment: Multiple config entries are supported (single_config_entry: false).
+
+  # Silver
+  action-exceptions:
+    status: exempt
+    comment: Integration does not register custom actions.
+  config-entry-unloading: done
+  docs-configuration-parameters: done
+  docs-installation-parameters: done
+  entity-unavailable: done
+  integration-owner: done
+  log-when-unavailable: done
+  parallel-updates: done
+  reauthentication-flow:
+    status: exempt
+    comment: Integration does not require authentication.
+  test-coverage: done

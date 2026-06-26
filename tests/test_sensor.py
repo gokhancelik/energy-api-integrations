@@ -30,6 +30,7 @@ from custom_components.dynamic_energy_prices.sensor import (
     BREAKDOWN_ELECTRICITY_SENSORS,
     CHEAPEST_BLOCK_SENSORS,
     DIAGNOSTIC_SENSORS,
+    GAS_SENSORS,
     TOMORROW_ELECTRICITY_SENSORS,
     TOMORROW_GAS_SENSORS,
 )
@@ -252,6 +253,502 @@ class TestDiagnosticSensors:
     def test_diagnostic_sensors_disabled_by_default(self) -> None:
         for desc in DIAGNOSTIC_SENSORS:
             assert desc.entity_registry_enabled_default is False
+
+
+class TestSensorDescriptions:
+    """Test sensor description definition metadata."""
+
+    def test_electricity_sensor_count(self) -> None:
+        assert len(ELECTRICITY_SENSORS) == 5
+
+    def test_gas_sensor_count(self) -> None:
+        assert len(GAS_SENSORS) == 2
+
+    def test_tomorrow_electricity_sensor_count(self) -> None:
+        assert len(TOMORROW_ELECTRICITY_SENSORS) == 3
+
+    def test_tomorrow_gas_sensor_count(self) -> None:
+        assert len(TOMORROW_GAS_SENSORS) == 3
+
+    def test_breakdown_sensor_count(self) -> None:
+        assert len(BREAKDOWN_ELECTRICITY_SENSORS) == 3
+
+    def test_cheapest_block_sensor_count(self) -> None:
+        assert len(CHEAPEST_BLOCK_SENSORS) == 1
+
+    def test_diagnostic_sensor_count(self) -> None:
+        assert len(DIAGNOSTIC_SENSORS) == 2
+
+    def test_all_descriptions_have_translation_key(self) -> None:
+        all_sensors = (
+            ELECTRICITY_SENSORS + GAS_SENSORS + TOMORROW_ELECTRICITY_SENSORS
+            + TOMORROW_GAS_SENSORS + BREAKDOWN_ELECTRICITY_SENSORS
+            + CHEAPEST_BLOCK_SENSORS + DIAGNOSTIC_SENSORS
+        )
+        for desc in all_sensors:
+            assert desc.translation_key is not None
+
+    def test_all_descriptions_have_value_fn(self) -> None:
+        all_sensors = (
+            ELECTRICITY_SENSORS + GAS_SENSORS + TOMORROW_ELECTRICITY_SENSORS
+            + TOMORROW_GAS_SENSORS + BREAKDOWN_ELECTRICITY_SENSORS
+            + CHEAPEST_BLOCK_SENSORS + DIAGNOSTIC_SENSORS
+        )
+        for desc in all_sensors:
+            assert desc.value_fn is not None
+
+    def test_gas_sensors_have_gas_energy_type(self) -> None:
+        for desc in GAS_SENSORS:
+            assert desc.energy_type == "gas"
+
+    def test_diagnostic_sensors_have_category_key(self) -> None:
+        for desc in DIAGNOSTIC_SENSORS:
+            assert desc.entity_category is not None
+
+
+class TestDynamicPriceSensorClass:
+    """Test the DynamicPriceSensor class methods."""
+
+    def test_native_value_none_when_no_data(self) -> None:
+        coordinator = MagicMock()
+        coordinator.data = None
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.last_update_success = True
+
+        sensor = DynamicPriceSensor(
+            coordinator,
+            ELECTRICITY_SENSORS[0],
+            "test_provider",
+            "Test Provider",
+        )
+        assert sensor.native_value is None
+
+    def test_native_value_uses_coordinator_value_fn(self) -> None:
+        coordinator = MagicMock()
+        coordinator.data = None
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.last_update_success = True
+
+        desc = DynamicEnergySensorDescription(
+            key="test",
+            name="Test",
+            value_fn=lambda p: 1.0,
+            coordinator_value_fn=lambda c: "coord_value",
+        )
+        sensor = DynamicPriceSensor(coordinator, desc, "test_provider", "Test Provider")
+        assert sensor.native_value == "coord_value"
+
+    def test_native_value_with_data(self, mock_provider_prices: Any) -> None:
+        coordinator = MagicMock()
+        coordinator.data = mock_provider_prices
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.last_update_success = True
+
+        sensor = DynamicPriceSensor(
+            coordinator,
+            ELECTRICITY_SENSORS[0],
+            "test_provider",
+            "Test Provider",
+        )
+        value = sensor.native_value
+        assert value is not None
+        assert isinstance(value, float)
+
+    def test_native_unit_none_when_coordinator_value_fn(self) -> None:
+        coordinator = MagicMock()
+        coordinator.data = MagicMock()
+        coordinator.data.electricity.unit = "EUR/kWh"
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+
+        desc = DynamicEnergySensorDescription(
+            key="test",
+            name="Test",
+            value_fn=lambda p: 1.0,
+            coordinator_value_fn=lambda c: "coord_value",
+        )
+        sensor = DynamicPriceSensor(coordinator, desc, "test_provider", "Test Provider")
+        assert sensor.native_unit_of_measurement is None
+
+    def test_native_unit_none_when_no_data(self) -> None:
+        coordinator = MagicMock()
+        coordinator.data = None
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+
+        sensor = DynamicPriceSensor(
+            coordinator,
+            ELECTRICITY_SENSORS[0],
+            "test_provider",
+            "Test Provider",
+        )
+        assert sensor.native_unit_of_measurement is None
+
+    def test_native_unit_electricity(self, mock_provider_prices: Any) -> None:
+        coordinator = MagicMock()
+        coordinator.data = mock_provider_prices
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+
+        sensor = DynamicPriceSensor(
+            coordinator,
+            ELECTRICITY_SENSORS[0],
+            "test_provider",
+            "Test Provider",
+        )
+        assert sensor.native_unit_of_measurement == "EUR/kWh"
+
+    def test_native_unit_gas(self, mock_provider_prices: Any) -> None:
+        coordinator = MagicMock()
+        coordinator.data = mock_provider_prices
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+
+        from custom_components.dynamic_energy_prices.sensor import GAS_SENSORS
+        sensor = DynamicPriceSensor(
+            coordinator,
+            GAS_SENSORS[0],
+            "test_provider",
+            "Test Provider",
+        )
+        assert sensor.native_unit_of_measurement == "EUR/m³"
+
+    def test_extra_state_attributes_none_when_no_data(self) -> None:
+        coordinator = MagicMock()
+        coordinator.data = None
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+
+        sensor = DynamicPriceSensor(
+            coordinator,
+            ELECTRICITY_SENSORS[0],
+            "test_provider",
+            "Test Provider",
+        )
+        assert sensor.extra_state_attributes is None
+
+    def test_extra_state_attributes_with_data(self, mock_provider_prices: Any) -> None:
+        coordinator = MagicMock()
+        coordinator.data = mock_provider_prices
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.last_update_success = True
+
+        sensor = DynamicPriceSensor(
+            coordinator,
+            ELECTRICITY_SENSORS[0],
+            "test_provider",
+            "Test Provider",
+        )
+        attrs = sensor.extra_state_attributes
+        assert attrs is not None
+        assert "provider" in attrs
+
+    def test_available_false_when_coordinator_unavailable(self) -> None:
+        coordinator = MagicMock()
+        coordinator.data = MagicMock()
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+
+        class UnavailableEntity:
+            @property
+            def available(self) -> bool:
+                return False
+
+        with patch(
+            "custom_components.dynamic_energy_prices.sensor.DynamicPriceSensor.available",
+            new=UnavailableEntity.available,
+        ):
+            sensor = DynamicPriceSensor(
+                coordinator,
+                ELECTRICITY_SENSORS[0],
+                "test_provider",
+                "Test Provider",
+            )
+            assert sensor.available is False
+
+    def test_available_false_when_prices_none(self) -> None:
+        coordinator = MagicMock()
+        coordinator.data = None
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.last_update_success = True
+
+        sensor = DynamicPriceSensor(
+            coordinator,
+            ELECTRICITY_SENSORS[0],
+            "test_provider",
+            "Test Provider",
+        )
+        sensor.entity_id = "sensor.test_electricity_price"
+        assert sensor.available is False
+
+    def test_available_true_with_data(self, mock_provider_prices: Any) -> None:
+        coordinator = MagicMock()
+        coordinator.data = mock_provider_prices
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.last_update_success = True
+
+        sensor = DynamicPriceSensor(
+            coordinator,
+            ELECTRICITY_SENSORS[0],
+            "test_provider",
+            "Test Provider",
+        )
+        assert sensor.available is True
+
+    def test_available_respects_available_fn(self, mock_provider_prices: Any) -> None:
+        coordinator = MagicMock()
+        coordinator.data = mock_provider_prices
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.last_update_success = True
+
+        desc = DynamicEnergySensorDescription(
+            key="test",
+            name="Test",
+            value_fn=lambda p: 1.0,
+            available_fn=lambda p: False,
+        )
+        sensor = DynamicPriceSensor(coordinator, desc, "test_provider", "Test Provider")
+        sensor.entity_id = "sensor.test"
+        assert sensor.available is False
+
+    def test_available_true_with_available_fn(self, mock_provider_prices: Any) -> None:
+        coordinator = MagicMock()
+        coordinator.data = mock_provider_prices
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.last_update_success = True
+
+        desc = DynamicEnergySensorDescription(
+            key="test",
+            name="Test",
+            value_fn=lambda p: 1.0,
+            available_fn=lambda p: True,
+        )
+        sensor = DynamicPriceSensor(coordinator, desc, "test_provider", "Test Provider")
+        assert sensor.available is True
+
+    def test_get_prices_uses_tomorrow_data(self, mock_provider_prices: Any) -> None:
+        coordinator = MagicMock()
+        coordinator.data = MagicMock()
+        coordinator.data.electricity.unit = "EUR/kWh"
+        coordinator.tomorrow_data = mock_provider_prices
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+
+        desc = DynamicEnergySensorDescription(
+            key="test",
+            name="Test",
+            value_fn=lambda p: 1.0,
+            use_tomorrow_data=True,
+        )
+        sensor = DynamicPriceSensor(coordinator, desc, "test_provider", "Test Provider")
+        assert sensor._get_prices() is mock_provider_prices
+
+    def test_get_prices_uses_current_data(self, mock_provider_prices: Any) -> None:
+        coordinator = MagicMock()
+        coordinator.data = mock_provider_prices
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+
+        desc = DynamicEnergySensorDescription(
+            key="test",
+            name="Test",
+            value_fn=lambda p: 1.0,
+            use_tomorrow_data=False,
+        )
+        sensor = DynamicPriceSensor(coordinator, desc, "test_provider", "Test Provider")
+        assert sensor._get_prices() is mock_provider_prices
+
+
+class TestGazFunctions:
+    """Test gas-specific utility functions."""
+
+    def test_gas_series_returned(self, mock_provider_prices: Any) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _gas_series
+        series = _gas_series(mock_provider_prices)
+        assert series is not None
+
+    def test_gas_series_none_when_no_gas(
+        self, mock_provider_prices_electricity_only: Any
+    ) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _gas_series
+        series = _gas_series(mock_provider_prices_electricity_only)
+        assert series is None
+
+    def test_gas_series_none_for_none(self) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _gas_series
+        assert _gas_series(None) is None
+
+    def test_gas_available_true(self, mock_provider_prices: Any) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _gas_available
+        assert _gas_available(mock_provider_prices) is True
+
+    def test_gas_available_false_when_none(
+        self, mock_provider_prices_electricity_only: Any
+    ) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _gas_available
+        assert _gas_available(mock_provider_prices_electricity_only) is False
+
+    def test_gas_not_available_when_empty_prices(self) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _gas_available
+        from custom_components.dynamic_energy_prices.providers import (
+            EnergyPriceSeries,
+            ProviderPrices,
+        )
+        prices = ProviderPrices(
+            electricity=EnergyPriceSeries(unit="EUR/kWh", prices=[]),
+            gas=EnergyPriceSeries(unit="EUR/m³", prices=[]),
+        )
+        assert _gas_available(prices) is False
+
+    def test_next_gas_price_none_for_none_input(self) -> None:
+        assert _next_gas_price_value(None) is None  # type: ignore[arg-type]
+
+    def test_next_gas_price_none_when_no_next_price(
+        self, mock_provider_prices: Any
+    ) -> None:
+        from custom_components.dynamic_energy_prices.providers import find_next_price
+
+        with patch(
+            "custom_components.dynamic_energy_prices.sensor.find_next_price",
+            return_value=None,
+        ):
+            value = _next_gas_price_value(mock_provider_prices)
+            assert value is None
+
+    def test_current_price_extra_attrs_none_for_none_input(self) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _current_price_extra_attrs
+        assert _current_price_extra_attrs(None, "test") is None  # type: ignore[arg-type]
+
+
+class TestBreakdownEdgeCases:
+    """Test breakdown function edge cases."""
+
+    def test_market_price_none_when_no_series(self) -> None:
+        assert _current_market_price_value(None) is None  # type: ignore[arg-type]
+
+    def test_supplier_markup_none_when_no_series(self) -> None:
+        assert _current_supplier_markup_value(None) is None  # type: ignore[arg-type]
+
+    def test_energy_tax_none_when_no_series(self) -> None:
+        assert _current_energy_tax_value(None) is None  # type: ignore[arg-type]
+
+    def test_current_breakdown_none_when_current_missing(
+        self, mock_provider_prices: Any
+    ) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _current_breakdown_value
+        from custom_components.dynamic_energy_prices.providers import find_current_price
+
+        with patch(
+            "custom_components.dynamic_energy_prices.sensor.find_current_price",
+            return_value=None,
+        ):
+            value = _current_breakdown_value(mock_provider_prices, "market_price")
+            assert value is None
+
+
+class TestNextGasPriceEdgeCase:
+    """Test next gas price when current is None."""
+
+    def test_next_gas_none_when_current_missing(
+        self, mock_provider_prices: Any
+    ) -> None:
+        from custom_components.dynamic_energy_prices.providers import find_next_price
+
+        with patch(
+            "custom_components.dynamic_energy_prices.sensor.find_next_price",
+            return_value=None,
+        ):
+            value = _next_gas_price_value(mock_provider_prices)
+            assert value is None
+
+
+class TestCheapestBlockEdgeCases:
+    """Test cheapest block function edge cases."""
+
+    def test_cheapest_block_value_none_when_no_series(self) -> None:
+        assert _cheapest_block_value(None) is None  # type: ignore[arg-type]
+
+    def test_cheapest_block_attrs_none_when_no_series(self) -> None:
+        assert _cheapest_block_extra_attrs(None, "test") is None  # type: ignore[arg-type]
+
+    def test_cheapest_block_value_none_when_no_block_found(self) -> None:
+        from custom_components.dynamic_energy_prices.providers import (
+            EnergyPriceSeries,
+            PricePoint,
+            ProviderPrices,
+        )
+        from datetime import datetime
+
+        now = datetime.now()
+        prices = ProviderPrices(
+            electricity=EnergyPriceSeries(
+                unit="EUR/kWh",
+                prices=[PricePoint(start=now, end=now, total_price=0.25)],
+            ),
+            gas=None,
+        )
+        value = _cheapest_block_value(prices)
+        assert value is None
+
+    def test_cheapest_block_attrs_none_when_no_block_found(self) -> None:
+        from custom_components.dynamic_energy_prices.providers import (
+            EnergyPriceSeries,
+            PricePoint,
+            ProviderPrices,
+        )
+        from datetime import datetime
+
+        now = datetime.now()
+        prices = ProviderPrices(
+            electricity=EnergyPriceSeries(
+                unit="EUR/kWh",
+                prices=[PricePoint(start=now, end=now, total_price=0.25)],
+            ),
+            gas=None,
+        )
+        attrs = _cheapest_block_extra_attrs(prices, "test")
+        assert attrs is None
+
+    def test_price_extra_attrs(self) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _price_extra_attrs
+        attrs = _price_extra_attrs(None, "test_provider")  # type: ignore[arg-type]
+        assert attrs is not None
+        assert attrs["provider"] == "test_provider"
+
+    def test_current_price_extra_attrs_none_when_current_missing(
+        self, mock_provider_prices: Any
+    ) -> None:
+        from custom_components.dynamic_energy_prices.sensor import _current_price_extra_attrs
+
+        with patch(
+            "custom_components.dynamic_energy_prices.sensor.find_current_price",
+            return_value=None,
+        ):
+            attrs = _current_price_extra_attrs(mock_provider_prices, "test")
+            assert attrs is None
 
 
 class TestForceUpdate:

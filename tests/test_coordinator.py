@@ -305,3 +305,83 @@ async def test_coordinator_no_issue_below_threshold(hass: Any) -> None:
                 await coordinator._async_update_data()
 
     hass.issues.async_create_issue.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_coordinator_last_successful_data(hass: Any) -> None:
+    """Test the last_successful_data property."""
+    with patch(
+        "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
+    ) as mock_fetch:
+        from custom_components.dynamic_energy_prices.coordinator import (
+            DynamicPriceCoordinator,
+        )
+
+        now = datetime.now(timezone.utc)
+        mock_fetch.return_value = ProviderPrices(
+            electricity=EnergyPriceSeries(
+                prices=[PricePoint(start=now, end=now, total_price=0.1)],
+                unit="EUR/kWh",
+            ),
+        )
+        with patch(
+            "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices_for_date"
+        ) as mock_fetch_tomorrow:
+            mock_fetch_tomorrow.return_value = None
+
+            entry = type(
+                "ConfigEntry",
+                (),
+                {
+                    "entry_id": "test",
+                    "data": {"provider": "essent"},
+                },
+            )()
+
+            coordinator = DynamicPriceCoordinator(hass, entry)
+            assert coordinator.last_successful_data is None
+
+            await coordinator._async_update_data()
+
+            assert coordinator.last_successful_data is not None
+            assert coordinator.last_successful_data.electricity.prices[0].total_price == 0.1
+
+
+@pytest.mark.asyncio
+async def test_coordinator_last_update_time(hass: Any) -> None:
+    """Test the last_update_time property."""
+    with patch(
+        "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
+    ) as mock_fetch:
+        from custom_components.dynamic_energy_prices.coordinator import (
+            DynamicPriceCoordinator,
+        )
+
+        now = datetime.now(timezone.utc)
+        mock_fetch.return_value = ProviderPrices(
+            electricity=EnergyPriceSeries(
+                prices=[PricePoint(start=now, end=now, total_price=0.1)],
+                unit="EUR/kWh",
+            ),
+        )
+        with patch(
+            "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices_for_date"
+        ) as mock_fetch_tomorrow:
+            mock_fetch_tomorrow.return_value = None
+
+            entry = type(
+                "ConfigEntry",
+                (),
+                {
+                    "entry_id": "test",
+                    "data": {"provider": "essent"},
+                },
+            )()
+
+            coordinator = DynamicPriceCoordinator(hass, entry)
+            assert coordinator.last_update_time is None
+
+            await coordinator._async_update_data()
+
+            assert coordinator.last_update_time is not None
+            assert isinstance(coordinator.last_update_time, datetime)
