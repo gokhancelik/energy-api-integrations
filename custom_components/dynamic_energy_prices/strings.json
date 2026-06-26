@@ -20,6 +20,11 @@
       "already_configured": "This provider is already configured."
     }
   },
+  "binary_sensor": {
+    "cheap_electricity": {
+      "name": "Cheap electricity"
+    }
+  },
   "services": {
     "force_update": {
       "name": "Force update",

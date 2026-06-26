@@ -19,6 +19,7 @@ ATTR_LOWEST_PRICE = "lowest_price"
 ATTR_HIGHEST_PRICE = "highest_price"
 ATTR_PRICE_BREAKDOWN = "price_breakdown"
 ATTR_PROVIDER = "provider"
+ATTR_THRESHOLD = "threshold"
 ATTR_LAST_UPDATED = "last_updated"
 ATTR_NEXT_UPDATE = "next_update"
 

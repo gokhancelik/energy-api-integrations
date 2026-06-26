@@ -74,6 +74,19 @@ def _mock_homeassistant() -> None:
         sensor_module.SensorEntity = SensorEntity
         sys.modules["homeassistant.components.sensor"] = sensor_module
 
+        class BinarySensorEntity:
+            pass
+
+        class BinarySensorEntityDescription:
+            def __init__(self, **kwargs: Any) -> None:
+                for k, v in kwargs.items():
+                    setattr(self, k, v)
+
+        binary_sensor_module = MagicMock()
+        binary_sensor_module.BinarySensorEntity = BinarySensorEntity
+        binary_sensor_module.BinarySensorEntityDescription = BinarySensorEntityDescription
+        sys.modules["homeassistant.components.binary_sensor"] = binary_sensor_module
+
         # Provide real base classes for entity hierarchy (no metaclass conflicts)
         class CoordinatorEntity:
             def __init__(self, coordinator=None):

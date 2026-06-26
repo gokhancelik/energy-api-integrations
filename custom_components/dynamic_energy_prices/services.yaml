@@ -4,4 +4,6 @@ force_update:
   target:
     entity:
       integration: dynamic_energy_prices
-      domain: sensor
+      domain:
+        - sensor
+        - binary_sensor
