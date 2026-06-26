@@ -230,7 +230,7 @@ async def test_coordinator_issue_raised_after_consecutive_failures(hass: Any) ->
 
 
 @pytest.mark.asyncio
-async def test_coordinator_issue_cleared_on_success(hass: Any) -> None:
+async def test_coordinator_issue_cleared_on_success(hass: Any, socket_enabled) -> None:  # noqa: F811
     """Test that the repair issue is deleted when data fetches successfully."""
     from custom_components.dynamic_energy_prices.const import CONSECUTIVE_FAILURE_LIMIT
     from custom_components.dynamic_energy_prices.coordinator import (
