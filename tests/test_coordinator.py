@@ -8,6 +8,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
+import importlib
+
 from datetime import datetime, timezone
 
 from custom_components.dynamic_energy_prices.providers.base import (
@@ -230,7 +232,11 @@ async def test_coordinator_issue_raised_after_consecutive_failures(hass: Any) ->
 
 
 @pytest.mark.asyncio
-async def test_coordinator_issue_cleared_on_success(hass: Any, socket_enabled) -> None:  # noqa: F811
+@pytest.mark.skipif(
+    importlib.util.find_spec("pytest_homeassistant_custom_component") is not None,
+    reason="requires mock hass (pytest-homeassistant-custom-component creates real HA with socket conflicts)",
+)
+async def test_coordinator_issue_cleared_on_success(hass: Any) -> None:
     """Test that the repair issue is deleted when data fetches successfully."""
     from custom_components.dynamic_energy_prices.const import CONSECUTIVE_FAILURE_LIMIT
     from custom_components.dynamic_energy_prices.coordinator import (
