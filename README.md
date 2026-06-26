@@ -81,6 +81,10 @@ pricing API — it cannot be implemented as a dynamic price provider.
 
 ### Tomorrow's prices
 
+Available for **EnergyZero**, **Eneco**, and **Frank Energie** (providers that
+implement `async_fetch_prices_for_date`). Not created for **Essent** since it
+does not offer a date-based API.
+
 | Sensor | Description | Enabled by default |
 |---|---|---|
 | `tomorrow_average_electricity_price` | Average electricity price for tomorrow | ✅ |

@@ -29,6 +29,7 @@ from .providers import (
     PROVIDER_REGISTRY,
     CheapestBlock,
     EnergyPriceSeries,
+    PriceProvider,
     ProviderPrices,
     calculate_average_price,
     calculate_max_price,
@@ -467,15 +468,22 @@ async def async_setup_entry(
             DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
         )
 
-    for description in TOMORROW_ELECTRICITY_SENSORS:
-        entities.append(
-            DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
-        )
+    supports_tomorrow = (
+        provider_cls is not None
+        and provider_cls.async_fetch_prices_for_date
+        is not PriceProvider.async_fetch_prices_for_date
+    )
 
-    for description in TOMORROW_GAS_SENSORS:
-        entities.append(
-            DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
-        )
+    if supports_tomorrow:
+        for description in TOMORROW_ELECTRICITY_SENSORS:
+            entities.append(
+                DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
+            )
+
+        for description in TOMORROW_GAS_SENSORS:
+            entities.append(
+                DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
+            )
 
     platform = entity_platform.async_get_current_platform()
     platform.async_register_entity_service(
