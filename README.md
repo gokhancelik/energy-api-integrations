@@ -230,6 +230,63 @@ automation:
 |---|---|---|
 | `force_update` | `sensor`, `binary_sensor` | Force refresh price data from the provider |
 
+## Data updates
+
+The integration polls your provider's API every **60 minutes** with a random
+start-minute offset (0–59) to spread load evenly across users. Each request
+has a **15-second timeout**. If a request fails, the coordinator keeps the
+last successful data and retries on the next cycle.
+
+After **3 consecutive failures** a repair issue is created in **Settings >
+Repairs** with the error details. It is cleared automatically on the next
+successful fetch.
+
+## Supported features
+
+- Real-time monitoring of current, next, average, lowest, and highest
+  electricity and gas prices
+- Breakdown sensors showing the market price, supplier markup, and energy tax
+  components of the current electricity price
+- Tomorrow price preview (for EnergyZero, Eneco, and Frank Energie)
+- Cheapest 3‑hour block sensor with `device_class: timestamp` — state is the
+  start time of the cheapest remaining block of the day
+- Binary sensor that indicates when the current price is below a configurable
+  threshold (defaults to the day's average price)
+- Diagnostics sensors showing the last update time and next scheduled update
+- Force‑update service to trigger an immediate refresh
+- `hourly_prices` attribute on `current_electricity_price` with the full 24-hour
+  price curve
+- Multi‑provider support: run multiple config entries simultaneously
+  (e.g., EnergyZero for electricity + Frank Energie for gas)
+
+## Known limitations
+
+- **Essent** does not offer a date-based API, so tomorrow-price sensors are
+  not created for Essent config entries.
+- **Vattenfall** TijdPrijs is a fixed time-of-use tariff, not a real-time
+  dynamic price — it cannot be implemented as a dynamic price provider.
+- The **cheapest 3‑hour block** only considers the remaining hours of the
+  current day. It will not find a block if fewer than 3 hours are left until
+  midnight.
+- The **binary sensor** compares the current hour's price against the day's
+  average. It uses the average of **all** 24 hours, so early in the day the
+  average is less representative.
+- Providers may return prices with different timezones. The integration uses
+  the provider's native timezone where possible (e.g., `Europe/Amsterdam` for
+  Essent).
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| No entities created after setup | API key issue or network | Check HA logs for `UpdateFailed` errors |
+| Essent shows "401 Unauthorized" | Missing `x-request-origin` header (fixed in v0.8.1) | Update to the latest version |
+| `'HomeAssistant' object has no attribute 'issues'` | HA version predates the issues API (pre-2023.6) | Update HA or ignore — no functional impact (fixed in v0.15.1) |
+| Entity "no longer being provided" | Setup failed during refresh | Restart HA after updating to latest version |
+| Tomorrow sensors missing | Provider does not support date-based queries (Essent) | Expected — not available for Essent |
+| Gas sensors missing | Provider returned no gas data, or only electricity is available | Expected — check provider capabilities |
+| Prices seem wrong / outdated | Data is polled every 60 minutes | Use the `force_update` service to trigger an immediate refresh |
+
 ## Adding a new provider
 
 See [`providers/base.py`](custom_components/dynamic_energy_prices/providers/base.py)

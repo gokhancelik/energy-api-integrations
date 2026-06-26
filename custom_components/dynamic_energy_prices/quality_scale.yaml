@@ -52,3 +52,42 @@ rules:
     status: exempt
     comment: Integration does not require authentication.
   test-coverage: done
+
+  # Gold
+  devices:
+    status: exempt
+    comment: Integration does not create device registry entries (service integration type).
+  diagnostics: done
+  discovery-update-info:
+    status: exempt
+    comment: No discovery mechanism.
+  discovery:
+    status: exempt
+    comment: No discovery mechanism.
+  docs-data-update: done
+  docs-examples: done
+  docs-known-limitations: done
+  docs-supported-devices:
+    status: exempt
+    comment: No physical devices.
+  docs-supported-functions: done
+  docs-troubleshooting: done
+  docs-use-cases: done
+  dynamic-devices:
+    status: exempt
+    comment: No dynamically discovered devices.
+  entity-category: done
+  entity-device-class: done
+  entity-disabled-by-default: done
+  entity-translations: done
+  exception-translations:
+    status: exempt
+    comment: Exceptions are internal (re-raised as UpdateFailed); user-facing errors use the repair issue flow with translations.
+  icon-translations:
+    status: exempt
+    comment: Entities use default icons from device_class (MONETARY, TIMESTAMP, DIAGNOSTIC) — no custom icons needed.
+  reconfiguration-flow: done
+  repair-issues: done
+  stale-devices:
+    status: exempt
+    comment: No devices to become stale.
