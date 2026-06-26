@@ -1,7 +1,6 @@
 """Tests for the config flow."""
 
 from __future__ import annotations
-
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
@@ -18,6 +17,7 @@ from homeassistant import config_entries, data_entry_flow
 from homeassistant.core import HomeAssistant
 
 from custom_components.dynamic_energy_prices.const import CONF_COUNTRY, CONF_PROVIDER, CONF_THRESHOLD, DOMAIN
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.dynamic_energy_prices.providers.base import (
     PROVIDER_REGISTRY,
     ProviderConnectionError,
@@ -332,7 +332,7 @@ async def test_options_flow_clear_threshold(
 @pytest.fixture
 def mock_essent_config_entry(hass: HomeAssistant) -> config_entries.ConfigEntry:
     """Create a mock Essent config entry."""
-    entry = config_entries.ConfigEntry(
+    entry = MockConfigEntry(
         version=1,
         domain=DOMAIN,
         title="Essent",
@@ -343,9 +343,6 @@ def mock_essent_config_entry(hass: HomeAssistant) -> config_entries.ConfigEntry:
         pref_disable_new_entities=False,
         pref_disable_polling=False,
         unique_id=f"{DOMAIN}_essent",
-        discovery_keys={},
-        minor_version=1,
-        subentries_data={},
     )
     entry.add_to_hass(hass)
     return entry
