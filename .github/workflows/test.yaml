@@ -32,3 +32,9 @@ jobs:
       - name: Run pytest
         run: |
           pytest -v --cov=custom_components/dynamic_energy_prices --cov-report=term-missing --cov-report=xml:coverage.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
