@@ -6,9 +6,8 @@
   "documentation": "https://github.com/gokhancelik/energy-api-integrations",
   "integration_type": "service",
   "iot_class": "cloud_polling",
-  "parallel_updates": 0,
   "issue_tracker": "https://github.com/gokhancelik/energy-api-integrations/issues",
   "requirements": [],
   "single_config_entry": false,
-  "version": "0.15.6"
+  "version": "0.15.7"
 }

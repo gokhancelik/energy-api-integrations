@@ -29,11 +29,6 @@
       "already_configured": "This provider is already configured."
     }
   },
-  "binary_sensor": {
-    "cheap_electricity": {
-      "name": "Cheap electricity"
-    }
-  },
   "issues": {
     "provider_unreachable": {
       "title": "{provider} is unreachable",
@@ -46,7 +41,8 @@
       "description": "Force a refresh of energy price data."
     }
   },
-  "sensor": {
+  "entity": {
+    "sensor": {
     "current_electricity_price": {
       "name": "Current electricity price"
     },
@@ -104,5 +100,11 @@
     "tomorrow_highest_gas_price": {
       "name": "Tomorrow highest gas price"
     }
+  },
+  "binary_sensor": {
+    "cheap_electricity": {
+      "name": "Cheap electricity"
+    }
   }
+}
 }
