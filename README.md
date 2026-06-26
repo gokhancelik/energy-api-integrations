@@ -178,7 +178,8 @@ python scripts/smoke_test_frank_energie.py
 - [x] Cheapest 3-hour block sensor (sliding window)
 - [x] Options flow with custom threshold
 - [x] Diagnostics sensors (last updated, next update)
-- [ ] Repair/issue flow for API errors
+- [x] Repair/issue flow for API errors
+- [ ] Silver quality scale
 - [ ] Diagnostics sensors (last updated, next update)
 - [ ] Repair/issue flow for API errors
 

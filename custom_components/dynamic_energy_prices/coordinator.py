@@ -11,7 +11,13 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import CONF_PROVIDER, DOMAIN, DEFAULT_SCAN_INTERVAL_MINUTES
+from .const import (
+    CONF_PROVIDER,
+    CONSECUTIVE_FAILURE_LIMIT,
+    DOMAIN,
+    DEFAULT_SCAN_INTERVAL_MINUTES,
+    ISSUE_ID_PROVIDER_UNREACHABLE,
+)
 from .providers import (
     PROVIDER_REGISTRY,
     PriceProvider,
@@ -39,6 +45,7 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
         self._last_successful_data: ProviderPrices | None = None
         self._tomorrow_data: ProviderPrices | None = None
         self._last_update_time: datetime | None = None
+        self._consecutive_failures = 0
 
         randomized_minute = randrange(0, 60)
         now = datetime.now()
@@ -64,10 +71,14 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
             async with asyncio.timeout(15):
                 data = await self.provider.async_fetch_prices()
         except ProviderConnectionError as err:
+            await self._handle_failure(err)
             raise UpdateFailed(f"Connection error: {err}") from err
         except ProviderResponseError as err:
+            await self._handle_failure(err)
             raise UpdateFailed(f"Response error: {err}") from err
 
+        self._consecutive_failures = 0
+        await self._clear_issue()
         self._last_successful_data = data
         self._last_update_time = datetime.now(timezone.utc)
 
@@ -83,6 +94,27 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
             self._tomorrow_data = None
 
         return data
+
+    async def _handle_failure(self, err: Exception) -> None:
+        """Handle a fetch failure and raise a repair issue if threshold exceeded."""
+        self._consecutive_failures += 1
+        if self._consecutive_failures >= CONSECUTIVE_FAILURE_LIMIT:
+            translation_placeholders = {
+                "provider": self.provider.display_name,
+                "error": str(err),
+            }
+            self.hass.issues.async_create_issue(
+                DOMAIN,
+                ISSUE_ID_PROVIDER_UNREACHABLE,
+                is_fixable=False,
+                severity="error",
+                translation_key="provider_unreachable",
+                translation_placeholders=translation_placeholders,
+            )
+
+    async def _clear_issue(self) -> None:
+        """Clear the repair issue if one was raised."""
+        self.hass.issues.async_delete_issue(DOMAIN, ISSUE_ID_PROVIDER_UNREACHABLE)
 
     @property
     def last_successful_data(self) -> ProviderPrices | None:

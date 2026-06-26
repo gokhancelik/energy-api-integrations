@@ -34,6 +34,12 @@
       "name": "Cheap electricity"
     }
   },
+  "issues": {
+    "provider_unreachable": {
+      "title": "{provider} is unreachable",
+      "description": "The {provider} API has been unreachable for several consecutive updates. The integration will keep retrying automatically.\n\nError: {error}"
+    }
+  },
   "services": {
     "force_update": {
       "name": "Force update",

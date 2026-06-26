@@ -24,4 +24,7 @@ ATTR_THRESHOLD = "threshold"
 ATTR_LAST_UPDATED = "last_updated"
 ATTR_NEXT_UPDATE = "next_update"
 
+CONSECUTIVE_FAILURE_LIMIT = 3
+ISSUE_ID_PROVIDER_UNREACHABLE = "provider_unreachable"
+
 
