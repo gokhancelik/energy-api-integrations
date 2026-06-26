@@ -167,7 +167,7 @@ def _hourly_prices_extra(prices: ProviderPrices) -> list[dict[str, Any]] | None:
     ]
 
 
-def _cheapest_block_value(prices: ProviderPrices) -> str | None:
+def _cheapest_block_value(prices: ProviderPrices) -> datetime | None:
     series = _electricity_series(prices)
     if series is None:
         return None
@@ -175,7 +175,7 @@ def _cheapest_block_value(prices: ProviderPrices) -> str | None:
     block = find_cheapest_block(remaining)
     if block is None:
         return None
-    return f"{block.start.strftime('%H:%M')} - {block.end.strftime('%H:%M')}"
+    return block.start
 
 
 def _cheapest_block_extra_attrs(
@@ -305,6 +305,7 @@ CHEAPEST_BLOCK_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         key="cheapest_3h_block_electricity",
         translation_key="cheapest_3h_block_electricity",
         name="Cheapest 3h block electricity",
+        device_class=SensorDeviceClass.TIMESTAMP,
         value_fn=_cheapest_block_value,
         extra_attrs_fn=_cheapest_block_extra_attrs,
         entity_registry_enabled_default=False,
@@ -561,7 +562,7 @@ class DynamicPriceSensor(DynamicPriceEntity, SensorEntity):
         """Return the unit of measurement."""
         if self.entity_description.coordinator_value_fn:
             return None
-        if self.entity_description.device_class is None:
+        if self.entity_description.device_class is None or self.entity_description.device_class == SensorDeviceClass.TIMESTAMP:
             return None
         prices = self._get_prices()
         if prices is None:

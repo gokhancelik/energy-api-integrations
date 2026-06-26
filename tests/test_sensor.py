@@ -184,8 +184,7 @@ class TestCheapestBlockSensor:
     def test_value_returns_formatted_time_range(self, mock_provider_prices: Any) -> None:
         value = _cheapest_block_value(mock_provider_prices)
         assert value is not None
-        assert isinstance(value, str)
-        assert "-" in value
+        assert isinstance(value, datetime)
 
     def test_value_none_for_no_data(self) -> None:
         assert _cheapest_block_value(None) is None  # type: ignore[arg-type]

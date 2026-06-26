@@ -51,6 +51,7 @@ def _mock_homeassistant() -> None:
         # Provide real dataclass bases so DynamicEnergySensorDescription can inherit
         class SensorDeviceClass:
             MONETARY = "monetary"
+            TIMESTAMP = "timestamp"
 
         class SensorStateClass:
             MEASUREMENT = "measurement"
