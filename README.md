@@ -6,7 +6,7 @@ Netherlands and Belgium, with a provider-pluggable architecture.
 ## Supported providers
 
 | Provider | API Type | Auth | Electricity | Gas | Belgium |
-|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|
 | Essent (NL) | REST | None (header fix) | ✅ | ✅ | ❌ |
 | EnergyZero (NL) | REST | None | ✅ | ✅ | ❌ |
 | Eneco (NL) | REST (EnergyZero alias) | None | ✅ | ✅ | ❌ |
