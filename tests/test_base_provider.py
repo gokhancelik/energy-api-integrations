@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from custom_components.dynamic_energy_prices.providers.base import (
+    CheapestBlock,
     EnergyPriceSeries,
     PricePoint,
     PriceProvider,
@@ -14,6 +15,7 @@ from custom_components.dynamic_energy_prices.providers.base import (
     calculate_average_price,
     calculate_max_price,
     calculate_min_price,
+    find_cheapest_block,
     find_current_price,
     find_next_price,
 )
@@ -222,3 +224,81 @@ class TestPriceProviderDateFetch:
         provider = EssentPriceProvider()
         result = await provider.async_fetch_prices_for_date("2026-06-19")
         assert result is None
+
+
+class TestCheapestBlock:
+    """Test the find_cheapest_block function."""
+
+    def _make_prices(self, values: list[float]) -> list[PricePoint]:
+        return [
+            PricePoint(
+                start=_utc_dt(h),
+                end=_utc_dt(h + 1),
+                total_price=v,
+            )
+            for h, v in enumerate(values)
+        ]
+
+    def test_finds_cheapest_3h_block(self) -> None:
+        prices = self._make_prices([0.4, 0.3, 0.2, 0.3, 0.4, 0.5])
+        block = find_cheapest_block(prices, block_size=3)
+        assert block is not None
+        assert block.start == _utc_dt(1)
+        assert block.end == _utc_dt(4)
+        assert block.average_price == pytest.approx(0.2667, rel=0.01)
+        assert block.total_price == 0.8
+        assert block.prices == [0.3, 0.2, 0.3]
+
+    def test_finds_cheapest_block_at_start(self) -> None:
+        prices = self._make_prices([0.2, 0.3, 0.4, 0.5, 0.6])
+        block = find_cheapest_block(prices, block_size=3)
+        assert block is not None
+        assert block.start == _utc_dt(0)
+        assert block.prices == [0.2, 0.3, 0.4]
+
+    def test_finds_cheapest_block_at_end(self) -> None:
+        prices = self._make_prices([0.6, 0.5, 0.4, 0.3, 0.2])
+        block = find_cheapest_block(prices, block_size=3)
+        assert block is not None
+        assert block.start == _utc_dt(2)
+        assert block.prices == [0.4, 0.3, 0.2]
+
+    def test_returns_none_for_empty_list(self) -> None:
+        assert find_cheapest_block([], block_size=3) is None
+
+    def test_returns_none_for_too_few_prices(self) -> None:
+        prices = self._make_prices([0.1, 0.2])
+        assert find_cheapest_block(prices, block_size=3) is None
+
+    def test_exact_block_size(self) -> None:
+        prices = self._make_prices([0.5, 0.3, 0.4])
+        block = find_cheapest_block(prices, block_size=3)
+        assert block is not None
+        assert block.average_price == pytest.approx(0.4)
+
+    def test_cheapest_block_dataclass(self) -> None:
+        now = _utc_dt(0)
+        block = CheapestBlock(
+            start=now,
+            end=_utc_dt(3),
+            average_price=0.2,
+            total_price=0.6,
+            prices=[0.1, 0.2, 0.3],
+        )
+        assert block.start == now
+        assert block.end == _utc_dt(3)
+        assert block.prices == [0.1, 0.2, 0.3]
+
+    def test_default_block_size_is_3(self) -> None:
+        prices = self._make_prices([0.5, 0.3, 0.1, 0.4])
+        block = find_cheapest_block(prices)
+        assert block is not None
+        assert block.start == _utc_dt(1)
+        assert block.prices == [0.3, 0.1, 0.4]
+
+    def test_ties_go_to_first_block(self) -> None:
+        prices = self._make_prices([0.2, 0.3, 0.4, 0.2, 0.3, 0.4])
+        block = find_cheapest_block(prices, block_size=3)
+        assert block is not None
+        assert block.start == _utc_dt(0)
+        assert block.prices == [0.2, 0.3, 0.4]

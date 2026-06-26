@@ -14,6 +14,8 @@ from .base import (
     calculate_min_price,
     find_current_price,
     find_next_price,
+    find_cheapest_block,
+    CheapestBlock,
 )
 
 from . import essent  # noqa: F401 - register the Essent provider
@@ -37,4 +39,6 @@ __all__ = [
     "calculate_min_price",
     "find_current_price",
     "find_next_price",
+    "find_cheapest_block",
+    "CheapestBlock",
 ]

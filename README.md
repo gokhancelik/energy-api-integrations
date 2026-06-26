@@ -66,6 +66,7 @@ pricing API — it cannot be implemented as a dynamic price provider.
 | `average_electricity_price` | Average of all 24 hourly prices today | ✅ |
 | `lowest_electricity_price` | Lowest price today | ❌ |
 | `highest_electricity_price` | Highest price today | ❌ |
+| `cheapest_3h_block_electricity` | Cheapest contiguous 3-hour block (sliding window) | ❌ |
 
 ### Today's gas prices
 
@@ -164,6 +165,7 @@ python scripts/smoke_test_frank_energie.py
 - [x] Tomorrow's prices sensors
 - [x] Standardised breakdown sensors (market price, supplier markup, energy tax)
 - [x] Cheap electricity binary sensor (current < average)
+- [x] Cheapest 3-hour block sensor (sliding window)
 - [ ] Options flow with custom threshold
 - [ ] Diagnostics sensors (last updated, next update)
 - [ ] Repair/issue flow for API errors

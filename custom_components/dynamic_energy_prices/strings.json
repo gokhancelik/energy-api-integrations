@@ -47,6 +47,9 @@
     "highest_electricity_price": {
       "name": "Highest electricity price"
     },
+    "cheapest_3h_block_electricity": {
+      "name": "Cheapest 3h block electricity"
+    },
     "current_gas_price": {
       "name": "Current gas price"
     },

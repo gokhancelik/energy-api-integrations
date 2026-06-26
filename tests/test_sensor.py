@@ -22,8 +22,11 @@ from custom_components.dynamic_energy_prices.sensor import (
     _current_market_price_value,
     _current_supplier_markup_value,
     _current_energy_tax_value,
+    _cheapest_block_value,
+    _cheapest_block_extra_attrs,
     ELECTRICITY_SENSORS,
     BREAKDOWN_ELECTRICITY_SENSORS,
+    CHEAPEST_BLOCK_SENSORS,
     TOMORROW_ELECTRICITY_SENSORS,
     TOMORROW_GAS_SENSORS,
 )
@@ -168,6 +171,39 @@ class TestTomorrowSensorDescriptions:
 
     def test_tomorrow_gas_sensor_count(self) -> None:
         assert len(TOMORROW_GAS_SENSORS) == 3
+
+
+class TestCheapestBlockSensor:
+    """Test the cheapest 3h block sensor value and attribute functions."""
+
+    def test_value_returns_formatted_time_range(self, mock_provider_prices: Any) -> None:
+        value = _cheapest_block_value(mock_provider_prices)
+        assert value is not None
+        assert isinstance(value, str)
+        assert "-" in value
+
+    def test_value_none_for_no_data(self) -> None:
+        assert _cheapest_block_value(None) is None  # type: ignore[arg-type]
+
+    def test_extra_attrs(self, mock_provider_prices: Any) -> None:
+        attrs = _cheapest_block_extra_attrs(mock_provider_prices, "test_provider")
+        assert attrs is not None
+        assert attrs["start_time"] is not None
+        assert attrs["end_time"] is not None
+        assert "average_price" in attrs
+        assert "total_price" in attrs
+        assert "prices" in attrs
+        assert len(attrs["prices"]) == 3
+
+    def test_extra_attrs_none_for_no_data(self) -> None:
+        assert _cheapest_block_extra_attrs(None, "test_provider") is None  # type: ignore[arg-type]
+
+    def test_disabled_by_default(self) -> None:
+        for desc in CHEAPEST_BLOCK_SENSORS:
+            assert desc.entity_registry_enabled_default is False
+
+    def test_sensor_count(self) -> None:
+        assert len(CHEAPEST_BLOCK_SENSORS) == 1
 
 
 class TestForceUpdate:

@@ -117,3 +117,40 @@ def find_next_price(prices: list[PricePoint]) -> PricePoint | None:
     if not upcoming:
         return None
     return min(upcoming, key=lambda p: p.start)
+
+
+@dataclass
+class CheapestBlock:
+    """Result of finding the cheapest contiguous block of hours."""
+
+    start: datetime
+    end: datetime
+    average_price: float
+    total_price: float
+    prices: list[float]
+
+
+def find_cheapest_block(prices: list[PricePoint], block_size: int = 3) -> CheapestBlock | None:
+    """Find the cheapest contiguous block of hours.
+
+    Slides a window of `block_size` hours across the price list and returns
+    the block with the lowest average price.
+    """
+    if not prices or len(prices) < block_size:
+        return None
+    best_start = 0
+    best_avg = float("inf")
+    for i in range(len(prices) - block_size + 1):
+        block = prices[i:i + block_size]
+        avg = sum(p.total_price for p in block) / block_size
+        if avg < best_avg:
+            best_avg = avg
+            best_start = i
+    block = prices[best_start:best_start + block_size]
+    return CheapestBlock(
+        start=block[0].start,
+        end=block[-1].end,
+        average_price=best_avg,
+        total_price=sum(p.total_price for p in block),
+        prices=[p.total_price for p in block],
+    )

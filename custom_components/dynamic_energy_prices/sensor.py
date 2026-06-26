@@ -26,11 +26,13 @@ from .providers import (
     BREAKDOWN_MARKET_PRICE,
     BREAKDOWN_SUPPLIER_MARKUP,
     PROVIDER_REGISTRY,
+    CheapestBlock,
     EnergyPriceSeries,
     ProviderPrices,
     calculate_average_price,
     calculate_max_price,
     calculate_min_price,
+    find_cheapest_block,
     find_current_price,
     find_next_price,
 )
@@ -137,6 +139,35 @@ def _current_energy_tax_value(prices: ProviderPrices) -> float | None:
     return _current_breakdown_value(prices, BREAKDOWN_ENERGY_TAX)
 
 
+def _cheapest_block_value(prices: ProviderPrices) -> str | None:
+    series = _electricity_series(prices)
+    if series is None:
+        return None
+    block = find_cheapest_block(series.prices)
+    if block is None:
+        return None
+    return f"{block.start.strftime('%H:%M')} - {block.end.strftime('%H:%M')}"
+
+
+def _cheapest_block_extra_attrs(
+    prices: ProviderPrices, provider_id: str
+) -> dict[str, Any] | None:
+    series = _electricity_series(prices)
+    if series is None:
+        return None
+    block = find_cheapest_block(series.prices)
+    if block is None:
+        return None
+    return {
+        ATTR_PROVIDER: provider_id,
+        "start_time": block.start.strftime("%H:%M"),
+        "end_time": block.end.strftime("%H:%M"),
+        "average_price": block.average_price,
+        "total_price": block.total_price,
+        "prices": block.prices,
+    }
+
+
 def _price_extra_attrs(
     prices: ProviderPrices, provider_id: str
 ) -> dict[str, Any] | None:
@@ -212,6 +243,17 @@ ELECTRICITY_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=_highest_price_value,
         extra_attrs_fn=_price_extra_attrs,
+        entity_registry_enabled_default=False,
+    ),
+)
+
+CHEAPEST_BLOCK_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
+    DynamicEnergySensorDescription(
+        key="cheapest_3h_block_electricity",
+        translation_key="cheapest_3h_block_electricity",
+        name="Cheapest 3h block electricity",
+        value_fn=_cheapest_block_value,
+        extra_attrs_fn=_cheapest_block_extra_attrs,
         entity_registry_enabled_default=False,
     ),
 )
@@ -363,6 +405,11 @@ async def async_setup_entry(
     entities: list[DynamicPriceSensor] = []
 
     for description in ELECTRICITY_SENSORS:
+        entities.append(
+            DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
+        )
+
+    for description in CHEAPEST_BLOCK_SENSORS:
         entities.append(
             DynamicPriceSensor(coordinator, description, provider_id, provider_display_name)
         )
