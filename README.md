@@ -114,14 +114,115 @@ The `current_electricity_market_price` sensor can be used as the
 
 ### Extra attributes
 
-Each sensor includes provider-specific attributes. The `current_electricity_price`
-sensor includes a `price_breakdown` attribute with `market_price`,
-`supplier_markup`, and `energy_tax` components.
+The `current_electricity_price` sensor includes:
+- `price_breakdown` — `market_price`, `supplier_markup`, `energy_tax` components
+- `hourly_prices` — list of `{start, end, price}` for all 24 hours of the day.
+  Useful for custom Lovelace cards or Grafana.
+
+The `cheapest_3h_block_electricity` sensor includes:
+- `end_time` — end time of the cheapest block
+- `average_price` — average price across the block
+- `prices` — list of individual hourly prices in the block
 
 The `cheap_electricity` binary sensor includes `current_price`,
 `average_price`, and `threshold` attributes. The threshold can be set to a
 custom value via **Configure** on the integration entry. When no custom
 threshold is set, today's average price is used.
+
+## Usage examples
+
+### Cheapest 3‑hour block — time‑based automation
+
+The sensor has `device_class: timestamp` — its state is the start time as a
+datetime. Use it directly in automations:
+
+```yaml
+automation:
+  - alias: "Run dishwasher at cheapest block"
+    trigger:
+      - platform: state
+        entity_id: sensor.essent_cheapest_3h_block_electricity
+    action:
+      - delay:
+          hours: 0  # fires immediately when cheapest block updates
+      - service: switch.turn_on
+        target:
+          entity_id: switch.dishwasher
+```
+
+To start at the *beginning* of the block instead of immediately on update:
+
+```yaml
+automation:
+  - alias: "Start charger at cheapest 3h block"
+    trigger:
+      - platform: template
+        value_template: >
+          {{ now().hour ==
+             state_attr('sensor.essent_cheapest_3h_block_electricity', 'start_time')[0:2] | int
+             and now().minute == 0 }}
+    action:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.ev_charger
+```
+
+### Template sensor — cheapest block end time
+
+```yaml
+template:
+  - sensor:
+      - name: "Cheapest block end"
+        state: >
+          {{ state_attr('sensor.essent_cheapest_3h_block_electricity', 'end_time') }}
+      - name: "Cheapest block average price"
+        unit_of_measurement: "EUR/kWh"
+        device_class: monetary
+        state: >
+          {{ state_attr('sensor.essent_cheapest_3h_block_electricity', 'average_price') }}
+```
+
+### Hourly prices in a template
+
+```yaml
+template:
+  - sensor:
+      - name: "Current hour price rank"
+        state: >
+          {% set prices = state_attr('sensor.essent_current_electricity_price', 'hourly_prices') %}
+          {% set sorted = prices | sort(attribute='price') %}
+          {% for p in sorted %}
+          {% if p.start == now().strftime('%H:%M') %}
+          {{ loop.index }} / {{ prices | length }}
+          {% endif %}
+          {% endfor %}
+```
+
+### Energy Dashboard export compensation
+
+The `current_electricity_market_price` breakdown sensor provides the
+pre-tax market rate and is the correct entity for the Energy Dashboard
+**Export Compensation** price entity.
+
+### Cheap electricity — automations
+
+With the binary sensor enabled, you can trigger on state changes:
+
+```yaml
+automation:
+  - alias: "Notify when electricity is cheap"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.essent_cheap_electricity
+        to: "on"
+    action:
+      - service: persistent_notification.create
+        data:
+          title: "Cheap electricity"
+          message: >
+            Price is {{ state_attr('binary_sensor.essent_cheap_electricity', 'current_price') }}
+            (threshold {{ state_attr('binary_sensor.essent_cheap_electricity', 'threshold') }})
+```
 
 ### Services
 
@@ -175,13 +276,11 @@ python scripts/smoke_test_frank_energie.py
 - [x] Tomorrow's prices sensors
 - [x] Standardised breakdown sensors (market price, supplier markup, energy tax)
 - [x] Cheap electricity binary sensor (current < average)
-- [x] Cheapest 3-hour block sensor (sliding window)
+- [x] Cheapest 3-hour block sensor (sliding window, TIMESTAMP device class)
 - [x] Options flow with custom threshold
 - [x] Diagnostics sensors (last updated, next update)
 - [x] Repair/issue flow for API errors
-- [ ] Silver quality scale
-- [ ] Diagnostics sensors (last updated, next update)
-- [ ] Repair/issue flow for API errors
+- [x] Silver quality scale
 
 ## Credits
 
