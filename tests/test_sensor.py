@@ -695,19 +695,45 @@ class TestFuturePrices:
     """Test the _future_prices filtering function."""
 
     @pytest.mark.freeze_time("2026-06-26 12:00:00")
-    def test_filters_past_hours(self, mock_provider_prices: Any) -> None:
+    def test_filters_past_hours(self) -> None:
         from custom_components.dynamic_energy_prices.sensor import _future_prices
-        series = mock_provider_prices.electricity
-        remaining = _future_prices(series.prices)
+        from custom_components.dynamic_energy_prices.providers import PricePoint
+
+        now = datetime.now().astimezone()
+        prices = [
+            PricePoint(
+                start=now.replace(hour=h, minute=0, second=0, microsecond=0),
+                end=now.replace(hour=h, minute=0, second=0, microsecond=0) + timedelta(hours=1),
+                total_price=p,
+                currency="EUR",
+            )
+            for h, p in enumerate([0.250, 0.231, 0.220, 0.210, 0.200, 0.198, 0.205, 0.215,
+                                   0.230, 0.250, 0.280, 0.320, 0.350, 0.370, 0.380, 0.390,
+                                   0.400, 0.390, 0.370, 0.340, 0.310, 0.290, 0.270, 0.255])
+        ]
+        remaining = _future_prices(prices)
         for p in remaining:
             assert p.end > datetime.now().astimezone()
         assert len(remaining) < 24
 
     @pytest.mark.freeze_time("2026-06-26 00:00:00")
-    def test_all_future_at_midnight(self, mock_provider_prices: Any) -> None:
+    def test_all_future_at_midnight(self) -> None:
         from custom_components.dynamic_energy_prices.sensor import _future_prices
-        series = mock_provider_prices.electricity
-        remaining = _future_prices(series.prices)
+        from custom_components.dynamic_energy_prices.providers import PricePoint
+
+        now = datetime.now().astimezone()
+        prices = [
+            PricePoint(
+                start=now.replace(hour=h, minute=0, second=0, microsecond=0),
+                end=now.replace(hour=h, minute=0, second=0, microsecond=0) + timedelta(hours=1),
+                total_price=p,
+                currency="EUR",
+            )
+            for h, p in enumerate([0.250, 0.231, 0.220, 0.210, 0.200, 0.198, 0.205, 0.215,
+                                   0.230, 0.250, 0.280, 0.320, 0.350, 0.370, 0.380, 0.390,
+                                   0.400, 0.390, 0.370, 0.340, 0.310, 0.290, 0.270, 0.255])
+        ]
+        remaining = _future_prices(prices)
         assert len(remaining) == 24
 
     @pytest.mark.freeze_time("2026-06-26 23:30:00")
