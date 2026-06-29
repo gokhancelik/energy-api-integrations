@@ -2,19 +2,12 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
-
-import importlib
+from typing import Any
+from unittest.mock import AsyncMock
 
 import aiohttp
 import pytest
 import voluptuous as vol
-
-
-pytestmark = pytest.mark.skipif(
-    importlib.util.find_spec("pytest_homeassistant_custom_component") is not None,
-    reason="aiohttp cleanup thread leaks on real HA instance",
-)
 
 from custom_components.dynamic_energy_prices.const import CONF_COUNTRY
 from custom_components.dynamic_energy_prices.providers.base import (
@@ -27,6 +20,8 @@ from custom_components.dynamic_energy_prices.providers.frank_energie import (
     COUNTRY_NL,
     FrankEnergiePriceProvider,
 )
+
+from .conftest import mock_http_response
 
 MOCK_MARKET_PRICES_RESPONSE: dict = {
     "data": {
@@ -74,29 +69,29 @@ def provider() -> FrankEnergiePriceProvider:
 
 
 @pytest.mark.asyncio
-async def test_successful_fetch(provider: FrankEnergiePriceProvider) -> None:
+async def test_successful_fetch(
+    provider: FrankEnergiePriceProvider, mock_aiohttp_session: Any
+) -> None:
     """Test successful price fetch."""
-    with patch("aiohttp.ClientSession.post") as mock_post:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(return_value=MOCK_MARKET_PRICES_RESPONSE)
-        mock_post.return_value.__aenter__.return_value = mock_response
+    resp = mock_http_response(json_data=MOCK_MARKET_PRICES_RESPONSE)
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
 
-        prices = await provider.async_fetch_prices()
+    prices = await provider.async_fetch_prices()
 
-        assert prices.electricity.unit == "EUR/kWh"
-        assert len(prices.electricity.prices) == 2
-        assert prices.gas is not None
-        assert len(prices.gas.prices) == 1
-        assert prices.electricity.prices[0].total_price == 0.18448
-        assert prices.electricity.prices[0].breakdown["market_price"] == 0.05012
-        assert prices.electricity.prices[0].breakdown["energy_tax"] == 0.11533
-        assert prices.gas.prices[0].total_price == 1.02527
+    assert prices.electricity.unit == "EUR/kWh"
+    assert len(prices.electricity.prices) == 2
+    assert prices.gas is not None
+    assert len(prices.gas.prices) == 1
+    assert prices.electricity.prices[0].total_price == 0.18448
+    assert prices.electricity.prices[0].breakdown["market_price"] == 0.05012
+    assert prices.electricity.prices[0].breakdown["energy_tax"] == 0.11533
+    assert prices.gas.prices[0].total_price == 1.02527
 
 
 @pytest.mark.asyncio
 async def test_successful_fetch_electricity_only(
     provider: FrankEnergiePriceProvider,
+    mock_aiohttp_session: Any,
 ) -> None:
     """Test successful fetch with only electricity prices."""
     mock_data = {
@@ -114,136 +109,129 @@ async def test_successful_fetch_electricity_only(
             }
         }
     }
-    with patch("aiohttp.ClientSession.post") as mock_post:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(return_value=mock_data)
-        mock_post.return_value.__aenter__.return_value = mock_response
+    resp = mock_http_response(json_data=mock_data)
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
 
-        prices = await provider.async_fetch_prices()
+    prices = await provider.async_fetch_prices()
 
-        assert prices.electricity is not None
-        assert len(prices.electricity.prices) == 1
-        assert prices.gas is None
+    assert prices.electricity is not None
+    assert len(prices.electricity.prices) == 1
+    assert prices.gas is None
 
 
 @pytest.mark.asyncio
-async def test_http_error(provider: FrankEnergiePriceProvider) -> None:
+async def test_http_error(
+    provider: FrankEnergiePriceProvider, mock_aiohttp_session: Any
+) -> None:
     """Test HTTP error handling."""
-    with patch("aiohttp.ClientSession.post") as mock_post:
-        mock_response = AsyncMock()
-        mock_response.status = 500
-        mock_post.return_value.__aenter__.return_value = mock_response
+    resp = mock_http_response(status=500)
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
 
-        with pytest.raises(ProviderConnectionError, match="500"):
-            await provider.async_fetch_prices()
+    with pytest.raises(ProviderConnectionError, match="500"):
+        await provider.async_fetch_prices()
 
 
 @pytest.mark.asyncio
-async def test_connection_error(provider: FrankEnergiePriceProvider) -> None:
+async def test_connection_error(
+    provider: FrankEnergiePriceProvider, mock_aiohttp_session: Any
+) -> None:
     """Test connection error handling."""
-    with patch("aiohttp.ClientSession.post") as mock_post:
-        mock_post.side_effect = aiohttp.ClientError("Connection refused")
+    mock_aiohttp_session.post.side_effect = aiohttp.ClientError("Connection refused")
 
-        with pytest.raises(ProviderConnectionError, match="Failed to connect"):
-            await provider.async_fetch_prices()
+    with pytest.raises(ProviderConnectionError, match="Failed to connect"):
+        await provider.async_fetch_prices()
 
 
 @pytest.mark.asyncio
-async def test_invalid_json(provider: FrankEnergiePriceProvider) -> None:
+async def test_invalid_json(
+    provider: FrankEnergiePriceProvider, mock_aiohttp_session: Any
+) -> None:
     """Test invalid JSON response handling."""
-    with patch("aiohttp.ClientSession.post") as mock_post:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(side_effect=ValueError("Expecting value"))
-        mock_post.return_value.__aenter__.return_value = mock_response
+    resp = mock_http_response()
+    resp.json = AsyncMock(side_effect=ValueError("Expecting value"))
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
 
-        with pytest.raises(ProviderResponseError, match="Invalid JSON"):
-            await provider.async_fetch_prices()
+    with pytest.raises(ProviderResponseError, match="Invalid JSON"):
+        await provider.async_fetch_prices()
 
 
 @pytest.mark.asyncio
-async def test_graphql_error(provider: FrankEnergiePriceProvider) -> None:
+async def test_graphql_error(
+    provider: FrankEnergiePriceProvider, mock_aiohttp_session: Any
+) -> None:
     """Test GraphQL error response handling."""
-    with patch("aiohttp.ClientSession.post") as mock_post:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(
-            return_value={"errors": [{"message": "No marketprices found"}]}
-        )
-        mock_post.return_value.__aenter__.return_value = mock_response
+    resp = mock_http_response(
+        json_data={"errors": [{"message": "No marketprices found"}]}
+    )
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
 
-        with pytest.raises(ProviderResponseError, match="GraphQL error"):
-            await provider.async_fetch_prices()
+    with pytest.raises(ProviderResponseError, match="GraphQL error"):
+        await provider.async_fetch_prices()
 
 
 @pytest.mark.asyncio
-async def test_missing_market_prices(provider: FrankEnergiePriceProvider) -> None:
+async def test_missing_market_prices(
+    provider: FrankEnergiePriceProvider, mock_aiohttp_session: Any
+) -> None:
     """Test response missing marketPrices field."""
-    with patch("aiohttp.ClientSession.post") as mock_post:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(return_value={"data": {}})
-        mock_post.return_value.__aenter__.return_value = mock_response
+    resp = mock_http_response(json_data={"data": {}})
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
 
-        with pytest.raises(ProviderResponseError, match="marketPrices"):
-            await provider.async_fetch_prices()
+    with pytest.raises(ProviderResponseError, match="marketPrices"):
+        await provider.async_fetch_prices()
 
 
 @pytest.mark.asyncio
-async def test_empty_electricity_prices(provider: FrankEnergiePriceProvider) -> None:
+async def test_empty_electricity_prices(
+    provider: FrankEnergiePriceProvider, mock_aiohttp_session: Any
+) -> None:
     """Test response with empty electricity prices list."""
-    with patch("aiohttp.ClientSession.post") as mock_post:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(
-            return_value={
-                "data": {
-                    "marketPrices": {
-                        "electricityPrices": [],
-                        "gasPrices": [],
-                    }
+    resp = mock_http_response(
+        json_data={
+            "data": {
+                "marketPrices": {
+                    "electricityPrices": [],
+                    "gasPrices": [],
                 }
             }
-        )
-        mock_post.return_value.__aenter__.return_value = mock_response
+        }
+    )
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
 
-        with pytest.raises(ProviderResponseError, match="no electricity prices"):
-            await provider.async_fetch_prices()
+    with pytest.raises(ProviderResponseError, match="no electricity prices"):
+        await provider.async_fetch_prices()
 
 
 @pytest.mark.asyncio
-async def test_breakdown_fields(provider: FrankEnergiePriceProvider) -> None:
+async def test_breakdown_fields(
+    provider: FrankEnergiePriceProvider, mock_aiohttp_session: Any
+) -> None:
     """Verify breakdown includes the correct field names."""
-    with patch("aiohttp.ClientSession.post") as mock_post:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(return_value=MOCK_MARKET_PRICES_RESPONSE)
-        mock_post.return_value.__aenter__.return_value = mock_response
+    resp = mock_http_response(json_data=MOCK_MARKET_PRICES_RESPONSE)
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
 
-        prices = await provider.async_fetch_prices()
+    prices = await provider.async_fetch_prices()
 
-        for point in prices.electricity.prices:
-            assert "market_price" in point.breakdown
-            assert "supplier_markup" in point.breakdown
-            assert "energy_tax" in point.breakdown
+    for point in prices.electricity.prices:
+        assert "market_price" in point.breakdown
+        assert "supplier_markup" in point.breakdown
+        assert "energy_tax" in point.breakdown
 
 
 @pytest.mark.asyncio
-async def test_fetch_for_date(provider: FrankEnergiePriceProvider) -> None:
+async def test_fetch_for_date(
+    provider: FrankEnergiePriceProvider, mock_aiohttp_session: Any
+) -> None:
     """Test fetching prices for a specific date."""
-    with patch("aiohttp.ClientSession.post") as mock_post:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(return_value=MOCK_MARKET_PRICES_RESPONSE)
-        mock_post.return_value.__aenter__.return_value = mock_response
+    resp = mock_http_response(json_data=MOCK_MARKET_PRICES_RESPONSE)
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
 
-        prices = await provider.async_fetch_prices_for_date("2026-06-19")
+    prices = await provider.async_fetch_prices_for_date("2026-06-19")
 
-        assert prices is not None
-        assert len(prices.electricity.prices) == 2
-        assert prices.gas is not None
-        assert len(prices.gas.prices) == 1
+    assert prices is not None
+    assert len(prices.electricity.prices) == 2
+    assert prices.gas is not None
+    assert len(prices.gas.prices) == 1
 
 
 @pytest.mark.asyncio
@@ -272,34 +260,28 @@ def test_config_schema_values() -> None:
 
 
 @pytest.mark.asyncio
-async def test_belgium_header_sent() -> None:
+async def test_belgium_header_sent(mock_aiohttp_session: Any) -> None:
     """Test that x-country: BE header is sent when BE is configured."""
     provider = FrankEnergiePriceProvider({CONF_COUNTRY: COUNTRY_BE})
-    with patch("aiohttp.ClientSession.post") as mock_post:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(return_value=MOCK_MARKET_PRICES_RESPONSE)
-        mock_post.return_value.__aenter__.return_value = mock_response
+    resp = mock_http_response(json_data=MOCK_MARKET_PRICES_RESPONSE)
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
 
-        await provider.async_fetch_prices()
+    await provider.async_fetch_prices()
 
-        _, kwargs = mock_post.call_args
-        assert "headers" in kwargs
-        assert kwargs["headers"].get("x-country") == COUNTRY_BE
+    _, kwargs = mock_aiohttp_session.post.call_args
+    assert "headers" in kwargs
+    assert kwargs["headers"].get("x-country") == COUNTRY_BE
 
 
 @pytest.mark.asyncio
-async def test_nl_default_no_country_header() -> None:
+async def test_nl_default_no_country_header(mock_aiohttp_session: Any) -> None:
     """Test that no x-country header is sent for NL (default)."""
     provider = FrankEnergiePriceProvider()
-    with patch("aiohttp.ClientSession.post") as mock_post:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(return_value=MOCK_MARKET_PRICES_RESPONSE)
-        mock_post.return_value.__aenter__.return_value = mock_response
+    resp = mock_http_response(json_data=MOCK_MARKET_PRICES_RESPONSE)
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
 
-        await provider.async_fetch_prices()
+    await provider.async_fetch_prices()
 
-        _, kwargs = mock_post.call_args
-        headers = kwargs.get("headers", {})
-        assert "x-country" not in headers
+    _, kwargs = mock_aiohttp_session.post.call_args
+    headers = kwargs.get("headers", {})
+    assert "x-country" not in headers

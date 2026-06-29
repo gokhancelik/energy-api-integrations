@@ -6,7 +6,7 @@ import sys
 from collections.abc import Generator
 from datetime import datetime
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -324,3 +324,32 @@ def mock_provider_prices_electricity_only() -> ProviderPrices:
         electricity=EnergyPriceSeries(unit="EUR/kWh", prices=MOCK_ELECTRICITY_PRICES),
         gas=None,
     )
+
+
+@pytest.fixture
+def mock_aiohttp_session() -> Generator[MagicMock, None, None]:
+    """Mock aiohttp.ClientSession entirely to prevent cleanup thread creation.
+
+    Patches the whole class, so the constructor never runs and no daemon
+    thread is spawned. Works for both ``.get`` and ``.post`` calls.
+    """
+    mock_session = MagicMock()
+    mock_session.get = MagicMock()
+    mock_session.post = MagicMock()
+
+    with patch("aiohttp.ClientSession") as mock_cls:
+        mock_cls.return_value.__aenter__.return_value = mock_session
+        yield mock_session
+
+
+def mock_http_response(
+    status: int = 200,
+    json_data: dict | None = None,
+) -> AsyncMock:
+    """Create a mock aiohttp response with ``__aenter__`` support."""
+    resp = AsyncMock()
+    resp.status = status
+    resp.json = AsyncMock(return_value=json_data or {})
+    resp.__aenter__.return_value = resp
+    resp.__aexit__.return_value = None
+    return resp
