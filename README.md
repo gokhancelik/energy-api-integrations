@@ -1,6 +1,6 @@
 # Dynamic Energy Prices
 
-[![Coverage Status](https://img.shields.io/coveralls/github/gokhancelik/energy-api-integrations.svg?branch=main)](https://coveralls.io/github/gokhancelik/energy-api-integrations?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/gokhancelik/energy-api-integrations/badge.svg?branch=main)](https://coveralls.io/github/gokhancelik/energy-api-integrations?branch=main)
 
 A Home Assistant custom integration for dynamic/real-time energy prices in the
 Netherlands and Belgium, with a provider-pluggable architecture.
