@@ -33,8 +33,8 @@ jobs:
         run: |
           pytest -v --cov=custom_components/dynamic_energy_prices --cov-report=term-missing --cov-report=xml:coverage.xml
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
         with:
-          files: coverage.xml
-          fail_ci_if_error: false
+          file: coverage.xml
+          format: cobertura
