@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
+import aiohttp
 import voluptuous as vol
 
 
@@ -58,8 +59,13 @@ class PriceProvider(ABC):
     provider_id: str = ""
     display_name: str = ""
 
-    def __init__(self, config: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self,
+        config: dict[str, Any] | None = None,
+        session: aiohttp.ClientSession | None = None,
+    ) -> None:
         self.config = config or {}
+        self._session = session
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)

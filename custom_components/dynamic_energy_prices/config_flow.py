@@ -7,6 +7,7 @@ from typing import Any
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import aiohttp_client
 from .const import CONF_COUNTRY, CONF_PROVIDER, CONF_THRESHOLD, DOMAIN
 from .providers import PROVIDER_REGISTRY, ProviderConnectionError, ProviderResponseError
 
@@ -40,7 +41,8 @@ class DynamicEnergyPricesConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self._selected_provider = provider_id
                     return await self.async_step_provider_options()
 
-                provider = provider_cls()
+                session = aiohttp_client.async_get_clientsession(self.hass)
+                provider = provider_cls(session=session)
                 try:
                     await provider.async_fetch_prices()
                 except ProviderConnectionError:
@@ -95,7 +97,8 @@ class DynamicEnergyPricesConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             data = {CONF_PROVIDER: provider_id, **user_input}
-            provider = provider_cls(data)
+            session = aiohttp_client.async_get_clientsession(self.hass)
+            provider = provider_cls(data, session=session)
             try:
                 await provider.async_fetch_prices()
             except ProviderConnectionError:

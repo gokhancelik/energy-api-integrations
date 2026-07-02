@@ -23,6 +23,7 @@ def mock_entry() -> Mock:
     entry.entry_id = "test_entry_id"
     entry.data = {"provider": "essent"}
     entry.title = "Essent"
+    entry.runtime_data = None
     return entry
 
 
@@ -46,8 +47,7 @@ async def test_setup_entry(hass: HomeAssistant, mock_entry: Mock) -> None:
         result = await async_setup_entry(hass, mock_entry)
 
         assert result is True
-        assert "dynamic_energy_prices" in hass.data
-        assert mock_entry.entry_id in hass.data["dynamic_energy_prices"]
+        assert mock_entry.runtime_data is mock_coordinator
 
 
 @pytest.mark.asyncio
@@ -74,4 +74,4 @@ async def test_unload_entry(hass: HomeAssistant, mock_entry: Mock) -> None:
         result = await async_unload_entry(hass, mock_entry)
 
         assert result is True
-        assert mock_entry.entry_id not in hass.data["dynamic_energy_prices"]
+        assert mock_entry.runtime_data is None

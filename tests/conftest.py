@@ -331,13 +331,17 @@ def mock_aiohttp_session() -> Generator[MagicMock, None, None]:
     """Mock aiohttp.ClientSession entirely to prevent cleanup thread creation.
 
     Patches the whole class, so the constructor never runs and no daemon
-    thread is spawned. Works for both ``.get`` and ``.post`` calls.
+    thread is spawned. Works for both ``.get`` and ``.post`` calls, and
+    supports both ``async with ClientSession() as session`` and direct
+    ``session = ClientSession()`` patterns.
     """
     mock_session = MagicMock()
     mock_session.get = MagicMock()
     mock_session.post = MagicMock()
+    mock_session.close = AsyncMock()
 
     with patch("aiohttp.ClientSession") as mock_cls:
+        mock_cls.return_value = mock_session
         mock_cls.return_value.__aenter__.return_value = mock_session
         yield mock_session
 

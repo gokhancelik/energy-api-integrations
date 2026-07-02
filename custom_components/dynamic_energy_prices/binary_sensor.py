@@ -9,12 +9,11 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
     BinarySensorEntityDescription,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import ATTR_AVERAGE_PRICE, ATTR_CURRENT_PRICE, ATTR_THRESHOLD, CONF_THRESHOLD, DOMAIN, SERVICE_FORCE_UPDATE
+from .const import ATTR_AVERAGE_PRICE, ATTR_CURRENT_PRICE, ATTR_THRESHOLD, CONF_THRESHOLD, DynamicEnergyPricesConfigEntry, SERVICE_FORCE_UPDATE
 from .coordinator import DynamicPriceCoordinator
 from .entity import DynamicPriceEntity
 from .providers import PROVIDER_REGISTRY, ProviderPrices, calculate_average_price, find_current_price
@@ -24,11 +23,11 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: DynamicEnergyPricesConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the binary sensor platform."""
-    coordinator: DynamicPriceCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: DynamicPriceCoordinator = entry.runtime_data
     provider_id = entry.data.get("provider", "")
     provider_cls = PROVIDER_REGISTRY.get(provider_id)
     provider_display_name = provider_cls.display_name if provider_cls else provider_id

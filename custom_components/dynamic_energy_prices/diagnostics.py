@@ -4,19 +4,18 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntry
 
-from .const import DOMAIN
+from .const import DynamicEnergyPricesConfigEntry
 from .coordinator import DynamicPriceCoordinator
 
 
 async def async_get_config_entry_diagnostics(
-    hass: HomeAssistant, entry: ConfigEntry
+    hass: HomeAssistant, entry: DynamicEnergyPricesConfigEntry
 ) -> dict[str, Any]:
     """Return diagnostics for a config entry."""
-    coordinator: DynamicPriceCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: DynamicPriceCoordinator = entry.runtime_data
     prices = coordinator.data
 
     diagnostics_data: dict[str, Any] = {
@@ -64,7 +63,7 @@ async def async_get_config_entry_diagnostics(
 
 
 async def async_get_device_diagnostics(
-    hass: HomeAssistant, entry: ConfigEntry, device: DeviceEntry
+    hass: HomeAssistant, entry: DynamicEnergyPricesConfigEntry, device: DeviceEntry
 ) -> dict[str, Any]:
     """Return diagnostics for a device entry."""
     return await async_get_config_entry_diagnostics(hass, entry)

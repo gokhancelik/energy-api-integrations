@@ -34,11 +34,10 @@ async def test_diagnostics_with_data(hass: Any) -> None:
     ]
     coordinator.data.gas = None
 
-    hass.data = {"dynamic_energy_prices": {"test_entry": coordinator}}
-
     entry = MagicMock()
     entry.entry_id = "test_entry"
     entry.as_dict.return_value = {"entry_id": "test_entry"}
+    entry.runtime_data = coordinator
 
     result = await async_get_config_entry_diagnostics(hass, entry)
     assert "entry" in result
@@ -63,11 +62,10 @@ async def test_diagnostics_with_gas(hass: Any) -> None:
         _make_price_point(datetime(2026, 6, 26, 7, 0), 0.789),
     ]
 
-    hass.data = {"dynamic_energy_prices": {"test_entry": coordinator}}
-
     entry = MagicMock()
     entry.entry_id = "test_entry"
     entry.as_dict.return_value = {"entry_id": "test_entry"}
+    entry.runtime_data = coordinator
 
     result = await async_get_config_entry_diagnostics(hass, entry)
     assert "gas" in result["prices"]
@@ -80,11 +78,10 @@ async def test_diagnostics_with_exception(hass: Any) -> None:
     coordinator.last_exception = ValueError("API error")
     coordinator.data = None
 
-    hass.data = {"dynamic_energy_prices": {"test_entry": coordinator}}
-
     entry = MagicMock()
     entry.entry_id = "test_entry"
     entry.as_dict.return_value = {"entry_id": "test_entry"}
+    entry.runtime_data = coordinator
 
     result = await async_get_config_entry_diagnostics(hass, entry)
     assert result["coordinator"]["last_update_success"] is False
@@ -99,11 +96,10 @@ async def test_diagnostics_without_exception(hass: Any) -> None:
     coordinator.last_exception = None
     coordinator.data = None
 
-    hass.data = {"dynamic_energy_prices": {"test_entry": coordinator}}
-
     entry = MagicMock()
     entry.entry_id = "test_entry"
     entry.as_dict.return_value = {"entry_id": "test_entry"}
+    entry.runtime_data = coordinator
 
     result = await async_get_config_entry_diagnostics(hass, entry)
     assert result["coordinator"]["last_exception"] is None
@@ -116,11 +112,10 @@ async def test_device_diagnostics(hass: Any) -> None:
     coordinator.last_exception = None
     coordinator.data = None
 
-    hass.data = {"dynamic_energy_prices": {"test_entry": coordinator}}
-
     entry = MagicMock()
     entry.entry_id = "test_entry"
     entry.as_dict.return_value = {"entry_id": "test_entry"}
+    entry.runtime_data = coordinator
 
     device = MagicMock()
     result = await async_get_device_diagnostics(hass, entry, device)

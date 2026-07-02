@@ -1,5 +1,7 @@
 """Providers for the Dynamic Energy Prices integration."""
 
+from __future__ import annotations
+
 from .base import PriceProvider, PricePoint, EnergyPriceSeries, ProviderPrices
 from .base import ProviderConnectionError, ProviderResponseError
 from .base import PROVIDER_REGISTRY

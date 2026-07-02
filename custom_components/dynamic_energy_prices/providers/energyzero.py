@@ -63,19 +63,27 @@ class EnergyZeroPriceProvider(PriceProvider):
         """Fetch dynamic energy prices from the EnergyZero public API."""
         from_date, till_date = self._today_date_range()
 
-        try:
+        session = self._session
+        own_session = False
+        if session is None:
             timeout = aiohttp.ClientTimeout(total=REQUEST_TIMEOUT)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
-                electricity_data = await self._fetch_type(
-                    session, from_date, till_date, usage_type=1
-                )
-                gas_data = await self._fetch_type(
-                    session, from_date, till_date, usage_type=3
-                )
+            session = aiohttp.ClientSession(timeout=timeout)
+            own_session = True
+
+        try:
+            electricity_data = await self._fetch_type(
+                session, from_date, till_date, usage_type=1
+            )
+            gas_data = await self._fetch_type(
+                session, from_date, till_date, usage_type=3
+            )
         except aiohttp.ClientError as err:
             raise ProviderConnectionError(
                 f"Failed to connect to EnergyZero API: {err}"
             ) from err
+        finally:
+            if own_session:
+                await session.close()
 
         return self._parse_response(electricity_data, gas_data)
 
@@ -83,19 +91,27 @@ class EnergyZeroPriceProvider(PriceProvider):
         """Fetch prices for a specific date (YYYY-MM-DD)."""
         from_date, till_date = self._date_range_from_date(date)
 
-        try:
+        session = self._session
+        own_session = False
+        if session is None:
             timeout = aiohttp.ClientTimeout(total=REQUEST_TIMEOUT)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
-                electricity_data = await self._fetch_type(
-                    session, from_date, till_date, usage_type=1
-                )
-                gas_data = await self._fetch_type(
-                    session, from_date, till_date, usage_type=3
-                )
+            session = aiohttp.ClientSession(timeout=timeout)
+            own_session = True
+
+        try:
+            electricity_data = await self._fetch_type(
+                session, from_date, till_date, usage_type=1
+            )
+            gas_data = await self._fetch_type(
+                session, from_date, till_date, usage_type=3
+            )
         except aiohttp.ClientError as err:
             raise ProviderConnectionError(
                 f"Failed to connect to EnergyZero API: {err}"
             ) from err
+        finally:
+            if own_session:
+                await session.close()
 
         return self._parse_response(electricity_data, gas_data)
 

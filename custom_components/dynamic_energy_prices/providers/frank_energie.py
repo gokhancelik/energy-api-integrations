@@ -85,17 +85,22 @@ class FrankEnergiePriceProvider(PriceProvider):
         if country == COUNTRY_BE:
             headers["x-country"] = COUNTRY_BE
 
-        try:
+        session = self._session
+        own_session = False
+        if session is None:
             timeout = aiohttp.ClientTimeout(total=REQUEST_TIMEOUT)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
-                async with session.post(
-                    API_ENDPOINT, json=payload, headers=headers
-                ) as response:
-                    if response.status != 200:
-                        raise ProviderConnectionError(
-                            f"Frank Energie API returned HTTP {response.status}"
-                        )
-                    data: dict[str, Any] = await response.json()
+            session = aiohttp.ClientSession(timeout=timeout)
+            own_session = True
+
+        try:
+            async with session.post(
+                API_ENDPOINT, json=payload, headers=headers
+            ) as response:
+                if response.status != 200:
+                    raise ProviderConnectionError(
+                        f"Frank Energie API returned HTTP {response.status}"
+                    )
+                data: dict[str, Any] = await response.json()
         except aiohttp.ClientError as err:
             raise ProviderConnectionError(
                 f"Failed to connect to Frank Energie API: {err}"
@@ -104,6 +109,9 @@ class FrankEnergiePriceProvider(PriceProvider):
             raise ProviderResponseError(
                 f"Invalid JSON from Frank Energie API: {err}"
             ) from err
+        finally:
+            if own_session:
+                await session.close()
 
         return self._parse_response(data)
 

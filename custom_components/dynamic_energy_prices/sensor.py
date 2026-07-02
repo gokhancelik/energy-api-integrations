@@ -14,14 +14,13 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
-from .const import ATTR_PRICE_BREAKDOWN, ATTR_PROVIDER, DOMAIN, SERVICE_FORCE_UPDATE
+from .const import ATTR_PRICE_BREAKDOWN, ATTR_PROVIDER, DynamicEnergyPricesConfigEntry, SERVICE_FORCE_UPDATE
 from .coordinator import DynamicPriceCoordinator
 from .entity import DynamicPriceEntity
 _LOGGER = logging.getLogger(__name__)
@@ -470,11 +469,11 @@ GAS_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: DynamicEnergyPricesConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
-    coordinator: DynamicPriceCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: DynamicPriceCoordinator = entry.runtime_data
     provider_id = entry.data.get("provider", "")
     provider_cls = PROVIDER_REGISTRY.get(provider_id)
     provider_display_name = provider_cls.display_name if provider_cls else provider_id
