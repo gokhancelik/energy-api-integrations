@@ -21,16 +21,23 @@ from custom_components.dynamic_energy_prices.providers.base import (
 )
 
 
+MOCK_SESSION_PATCH = "homeassistant.helpers.aiohttp_client.async_get_clientsession"
+
+
 @pytest.mark.asyncio
 async def test_coordinator_update_success(hass: Any) -> None:
     """Test successful coordinator update."""
-    with patch(
-        "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
-    ) as mock_fetch:
+    with (
+        patch(
+            "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
+        ) as mock_fetch,
+        patch(MOCK_SESSION_PATCH) as mock_gs,
+    ):
         from custom_components.dynamic_energy_prices.coordinator import (
             DynamicPriceCoordinator,
         )
 
+        mock_gs.return_value = AsyncMock()
         mock_fetch.return_value = ProviderPrices(
             electricity=type(
                 "EnergyPriceSeries",
@@ -58,13 +65,17 @@ async def test_coordinator_update_success(hass: Any) -> None:
 @pytest.mark.asyncio
 async def test_coordinator_update_failure_connection(hass: Any) -> None:
     """Test coordinator update failure due to connection error raises UpdateFailed."""
-    with patch(
-        "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
-    ) as mock_fetch:
+    with (
+        patch(
+            "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
+        ) as mock_fetch,
+        patch(MOCK_SESSION_PATCH) as mock_gs,
+    ):
         from custom_components.dynamic_energy_prices.coordinator import (
             DynamicPriceCoordinator,
         )
 
+        mock_gs.return_value = AsyncMock()
         mock_fetch.side_effect = ProviderConnectionError("API unreachable")
 
         entry = type(
@@ -84,13 +95,17 @@ async def test_coordinator_update_failure_connection(hass: Any) -> None:
 @pytest.mark.asyncio
 async def test_coordinator_update_failure_response(hass: Any) -> None:
     """Test coordinator update failure due to response error raises UpdateFailed."""
-    with patch(
-        "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
-    ) as mock_fetch:
+    with (
+        patch(
+            "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
+        ) as mock_fetch,
+        patch(MOCK_SESSION_PATCH) as mock_gs,
+    ):
         from custom_components.dynamic_energy_prices.coordinator import (
             DynamicPriceCoordinator,
         )
 
+        mock_gs.return_value = AsyncMock()
         mock_fetch.side_effect = ProviderResponseError("Bad data")
 
         entry = type(
@@ -117,11 +132,13 @@ async def test_coordinator_tomorrow_data_populated(hass: Any) -> None:
         patch(
             "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices_for_date"
         ) as mock_fetch_tomorrow,
+        patch(MOCK_SESSION_PATCH) as mock_gs,
     ):
         from custom_components.dynamic_energy_prices.coordinator import (
             DynamicPriceCoordinator,
         )
 
+        mock_gs.return_value = AsyncMock()
         now = datetime.now(timezone.utc)
         mock_fetch.return_value = ProviderPrices(
             electricity=EnergyPriceSeries(
@@ -164,11 +181,13 @@ async def test_coordinator_tomorrow_data_none_on_failure(hass: Any) -> None:
         patch(
             "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices_for_date"
         ) as mock_fetch_tomorrow,
+        patch(MOCK_SESSION_PATCH) as mock_gs,
     ):
         from custom_components.dynamic_energy_prices.coordinator import (
             DynamicPriceCoordinator,
         )
 
+        mock_gs.return_value = AsyncMock()
         now = datetime.now(timezone.utc)
         mock_fetch.return_value = ProviderPrices(
             electricity=EnergyPriceSeries(
@@ -211,24 +230,26 @@ async def test_coordinator_issue_raised_after_consecutive_failures(hass: Any) ->
         },
     )()
 
-    coordinator = DynamicPriceCoordinator(hass, entry)
+    with patch(MOCK_SESSION_PATCH) as mock_gs:
+        mock_gs.return_value = AsyncMock()
+        coordinator = DynamicPriceCoordinator(hass, entry)
 
-    with patch(
-        "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
-    ) as mock_fetch:
-        mock_fetch.side_effect = ProviderConnectionError("API unreachable")
+        with patch(
+            "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
+        ) as mock_fetch:
+            mock_fetch.side_effect = ProviderConnectionError("API unreachable")
 
-        for i in range(CONSECUTIVE_FAILURE_LIMIT):
-            with pytest.raises(UpdateFailed):
-                await coordinator._async_update_data()
+            for i in range(CONSECUTIVE_FAILURE_LIMIT):
+                with pytest.raises(UpdateFailed):
+                    await coordinator._async_update_data()
 
-    issues = getattr(hass, "issues", None)
-    if issues is not None:
-        issues.async_create_issue.assert_called_once()
-        call_args = issues.async_create_issue.call_args
-        assert call_args[0][0] == "dynamic_energy_prices"
-        assert call_args[0][1] == "provider_unreachable"
-        assert call_args[1]["severity"] == "error"
+        issues = getattr(hass, "issues", None)
+        if issues is not None:
+            issues.async_create_issue.assert_called_once()
+            call_args = issues.async_create_issue.call_args
+            assert call_args[0][0] == "dynamic_energy_prices"
+            assert call_args[0][1] == "provider_unreachable"
+            assert call_args[1]["severity"] == "error"
 
 
 @pytest.mark.asyncio
@@ -252,40 +273,42 @@ async def test_coordinator_issue_cleared_on_success(hass: Any) -> None:
         },
     )()
 
-    coordinator = DynamicPriceCoordinator(hass, entry)
+    with patch(MOCK_SESSION_PATCH) as mock_gs:
+        mock_gs.return_value = AsyncMock()
+        coordinator = DynamicPriceCoordinator(hass, entry)
 
-    with patch(
-        "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
-    ) as mock_fetch:
-        mock_fetch.side_effect = ProviderConnectionError("API unreachable")
+        with patch(
+            "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
+        ) as mock_fetch:
+            mock_fetch.side_effect = ProviderConnectionError("API unreachable")
 
-        for i in range(CONSECUTIVE_FAILURE_LIMIT):
-            with pytest.raises(UpdateFailed):
+            for i in range(CONSECUTIVE_FAILURE_LIMIT):
+                with pytest.raises(UpdateFailed):
+                    await coordinator._async_update_data()
+
+            issues = getattr(hass, "issues", None)
+            if issues is not None:
+                issues.async_delete_issue.assert_not_called()
+
+            mock_fetch.side_effect = None
+            mock_fetch.return_value = ProviderPrices(
+                electricity=type(
+                    "EnergyPriceSeries",
+                    (),
+                    {"prices": [], "unit": "EUR/kWh"},
+                )(),
+            )
+            with patch(
+                "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices_for_date"
+            ) as mock_fetch_tomorrow:
+                mock_fetch_tomorrow.return_value = None
                 await coordinator._async_update_data()
 
-        issues = getattr(hass, "issues", None)
-        if issues is not None:
-            issues.async_delete_issue.assert_not_called()
-
-        mock_fetch.side_effect = None
-        mock_fetch.return_value = ProviderPrices(
-            electricity=type(
-                "EnergyPriceSeries",
-                (),
-                {"prices": [], "unit": "EUR/kWh"},
-            )(),
-        )
-        with patch(
-            "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices_for_date"
-        ) as mock_fetch_tomorrow:
-            mock_fetch_tomorrow.return_value = None
-            await coordinator._async_update_data()
-
-        issues = getattr(hass, "issues", None)
-        if issues is not None:
-            issues.async_delete_issue.assert_called_once_with(
-                "dynamic_energy_prices", "provider_unreachable"
-            )
+            issues = getattr(hass, "issues", None)
+            if issues is not None:
+                issues.async_delete_issue.assert_called_once_with(
+                    "dynamic_energy_prices", "provider_unreachable"
+                )
 
 
 @pytest.mark.asyncio
@@ -305,32 +328,38 @@ async def test_coordinator_no_issue_below_threshold(hass: Any) -> None:
         },
     )()
 
-    coordinator = DynamicPriceCoordinator(hass, entry)
+    with patch(MOCK_SESSION_PATCH) as mock_gs:
+        mock_gs.return_value = AsyncMock()
+        coordinator = DynamicPriceCoordinator(hass, entry)
 
-    with patch(
-        "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
-    ) as mock_fetch:
-        mock_fetch.side_effect = ProviderConnectionError("API unreachable")
+        with patch(
+            "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
+        ) as mock_fetch:
+            mock_fetch.side_effect = ProviderConnectionError("API unreachable")
 
-        for i in range(CONSECUTIVE_FAILURE_LIMIT - 1):
-            with pytest.raises(UpdateFailed):
-                await coordinator._async_update_data()
+            for i in range(CONSECUTIVE_FAILURE_LIMIT - 1):
+                with pytest.raises(UpdateFailed):
+                    await coordinator._async_update_data()
 
-    issues = getattr(hass, "issues", None)
-    if issues is not None:
-        issues.async_create_issue.assert_not_called()
+        issues = getattr(hass, "issues", None)
+        if issues is not None:
+            issues.async_create_issue.assert_not_called()
 
 
 @pytest.mark.asyncio
 async def test_coordinator_last_successful_data(hass: Any) -> None:
     """Test the last_successful_data property."""
-    with patch(
-        "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
-    ) as mock_fetch:
+    with (
+        patch(
+            "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
+        ) as mock_fetch,
+        patch(MOCK_SESSION_PATCH) as mock_gs,
+    ):
         from custom_components.dynamic_energy_prices.coordinator import (
             DynamicPriceCoordinator,
         )
 
+        mock_gs.return_value = AsyncMock()
         now = datetime.now(timezone.utc)
         mock_fetch.return_value = ProviderPrices(
             electricity=EnergyPriceSeries(
@@ -364,13 +393,17 @@ async def test_coordinator_last_successful_data(hass: Any) -> None:
 @pytest.mark.asyncio
 async def test_coordinator_last_update_time(hass: Any) -> None:
     """Test the last_update_time property."""
-    with patch(
-        "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
-    ) as mock_fetch:
+    with (
+        patch(
+            "custom_components.dynamic_energy_prices.providers.essent.EssentPriceProvider.async_fetch_prices"
+        ) as mock_fetch,
+        patch(MOCK_SESSION_PATCH) as mock_gs,
+    ):
         from custom_components.dynamic_energy_prices.coordinator import (
             DynamicPriceCoordinator,
         )
 
+        mock_gs.return_value = AsyncMock()
         now = datetime.now(timezone.utc)
         mock_fetch.return_value = ProviderPrices(
             electricity=EnergyPriceSeries(
