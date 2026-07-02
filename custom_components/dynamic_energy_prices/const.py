@@ -1,5 +1,19 @@
 """Constants for the Dynamic Energy Prices integration."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from homeassistant.config_entries import ConfigEntry
+
+if TYPE_CHECKING:
+    from .coordinator import DynamicPriceCoordinator
+
+if TYPE_CHECKING:
+    DynamicEnergyPricesConfigEntry = ConfigEntry[DynamicPriceCoordinator]
+else:
+    DynamicEnergyPricesConfigEntry = ConfigEntry
+
 DOMAIN = "dynamic_energy_prices"
 
 CONF_PROVIDER = "provider"

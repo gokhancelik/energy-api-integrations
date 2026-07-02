@@ -44,20 +44,25 @@ class EssentPriceProvider(PriceProvider):
             "x-request-origin": "client",
         }
 
-        try:
+        session = self._session
+        own_session = False
+        if session is None:
             timeout = aiohttp.ClientTimeout(total=REQUEST_TIMEOUT)
-            async with aiohttp.ClientSession(timeout=timeout) as session:
-                async with session.get(API_ENDPOINT, headers=headers) as response:
-                    if response.status == 401:
-                        raise ProviderConnectionError(
-                            "Essent API returned 401 Unauthorized. "
-                            "The x-request-origin header may need updating."
-                        )
-                    if response.status != 200:
-                        raise ProviderConnectionError(
-                            f"Essent API returned HTTP {response.status}"
-                        )
-                    data: dict[str, Any] = await response.json()
+            session = aiohttp.ClientSession(timeout=timeout)
+            own_session = True
+
+        try:
+            async with session.get(API_ENDPOINT, headers=headers) as response:
+                if response.status == 401:
+                    raise ProviderConnectionError(
+                        "Essent API returned 401 Unauthorized. "
+                        "The x-request-origin header may need updating."
+                    )
+                if response.status != 200:
+                    raise ProviderConnectionError(
+                        f"Essent API returned HTTP {response.status}"
+                    )
+                data: dict[str, Any] = await response.json()
         except aiohttp.ClientError as err:
             raise ProviderConnectionError(
                 f"Failed to connect to Essent API: {err}"
@@ -66,6 +71,9 @@ class EssentPriceProvider(PriceProvider):
             raise ProviderResponseError(
                 f"Invalid JSON from Essent API: {err}"
             ) from err
+        finally:
+            if own_session:
+                await session.close()
 
         return self._parse_response(data)
 

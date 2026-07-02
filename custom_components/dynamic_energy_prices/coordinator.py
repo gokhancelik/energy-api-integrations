@@ -7,8 +7,10 @@ from datetime import datetime, timedelta, timezone
 import logging
 from random import randrange
 
+import aiohttp
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import aiohttp_client
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
@@ -41,7 +43,8 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
         if provider_cls is None:
             raise ValueError(f"Unknown provider: {provider_id}")
 
-        self.provider: PriceProvider = provider_cls(entry.data)
+        session: aiohttp.ClientSession = aiohttp_client.async_get_clientsession(hass)
+        self.provider: PriceProvider = provider_cls(entry.data, session=session)
         self._last_successful_data: ProviderPrices | None = None
         self._tomorrow_data: ProviderPrices | None = None
         self._last_update_time: datetime | None = None
