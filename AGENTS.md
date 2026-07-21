@@ -63,7 +63,12 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes-file AGENTS.md
 
 ## Changelog
 
-### v0.17.0
+### v0.18.0
+
+- **Fix 500 error on options flow:** Removed `async` from `async_get_options_flow` — HA's flow manager doesn't `await` it, causing `AttributeError: 'coroutine' object has no attribute 'hass'`.
+- **Fix state_class warnings:** Removed `state_class=MEASUREMENT` from all monetary sensors — HA 2026.6+ requires `device_class='monetary'` to have state_class `None` or `'total'`.
+
+### v0.17.0 (broken — released and deleted)
 
 - **Hourly sync timer:** Coordinator now fires sensor state updates at each local `:00` hour boundary. Sensor `last_changed` timestamps now align with actual price slot transitions instead of the randomized coordinator refresh offset.
 - **Essent multi-day response:** Essent API returns yesterday + today + tomorrow prices in a single call. `async_fetch_prices_for_date` now serves tomorrow data from cache — no extra HTTP call.
