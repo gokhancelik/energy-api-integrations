@@ -63,6 +63,10 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes-file AGENTS.md
 
 ## Changelog
 
+### v0.19.0
+
+- **Restore long-term statistics for price sensors:** Dropped `device_class=MONETARY` from all price sensors and added `state_class=MEASUREMENT` instead. `MONETARY` only allows `state_class=TOTAL` in HA, but these are rates (prices per unit), not balances — so `MONETARY` was the wrong device class. Sensors now use the native unit from the provider (e.g. `EUR/kWh`) without monetary formatting.
+
 ### v0.18.0
 
 - **Fix 500 error on options flow:** Removed `async` from `async_get_options_flow` — HA's flow manager doesn't `await` it, causing `AttributeError: 'coroutine' object has no attribute 'hass'`.

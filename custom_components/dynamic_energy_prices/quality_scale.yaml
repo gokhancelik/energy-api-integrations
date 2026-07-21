@@ -87,7 +87,7 @@ rules:
     comment: Exceptions are internal (re-raised as UpdateFailed); user-facing errors use the repair issue flow with translations.
   icon-translations:
     status: exempt
-    comment: Entities use default icons from device_class (MONETARY, TIMESTAMP, DIAGNOSTIC) — no custom icons needed.
+    comment: Entities use default icons from device_class (TIMESTAMP, DIAGNOSTIC) — no custom icons needed. Monetary sensors dropped device_class to allow state_class=MEASUREMENT for statistics.
   reconfiguration-flow: done
   repair-issues: done
   stale-devices:
