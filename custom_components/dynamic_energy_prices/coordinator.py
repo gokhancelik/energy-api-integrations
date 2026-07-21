@@ -5,12 +5,13 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime, timedelta, timezone
 import logging
-from random import randrange
+
 
 import aiohttp
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import aiohttp_client
+from homeassistant.helpers.event import async_track_point_in_time
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
@@ -49,14 +50,7 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
         self._tomorrow_data: ProviderPrices | None = None
         self._last_update_time: datetime | None = None
         self._consecutive_failures = 0
-
-        randomized_minute = randrange(0, 60)
-        now = datetime.now()
-        next_hour = (now + timedelta(hours=1)).replace(
-            minute=randomized_minute, second=0, microsecond=0
-        )
-        if next_hour <= now:
-            next_hour += timedelta(hours=1)
+        self._hourly_sync_unsub: Callable[[], None] | None = None
 
         update_interval = timedelta(minutes=DEFAULT_SCAN_INTERVAL_MINUTES)
 
@@ -67,6 +61,8 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
             update_interval=update_interval,
             update_method=self._async_update_data,
         )
+
+        self._schedule_next_hourly_sync()
 
     async def _async_update_data(self) -> ProviderPrices:
         """Fetch data from the provider with fallback to cached data."""
@@ -137,3 +133,26 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
     def last_update_time(self) -> datetime | None:
         """Return the timestamp of the last successful update."""
         return self._last_update_time
+
+    @callback
+    def _schedule_next_hourly_sync(self) -> None:
+        """Schedule a listener update at the next local hour boundary."""
+        now = datetime.now().astimezone()
+        next_hour = (now + timedelta(hours=1)).replace(
+            minute=0, second=0, microsecond=0
+        )
+        self._hourly_sync_unsub = async_track_point_in_time(
+            self.hass, self._on_hourly_sync, next_hour
+        )
+
+    @callback
+    def _on_hourly_sync(self, _: datetime) -> None:
+        """Fire listener updates at the hour boundary."""
+        self.async_update_listeners()
+        self._schedule_next_hourly_sync()
+
+    async def async_shutdown(self) -> None:
+        """Shutdown the coordinator and cancel hourly sync."""
+        if self._hourly_sync_unsub is not None:
+            self._hourly_sync_unsub()
+            self._hourly_sync_unsub = None

@@ -37,6 +37,15 @@ class EssentPriceProvider(PriceProvider):
     provider_id = "essent"
     display_name = "Essent"
 
+    def __init__(
+        self,
+        config: dict[str, Any] | None = None,
+        session: aiohttp.ClientSession | None = None,
+    ) -> None:
+        """Initialize the provider."""
+        super().__init__(config, session)
+        self._cached_days: dict[str, ProviderPrices] = {}
+
     async def async_fetch_prices(self) -> ProviderPrices:
         """Fetch dynamic energy prices from Essent's public API."""
         headers = {
@@ -75,10 +84,16 @@ class EssentPriceProvider(PriceProvider):
             if own_session:
                 await session.close()
 
-        return self._parse_response(data)
+        self._cached_days = self._parse_response(data)
 
-    def _parse_response(self, data: dict[str, Any]) -> ProviderPrices:
-        """Parse the Essent API response into ProviderPrices."""
+        today_str = datetime.now(AMSTERDAM_TZ).strftime("%Y-%m-%d")
+        today_prices = self._cached_days.get(today_str)
+        if today_prices is not None:
+            return today_prices
+        return next(iter(self._cached_days.values()))
+
+    def _parse_response(self, data: dict[str, Any]) -> dict[str, ProviderPrices]:
+        """Parse Essent API response into per-date ProviderPrices."""
         try:
             raw_prices = data["prices"]
         except KeyError as err:
@@ -86,16 +101,20 @@ class EssentPriceProvider(PriceProvider):
                 f"Missing 'prices' field in Essent response: {err}"
             ) from err
 
-        electricity_prices: list[PricePoint] = []
-        gas_prices: list[PricePoint] = []
         currency = data.get("currency", "EUR")
+        result: dict[str, ProviderPrices] = {}
 
         for day_entry in raw_prices:
+            date_str = day_entry.get("date")
+            if not date_str:
+                continue
+
             electricity_data = day_entry.get("electricity")
             gas_data = day_entry.get("gas")
+            electricity_prices: list[PricePoint] = []
+            gas_prices: list[PricePoint] = []
 
             if electricity_data:
-                unit = electricity_data.get("unitOfMeasurement", "kWh")
                 for tariff in electricity_data.get("tariffs", []):
                     try:
                         point = self._parse_tariff(tariff, currency)
@@ -106,7 +125,6 @@ class EssentPriceProvider(PriceProvider):
                         ) from err
 
             if gas_data:
-                unit = gas_data.get("unitOfMeasurement", "m\u00b3")
                 for tariff in gas_data.get("tariffs", []):
                     try:
                         point = self._parse_tariff(tariff, currency)
@@ -116,24 +134,34 @@ class EssentPriceProvider(PriceProvider):
                             f"Failed to parse gas tariff: {err}"
                         ) from err
 
-        if not electricity_prices:
-            raise ProviderResponseError(
-                "Essent response contains no electricity prices"
+            if not electricity_prices:
+                raise ProviderResponseError(
+                    f"Essent response contains no electricity prices for {date_str}"
+                )
+
+            result[date_str] = ProviderPrices(
+                electricity=EnergyPriceSeries(
+                    prices=electricity_prices,
+                    unit="EUR/kWh",
+                ),
+                gas=EnergyPriceSeries(
+                    prices=gas_prices,
+                    unit="EUR/m\u00b3",
+                ) if gas_prices else None,
             )
 
-        electricity_unit = "EUR/kWh"
-        gas_unit = "EUR/m\u00b3"
+        if not result:
+            raise ProviderResponseError(
+                "Essent response contains no price data"
+            )
 
-        return ProviderPrices(
-            electricity=EnergyPriceSeries(
-                prices=electricity_prices,
-                unit=electricity_unit,
-            ),
-            gas=EnergyPriceSeries(
-                prices=gas_prices,
-                unit=gas_unit,
-            ) if gas_prices else None,
-        )
+        return result
+
+    async def async_fetch_prices_for_date(
+        self, date: str
+    ) -> ProviderPrices | None:
+        """Return cached prices for a specific date (YYYY-MM-DD)."""
+        return self._cached_days.get(date)
 
     def _parse_tariff(
         self, tariff: dict[str, Any], currency: str

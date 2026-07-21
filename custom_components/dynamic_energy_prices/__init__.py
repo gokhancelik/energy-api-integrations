@@ -29,6 +29,9 @@ async def async_unload_entry(
     hass: HomeAssistant, entry: DynamicEnergyPricesConfigEntry
 ) -> bool:
     """Unload a config entry."""
+    coordinator = entry.runtime_data
+    await coordinator.async_shutdown()
+
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         entry.runtime_data = None  # type: ignore[arg-type]

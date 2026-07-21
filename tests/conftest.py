@@ -33,6 +33,7 @@ def _mock_homeassistant() -> None:
         ha_mock.helpers = MagicMock()
         ha_mock.helpers.update_coordinator = MagicMock()
         ha_mock.helpers.entity_platform = MagicMock()
+        ha_mock.helpers.event = MagicMock()
         ha_mock.data_entry_flow = MagicMock()
         sys.modules["homeassistant"] = ha_mock
         sys.modules["homeassistant.config_entries"] = ha_mock.config_entries
@@ -46,6 +47,7 @@ def _mock_homeassistant() -> None:
             ha_mock.helpers.entity_platform
         )
         sys.modules["homeassistant.data_entry_flow"] = ha_mock.data_entry_flow
+        sys.modules["homeassistant.helpers.event"] = ha_mock.helpers.event
         sys.modules["homeassistant.components"] = MagicMock()
 
         # Provide real dataclass bases so DynamicEnergySensorDescription can inherit

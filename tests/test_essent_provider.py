@@ -122,7 +122,7 @@ async def test_empty_prices_list(
     )
     mock_aiohttp_session.get.return_value.__aenter__.return_value = resp
 
-    with pytest.raises(ProviderResponseError, match="no electricity prices"):
+    with pytest.raises(ProviderResponseError, match="no price data"):
         await provider.async_fetch_prices()
 
 
@@ -144,10 +144,22 @@ async def test_header_fix_applied(
 
 
 @pytest.mark.asyncio
-async def test_fetch_for_date_not_supported(provider: EssentPriceProvider) -> None:
-    """Verify Essent does not support date-specific fetching."""
-    result = await provider.async_fetch_prices_for_date("2026-06-19")
-    assert result is None
+async def test_fetch_for_date(
+    provider: EssentPriceProvider, mock_aiohttp_session: Any
+) -> None:
+    """Verify Essent returns cached data for a specific date."""
+    resp = mock_http_response(200, MOCK_ESSENT_RESPONSE)
+    mock_aiohttp_session.get.return_value.__aenter__.return_value = resp
+
+    await provider.async_fetch_prices()
+
+    result = await provider.async_fetch_prices_for_date("2026-06-17")
+    assert result is not None
+    assert len(result.electricity.prices) == 2
+    assert result.electricity.prices[0].total_price == 0.254
+
+    missing = await provider.async_fetch_prices_for_date("2026-06-19")
+    assert missing is None
 
 
 @pytest.mark.asyncio
