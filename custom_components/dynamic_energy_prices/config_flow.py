@@ -120,7 +120,7 @@ class DynamicEnergyPricesConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     @staticmethod
-    async def async_get_options_flow(
+    def async_get_options_flow(
         config_entry: config_entries.ConfigEntry,
     ) -> DynamicEnergyPricesOptionsFlowHandler:
         """Create the options flow handler."""
