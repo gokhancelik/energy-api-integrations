@@ -63,6 +63,10 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes-file AGENTS.md
 
 ## Changelog
 
+### v0.20.0
+
+- **Fix cheapest 3h block sensor shifting every hour:** The cheapest block was recomputed on the remaining future hours at every refresh, so the result crept forward hourly and went `unknown` late at night. It's now computed once from the full day's price data and stays stable until the next day's data arrives.
+
 ### v0.19.0
 
 - **Restore long-term statistics for price sensors:** Dropped `device_class=MONETARY` from all price sensors and added `state_class=MEASUREMENT` instead. `MONETARY` only allows `state_class=TOTAL` in HA, but these are rates (prices per unit), not balances — so `MONETARY` was the wrong device class. Sensors now use the native unit from the provider (e.g. `EUR/kWh`) without monetary formatting.

@@ -170,8 +170,7 @@ def _cheapest_block_value(prices: ProviderPrices) -> datetime | None:
     series = _electricity_series(prices)
     if series is None:
         return None
-    remaining = _future_prices(series.prices)
-    block = find_cheapest_block(remaining)
+    block = find_cheapest_block(series.prices)
     if block is None:
         return None
     return block.start
@@ -183,8 +182,7 @@ def _cheapest_block_extra_attrs(
     series = _electricity_series(prices)
     if series is None:
         return None
-    remaining = _future_prices(series.prices)
-    block = find_cheapest_block(remaining)
+    block = find_cheapest_block(series.prices)
     if block is None:
         return None
     return {

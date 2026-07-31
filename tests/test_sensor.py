@@ -207,6 +207,32 @@ class TestCheapestBlockSensor:
         for desc in CHEAPEST_BLOCK_SENSORS:
             assert desc.entity_registry_enabled_default is False
 
+    @pytest.mark.parametrize(
+        "frozen_time",
+        ["2026-06-26 00:00:00", "2026-06-26 10:00:00", "2026-06-26 18:00:00"],
+    )
+    def test_value_stable_across_the_day(
+        self, mock_provider_prices: Any, freezer: Any, frozen_time: str
+    ) -> None:
+        freezer.move_to(frozen_time)
+        value = _cheapest_block_value(mock_provider_prices)
+        assert value is not None
+        assert value.hour == 4
+
+    @pytest.mark.parametrize(
+        "frozen_time",
+        ["2026-06-26 00:00:00", "2026-06-26 10:00:00", "2026-06-26 18:00:00"],
+    )
+    def test_extra_attrs_stable_across_the_day(
+        self, mock_provider_prices: Any, freezer: Any, frozen_time: str
+    ) -> None:
+        freezer.move_to(frozen_time)
+        attrs = _cheapest_block_extra_attrs(mock_provider_prices, "test_provider")
+        assert attrs is not None
+        assert attrs["start_time"] == "04:00"
+        assert attrs["end_time"] == "07:00"
+        assert len(attrs["prices"]) == 3
+
     def test_sensor_count(self) -> None:
         assert len(CHEAPEST_BLOCK_SENSORS) == 1
 
