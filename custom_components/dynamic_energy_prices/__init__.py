@@ -2,13 +2,28 @@
 
 from __future__ import annotations
 
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+import voluptuous as vol
 
-from .const import DOMAIN, DynamicEnergyPricesConfigEntry
+from homeassistant.const import Platform
+from homeassistant.core import HomeAssistant, ServiceCall
+
+from .const import (
+    DOMAIN,
+    DynamicEnergyPricesConfigEntry,
+    SERVICE_INSTALL_DASHBOARD,
+)
 from .coordinator import DynamicPriceCoordinator
+from .dashboard import install_dashboard
 
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
+
+
+async def _async_install_dashboard_service(
+    hass: HomeAssistant,
+    call: ServiceCall,
+) -> None:
+    """Install or update the Energy Prices dashboard."""
+    await install_dashboard(hass)
 
 
 async def async_setup_entry(
@@ -21,6 +36,13 @@ async def async_setup_entry(
     entry.runtime_data = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_INSTALL_DASHBOARD,
+        _async_install_dashboard_service,
+        schema=vol.Schema({}),
+    )
 
     return True
 

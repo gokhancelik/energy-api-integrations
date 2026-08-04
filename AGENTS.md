@@ -63,6 +63,15 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes-file AGENTS.md
 
 ## Changelog
 
+### v0.21.0
+
+- **Auto-installable, provider-aware dashboard:** The integration can now build and install a Lovelace dashboard at runtime (`dashboard.py`), resolving each configured entry's real entity IDs from the entity registry (so renames are respected) and emitting only the cards for the sensors a given provider/tariff actually creates.
+  - Trigger it from the options flow (tick *Install or update the Energy Prices dashboard*) or via the new `dynamic_energy_prices.install_dashboard` service.
+  - Multiple config entries are merged into one *Energy Prices* dashboard (`url_path: energy-prices`) with a tab per provider.
+  - The `apexcharts-card` price-curve card is optional and off by default, controlled per entry by the `include_price_curve` option.
+  - YAML-mode Lovelace is detected; `save_dashboard` returns False and the caller can fall back to `examples/dashboard.yaml` / `dashboard_to_yaml` (the service just logs a warning).
+  - `examples/dashboard.yaml` remains as a static YAML-mode fallback reference.
+
 ### v0.20.0
 
 - **Fix cheapest 3h block sensor shifting every hour:** The cheapest block was recomputed on the remaining future hours at every refresh, so the result crept forward hourly and went `unknown` late at night. It's now computed once from the full day's price data and stays stable until the next day's data arrives.

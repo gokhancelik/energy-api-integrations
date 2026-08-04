@@ -227,11 +227,50 @@ automation:
             (threshold {{ state_attr('binary_sensor.essent_cheap_electricity', 'threshold') }})
 ```
 
+### Example dashboard
+
+A ready-to-use Lovelace dashboard is provided for the integration. It shows the
+current and next price, today's average, a cheap-electricity indicator, a
+24-hour price curve, the cheapest 3‑hour block, tomorrow's preview, and gas
+prices. Cards are generated only for the sensors your provider/tariff actually
+creates, and use each configured entry's real entity IDs (respecting any
+renames you've made).
+
+#### Auto-install (recommended)
+
+The dashboard installs itself into Home Assistant — no copy-pasting or
+prefix-replacing:
+
+- **Options flow:** open **Settings > Devices & Services > Dynamic Energy
+  Prices > Configure**, tick *Install or update the Energy Prices dashboard*,
+  and submit. The dashboard appears as *Energy Prices* in the sidebar.
+- **Service:** call `dynamic_energy_prices.install_dashboard` at any time to
+  re-create or update it (for example from a script or automation).
+
+If you run multiple config entries (e.g. EnergyZero electricity + Frank
+Energie gas), installing merges every entry into one dashboard with a tab per
+provider. The price-curve card is optional and off by default: enable *Include
+'Today's price curve' card* in the options when you have
+[`apexcharts-card`](https://github.com/RomRider/apexcharts-card) installed
+(**HACS > Frontend**).
+
+If your Lovelace is in YAML mode the automatic install isn't possible; the
+integration logs a warning and you can fall back to the static example below.
+
+#### Manual (YAML mode fallback)
+
+[`examples/dashboard.yaml`](examples/dashboard.yaml) is a static reference
+copy of the same dashboard. To use it: copy the file's contents into a new
+dashboard (**Settings > Dashboards > Add Dashboard > New dashboard from
+YAML**, or edit an existing dashboard in YAML mode), then replace the `essent`
+entity prefix with your own provider's prefix.
+
 ### Services
 
 | Service | Target | Description |
 |---|---|---|
 | `force_update` | `sensor`, `binary_sensor` | Force refresh price data from the provider |
+| `install_dashboard` | — | Install or update the Energy Prices dashboard for all configured entries |
 
 ## Data updates
 

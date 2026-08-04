@@ -8,7 +8,15 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import aiohttp_client
-from .const import CONF_COUNTRY, CONF_PROVIDER, CONF_THRESHOLD, DOMAIN
+from .const import (
+    CONF_COUNTRY,
+    CONF_INCLUDE_PRICE_CURVE,
+    CONF_INSTALL_DASHBOARD,
+    CONF_PROVIDER,
+    CONF_THRESHOLD,
+    DOMAIN,
+)
+from .dashboard import install_dashboard
 from .providers import PROVIDER_REGISTRY, ProviderConnectionError, ProviderResponseError
 
 
@@ -138,14 +146,21 @@ class DynamicEnergyPricesOptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the options."""
         if user_input is not None:
+            install = user_input.pop(CONF_INSTALL_DASHBOARD, False)
+            data = {
+                k: v for k, v in user_input.items() if v is not None
+            }
+            if install:
+                await install_dashboard(self.hass)
             return self.async_create_entry(
                 title="",
-                data={
-                    k: v for k, v in user_input.items() if v is not None
-                },
+                data=data,
             )
 
         current_threshold = self._config_entry.options.get(CONF_THRESHOLD)
+        current_include_curve = self._config_entry.options.get(
+            CONF_INCLUDE_PRICE_CURVE, False
+        )
 
         schema = vol.Schema(
             {
@@ -157,6 +172,14 @@ class DynamicEnergyPricesOptionsFlowHandler(config_entries.OptionsFlow):
                     None,
                     vol.All(vol.Coerce(float), vol.Range(min=0)),
                 ),
+                vol.Optional(
+                    CONF_INCLUDE_PRICE_CURVE,
+                    default=current_include_curve,
+                ): bool,
+                vol.Optional(
+                    CONF_INSTALL_DASHBOARD,
+                    default=False,
+                ): bool,
             }
         )
 

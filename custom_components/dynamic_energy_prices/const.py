@@ -19,6 +19,8 @@ DOMAIN = "dynamic_energy_prices"
 CONF_PROVIDER = "provider"
 CONF_COUNTRY = "country"
 CONF_THRESHOLD = "threshold"
+CONF_INCLUDE_PRICE_CURVE = "include_price_curve"
+CONF_INSTALL_DASHBOARD = "install_dashboard"
 
 DEFAULT_SCAN_INTERVAL_MINUTES = 60
 DEFAULT_CURRENCY = "EUR"
@@ -26,6 +28,7 @@ DEFAULT_UNIT_ELECTRICITY = "EUR/kWh"
 DEFAULT_UNIT_GAS = "EUR/m³"
 
 SERVICE_FORCE_UPDATE = "force_update"
+SERVICE_INSTALL_DASHBOARD = "install_dashboard"
 
 ATTR_CURRENT_PRICE = "current_price"
 ATTR_NEXT_PRICE = "next_price"

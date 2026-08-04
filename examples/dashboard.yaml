@@ -1,0 +1,147 @@
+# Example Lovelace dashboard for the Dynamic Energy Prices integration.
+#
+# NOTE: This is a static reference copy. Since v0.21.0 the integration
+# installs the same dashboard automatically with the correct entity IDs for
+# your configured provider(s): open Settings > Devices & Services > Dynamic
+# Energy Prices > Configure and tick "Install or update the Energy Prices
+# dashboard", or call the dynamic_energy_prices.install_dashboard service.
+# Only use this file when your Lovelace is in YAML mode (auto-install isn't
+# possible there).
+#
+# Replace the "essent" prefix in every entity_id below with your own
+# provider's prefix (e.g. energyzero, eneco, frank_energie) — check
+# Settings > Devices & Services > Dynamic Energy Prices > Entities for
+# your exact entity IDs.
+#
+# Everything except the "Today's price curve" card uses only Home
+# Assistant's built-in card types. The price-curve card needs the
+# `apexcharts-card` custom card (install via HACS > Frontend). If you'd
+# rather not add that dependency, delete that one card — the rest of the
+# dashboard works without it.
+#
+# Some rows are only relevant for certain providers/tariffs (gas, or
+# tomorrow's prices — only available for EnergyZero, Eneco, and Frank
+# Energie). Delete rows for sensors your setup doesn't create.
+
+title: Energy Prices
+views:
+  - title: Energy Prices
+    path: energy-prices
+    icon: mdi:flash
+    cards:
+      # --- Right now ---------------------------------------------------
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: tile
+            entity: sensor.essent_current_electricity_price
+            name: Current price
+            icon: mdi:flash
+          - type: tile
+            entity: sensor.essent_next_electricity_price
+            name: Next hour
+            icon: mdi:flash-outline
+          - type: tile
+            entity: sensor.essent_average_electricity_price
+            name: Today's average
+            icon: mdi:chart-line
+          - type: tile
+            entity: binary_sensor.essent_cheap_electricity
+            name: Cheap now?
+            icon: mdi:cash-check
+
+      # --- Today's price curve (needs apexcharts-card, see note above) --
+      - type: custom:apexcharts-card
+        header:
+          show: true
+          title: Today's electricity price
+        graph_span: 24h
+        span:
+          start: day
+        now:
+          show: true
+          label: Now
+        yaxis:
+          - decimals: 3
+        series:
+          - entity: sensor.essent_current_electricity_price
+            name: Price
+            type: column
+            color: var(--primary-color)
+            data_generator: |
+              return entity.attributes.hourly_prices.map((p) => {
+                const [h, m] = p.start.split(':').map(Number);
+                const d = new Date();
+                d.setHours(h, m, 0, 0);
+                return [d.getTime(), p.price];
+              });
+          - entity: sensor.essent_average_electricity_price
+            name: Average
+            type: line
+            color: var(--secondary-text-color)
+            curve: straight
+            data_generator: |
+              const curve = hass.states['sensor.essent_current_electricity_price']
+                .attributes.hourly_prices;
+              const avg = parseFloat(entity.state);
+              return curve.map((p) => {
+                const [h, m] = p.start.split(':').map(Number);
+                const d = new Date();
+                d.setHours(h, m, 0, 0);
+                return [d.getTime(), avg];
+              });
+
+      # --- Planning: cheapest block + tomorrow preview ------------------
+      - type: entities
+        title: Cheapest 3-hour block
+        entities:
+          - entity: sensor.essent_cheapest_3h_block_electricity
+            name: Starts
+          - type: attribute
+            entity: sensor.essent_cheapest_3h_block_electricity
+            attribute: end_time
+            name: Ends
+          - type: attribute
+            entity: sensor.essent_cheapest_3h_block_electricity
+            attribute: average_price
+            name: Average price in block
+
+      # Only available for EnergyZero, Eneco, and Frank Energie —
+      # delete this card for Essent.
+      - type: entities
+        title: Tomorrow
+        entities:
+          - entity: sensor.essent_tomorrow_average_electricity_price
+            name: Average
+          - entity: sensor.essent_tomorrow_lowest_electricity_price
+            name: Lowest
+          - entity: sensor.essent_tomorrow_highest_electricity_price
+            name: Highest
+
+      # Only if your provider/tariff includes gas — delete otherwise.
+      - type: entities
+        title: Gas
+        entities:
+          - entity: sensor.essent_current_gas_price
+            name: Current
+          - entity: sensor.essent_next_gas_price
+            name: Next hour
+
+      # --- Diagnostics ----------------------------------------------------
+      - type: entities
+        title: Diagnostics
+        show_header_toggle: false
+        entities:
+          - entity: sensor.essent_last_updated
+            name: Last updated
+          - entity: sensor.essent_next_update
+            name: Next update
+          - type: button
+            name: Force refresh
+            icon: mdi:refresh
+            tap_action:
+              action: call-service
+              service: dynamic_energy_prices.force_update
+              target:
+                entity_id: sensor.essent_current_electricity_price
