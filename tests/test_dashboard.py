@@ -211,44 +211,86 @@ class TestBuildDashboardConfig:
 
 
 class TestSaveDashboard:
-    async def test_creates_and_saves_dashboard(self) -> None:
-        config = {"title": "Energy Prices", "views": []}
-        dash_obj = MagicMock()
-        dash_obj.async_save = AsyncMock()
-        lovelace = MagicMock()
-        lovelace.dashboards.async_get_dashboard = AsyncMock(side_effect=[None, dash_obj])
-        lovelace.dashboards.async_create_item = AsyncMock()
-        hass = MagicMock()
-        hass.data = {"lovelace": lovelace}
-
-        ok = await dash.save_dashboard(hass, config)
-
-        assert ok is True
-        lovelace.dashboards.async_create_item.assert_awaited_once()
-        created = lovelace.dashboards.async_create_item.await_args.args[0]
-        assert created["url_path"] == "energy-prices"
-        dash_obj.async_save.assert_awaited_once_with(config)
-
     async def test_updates_existing_dashboard(self) -> None:
         config = {"title": "Energy Prices", "views": []}
-        dash_obj = MagicMock()
-        dash_obj.async_save = AsyncMock()
+        existing = MagicMock()
+        existing.async_save = AsyncMock()
         lovelace = MagicMock()
-        lovelace.dashboards.async_get_dashboard = AsyncMock(return_value=dash_obj)
-        lovelace.dashboards.async_create_item = AsyncMock()
+        lovelace.dashboards = {dash.DASHBOARD_URL_PATH: existing}
         hass = MagicMock()
         hass.data = {"lovelace": lovelace}
 
         ok = await dash.save_dashboard(hass, config)
 
         assert ok is True
-        lovelace.dashboards.async_create_item.assert_not_called()
-        dash_obj.async_save.assert_awaited_once_with(config)
+        existing.async_save.assert_awaited_once_with(config)
+
+    async def test_creates_and_saves_dashboard(self) -> None:
+        config = {"title": "Energy Prices", "views": []}
+        new_dashboard = MagicMock()
+        new_dashboard.async_save = AsyncMock()
+
+        fake_store = MagicMock()
+        fake_store.async_load = AsyncMock(return_value={"items": []})
+        fake_store.async_save = AsyncMock()
+        store_cls = MagicMock(return_value=fake_store)
+
+        fake_const = MagicMock()
+        fake_const.CONF_REQUIRE_ADMIN = "require_admin"
+        fake_const.CONF_ICON = "icon"
+        fake_const.CONF_TITLE = "title"
+        fake_const.CONF_SHOW_IN_SIDEBAR = "show_in_sidebar"
+        fake_const.CONF_MODE = "mode"
+        fake_const.CONF_URL_PATH = "url_path"
+        fake_const.MODE_STORAGE = "storage"
+        fake_const.DOMAIN = "lovelace"
+
+        fake_dashboard_mod = MagicMock()
+        fake_dashboard_mod.LovelaceStorage = MagicMock(return_value=new_dashboard)
+
+        lovelace = MagicMock()
+        lovelace.dashboards = {}
+        hass = MagicMock()
+        hass.data = {"lovelace": lovelace}
+        ll_frontend = MagicMock()
+
+        with (
+            patch.object(dash, "_INTERNAL_IMPORTS_OK", True),
+            patch.object(dash, "_ll_const", fake_const),
+            patch.object(dash, "_ll_dashboard", fake_dashboard_mod),
+            patch.object(dash, "_ll_frontend", ll_frontend),
+            patch.object(dash, "_ll_storage", type("S", (), {"Store": store_cls})),
+        ):
+            ok = await dash.save_dashboard(hass, config)
+
+        assert ok is True
+        store_cls.assert_called()
+        fake_store.async_save.assert_awaited_once()
+        fake_dashboard_mod.LovelaceStorage.assert_called_once()
+        new_dashboard.async_save.assert_awaited_once_with(config)
+        assert dash.DASHBOARD_URL_PATH in lovelace.dashboards
+        ll_frontend.async_register_built_in_panel.assert_called_once()
+        panel_kwargs = ll_frontend.async_register_built_in_panel.call_args.kwargs
+        assert panel_kwargs["frontend_url_path"] == "energy-prices"
+        assert panel_kwargs["show_in_sidebar"] is True
+
+    async def test_without_dashboard_returns_false_when_internals_unavailable(self) -> None:
+        lovelace = MagicMock()
+        lovelace.dashboards = {}
+        hass = MagicMock()
+        hass.data = {"lovelace": lovelace}
+
+        with (
+            patch.object(dash, "_INTERNAL_IMPORTS_OK", False),
+            patch.object(dash, "_ll_dashboard", None),
+        ):
+            ok = await dash.save_dashboard(hass, {"title": "x", "views": []})
+        assert ok is False
 
     async def test_yaml_mode_returns_false(self) -> None:
         hass = MagicMock()
         hass.data = {"lovelace": MagicMock()}
-        # no .dashboards attribute -> treat as YAML mode
+        # no .dashboards dict -> treat as unavailable
         hass.data["lovelace"].dashboards = None
         ok = await dash.save_dashboard(hass, {"title": "x", "views": []})
         assert ok is False
@@ -262,16 +304,16 @@ class TestInstallDashboard:
         fake_registry = FakeRegistry(_registry_for([entry]))
         with patch.object(dash.entity_registry, "async_get", return_value=fake_registry):
             lovelace = MagicMock()
-            dash_obj = MagicMock()
-            dash_obj.async_save = AsyncMock()
-            lovelace.dashboards.async_get_dashboard = AsyncMock(return_value=dash_obj)
+            existing = MagicMock()
+            existing.async_save = AsyncMock()
+            lovelace.dashboards = {dash.DASHBOARD_URL_PATH: existing}
             hass.data = {"lovelace": lovelace}
 
             result = await dash.install_dashboard(hass)
 
         assert result["installed"] is True
         assert result["skipped"] == []
-        saved = dash_obj.async_save.await_args.args[0]
+        saved = existing.async_save.await_args.args[0]
         assert saved["views"][0]["title"] == "Essent"
 
     async def test_no_entities_does_not_install(self) -> None:

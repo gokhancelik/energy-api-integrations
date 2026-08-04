@@ -27,6 +27,20 @@ DASHBOARD_URL_PATH = "energy-prices"
 DASHBOARD_TITLE = "Energy Prices"
 DASHBOARD_ICON = "mdi:flash"
 
+try:
+    from homeassistant.components import frontend as _ll_frontend
+    from homeassistant.components.lovelace import const as _ll_const
+    from homeassistant.components.lovelace import dashboard as _ll_dashboard
+    from homeassistant.helpers import storage as _ll_storage
+
+    _INTERNAL_IMPORTS_OK = True
+except ImportError:  # pragma: no cover - mocked/test environments
+    _ll_frontend = None
+    _ll_const = None
+    _ll_dashboard = None
+    _ll_storage = None
+    _INTERNAL_IMPORTS_OK = False
+
 _SENSOR_KEYS = (
     "current_electricity_price",
     "next_electricity_price",
@@ -310,39 +324,92 @@ async def save_dashboard(
     hass: HomeAssistant,
     config: dict[str, Any],
 ) -> bool:
-    """Persist the dashboard config into Lovelace (storage mode).
+    """Persist the dashboard config into Home Assistant's Lovelace.
 
-    Returns True on success, or False when Lovelace is unavailable (e.g. YAML
-    mode) so callers can fall back to raw YAML export.
+    ``hass.data["lovelace"].dashboards`` is a ``dict`` mapping ``url_path`` to
+    a Lovelace config object. If our dashboard already exists we save straight
+    into it; otherwise we create a storage-mode dashboard (mirroring how the
+    Lovelace component creates dashboards) and then save.
+
+    Returns True on success, or False when Lovelace is unavailable so callers
+    can fall back to raw YAML export.
     """
     lovelace = hass.data.get("lovelace")
-    if lovelace is None or getattr(lovelace, "dashboards", None) is None:
+    dashboards = getattr(lovelace, "dashboards", None)
+    if not isinstance(dashboards, dict):
         _LOGGER.warning(
-            "Lovelace is not editable from this integration (YAML mode or "
-            "not available); the dashboard could not be installed automatically."
+            "Lovelace is not available; the dashboard could not be installed "
+            "automatically. Use the example dashboard instead."
         )
         return False
 
-    dashboards = lovelace.dashboards
-    dashboard = await dashboards.async_get_dashboard(DASHBOARD_URL_PATH)
-    if dashboard is None:
-        await dashboards.async_create_item(
-            {
-                "url_path": DASHBOARD_URL_PATH,
-                "title": DASHBOARD_TITLE,
-                "icon": DASHBOARD_ICON,
-                "show_in_sidebar": True,
-                "views": [],
-            }
-        )
-        dashboard = await dashboards.async_get_dashboard(DASHBOARD_URL_PATH)
+    existing = dashboards.get(DASHBOARD_URL_PATH)
+    if existing is not None:
+        try:
+            await existing.async_save(config)
+        except Exception:  # noqa: BLE001
+            _LOGGER.exception("Failed to save the %s dashboard.", DASHBOARD_TITLE)
+            return False
+        _LOGGER.info("Updated the %s dashboard.", DASHBOARD_TITLE)
+        return True
 
-    if dashboard is None:
-        _LOGGER.error("Could not create the %s dashboard.", DASHBOARD_TITLE)
+    return await _create_storage_dashboard(hass, lovelace, dashboards, config)
+
+
+async def _create_storage_dashboard(
+    hass: HomeAssistant,
+    lovelace: Any,
+    dashboards: dict,
+    config: dict[str, Any],
+) -> bool:
+    """Create a storage-mode dashboard entry, register its panel, and save."""
+
+    if not _INTERNAL_IMPORTS_OK or _ll_dashboard is None:
+        _LOGGER.warning(
+            "Could not load Lovelace internals to auto-install the dashboard; "
+            "use the example dashboard instead."
+        )
         return False
 
-    await dashboard.async_save(config)
-    _LOGGER.info("Installed/updated the %s dashboard.", DASHBOARD_TITLE)
+    url_path = DASHBOARD_URL_PATH
+    item: dict[str, Any] = {
+        _ll_const.CONF_REQUIRE_ADMIN: False,
+        _ll_const.CONF_ICON: DASHBOARD_ICON,
+        _ll_const.CONF_TITLE: DASHBOARD_TITLE,
+        _ll_const.CONF_SHOW_IN_SIDEBAR: True,
+        _ll_const.CONF_MODE: _ll_const.MODE_STORAGE,
+        _ll_const.CONF_URL_PATH: url_path,
+        "id": url_path,
+    }
+    try:
+        # Persist the dashboard entry so it survives a restart.
+        store = _ll_storage.Store(hass, 1, "lovelace_dashboards")
+        data = await store.async_load()
+        data = data or {"items": []}
+        data.setdefault("items", [])
+        if not any(i.get("url_path") == url_path for i in data["items"]):
+            data["items"].append(item)
+            await store.async_save(data)
+
+        new_dashboard = _ll_dashboard.LovelaceStorage(hass, item)
+        dashboards[url_path] = new_dashboard
+        _ll_frontend.async_register_built_in_panel(
+            hass,
+            _ll_const.DOMAIN,
+            frontend_url_path=url_path,
+            require_admin=False,
+            show_in_sidebar=True,
+            sidebar_title=DASHBOARD_TITLE,
+            sidebar_icon=DASHBOARD_ICON,
+            config={"mode": _ll_const.MODE_STORAGE},
+            update=False,
+        )
+        await new_dashboard.async_save(config)
+    except Exception:  # noqa: BLE001
+        _LOGGER.exception("Failed to create the %s dashboard.", DASHBOARD_TITLE)
+        return False
+
+    _LOGGER.info("Installed the %s dashboard.", DASHBOARD_TITLE)
     return True
 
 

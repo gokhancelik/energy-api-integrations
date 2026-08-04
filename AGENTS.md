@@ -63,6 +63,10 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes-file AGENTS.md
 
 ## Changelog
 
+### v0.22.1
+
+- **Fix dashboard install crash (v0.21.0):** `save_dashboard` used `dashboards.async_get_dashboard(...)`, which doesn't exist — in Home Assistant `hass.data["lovelace"].dashboards` is a plain `dict` of `url_path → LovelaceConfig`. It now saves straight into the existing dashboard when present, and otherwise creates a storage-mode dashboard (registers the sidebar panel via `frontend`, persists the entry to the `lovelace_dashboards` store, and saves the config) mirroring how HA's own Lovelace component does it. Internal components are imported lazily with a graceful fallback to `examples/dashboard.yaml` guidance.
+
 ### v0.22.0
 
 - **Restore full multi-day `hourly_prices` curve (fixes #2):** v0.17 split Essent's multi-day API response per-date, so `hourly_prices` on `current_electricity_price` shrank from 72 entries (yesterday+today+tomorrow, as in v0.16) to 24. It now spans all available days again for every provider: **yesterday+today+tomorrow** for Essent, **today+tomorrow** for EnergyZero/Eneco/Frank.
