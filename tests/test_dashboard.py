@@ -109,6 +109,32 @@ class TestBuildProviderView:
         curves = _cards_of_type(view, "custom:apexcharts-card")
         assert len(curves) == 1
 
+    def test_builtin_curve_used_when_apexcharts_unavailable(self) -> None:
+        view = dash.build_provider_view(
+            "Essent",
+            _electricity_only_entities(),
+            include_price_curve=True,
+            apexcharts_available=False,
+        )
+        assert _cards_of_type(view, "custom:apexcharts-card") == []
+        history = _cards_of_type(view, "history-graph")
+        assert len(history) == 1
+        assert history[0]["hours_to_show"] == 24
+
+    def test_no_price_curve_without_electricity(self) -> None:
+        entities = {
+            "current_gas_price": _sensor("current_gas_price"),
+            "next_gas_price": _sensor("next_gas_price"),
+        }
+        view = dash.build_provider_view(
+            "Essent",
+            entities,
+            include_price_curve=True,
+            apexcharts_available=False,
+        )
+        assert _cards_of_type(view, "history-graph") == []
+        assert _cards_of_type(view, "custom:apexcharts-card") == []
+
     def test_gas_only_entry(self) -> None:
         entities = {
             "current_gas_price": _sensor("current_gas_price"),
@@ -125,11 +151,19 @@ class TestBuildProviderView:
 
 
 class FakeRegistry:
-    def __init__(self, mapping: dict[tuple[str, str], str | None]) -> None:
+    def __init__(
+        self, mapping: dict[tuple[str, str], str | None], disabled: set[str] | None = None
+    ) -> None:
         self._mapping = mapping
+        self._disabled = disabled or set()
 
     def async_get_entity_id(self, platform: str, domain: str, unique_id: str) -> str | None:
         return self._mapping.get((platform, unique_id))
+
+    def async_get(self, entity_id: str) -> SimpleNamespace | None:
+        if entity_id in self._disabled:
+            return SimpleNamespace(disabled_by="user", entity_id=entity_id)
+        return SimpleNamespace(disabled_by=None, entity_id=entity_id)
 
 
 def _make_entry(
@@ -178,6 +212,32 @@ class TestResolveEntities:
         with patch.object(dash.entity_registry, "async_get", return_value=fake_registry):
             result = await dash.resolve_entities(hass, entry)
         assert result == {"current_electricity_price": "sensor.essent_current_electricity_price"}
+
+    async def test_disabled_entities_omitted(self) -> None:
+        entry = _make_entry("entry_1", "Essent", "essent")
+        mapping = _registry_for([entry])
+        disabled = {"sensor.essent_current_electricity_price", "sensor.essent_next_electricity_price"}
+        fake_registry = FakeRegistry(mapping, disabled=disabled)
+        hass = MagicMock()
+        with patch.object(dash.entity_registry, "async_get", return_value=fake_registry):
+            result = await dash.resolve_entities(hass, entry)
+        assert "current_electricity_price" not in result
+        assert "next_electricity_price" not in result
+        assert result["average_electricity_price"] == "sensor.essent_average_electricity_price"
+
+    async def test_provider_with_all_sensors_disabled_yields_no_tab(self) -> None:
+        entry = _make_entry("entry_1", "Essent", "essent")
+        mapping = _registry_for([entry])
+        all_sensor_ids = {
+            eid
+            for eid in mapping.values()
+            if eid is not None and eid.startswith("sensor.")
+        }
+        fake_registry = FakeRegistry(mapping, disabled=all_sensor_ids)
+        hass = MagicMock()
+        with patch.object(dash.entity_registry, "async_get", return_value=fake_registry):
+            entities = await dash.resolve_entities(hass, entry)
+        assert dash.build_provider_view("Essent", entities, include_price_curve=False) is None
 
 
 class TestBuildDashboardConfig:
@@ -325,6 +385,33 @@ class TestInstallDashboard:
             hass.data = {}
             result = await dash.install_dashboard(hass)
         assert result["installed"] is False
+
+
+class TestApexchartsDetection:
+    async def test_detects_apexcharts_resource(self) -> None:
+        lovelace = MagicMock()
+        lovelace.resources.async_items = MagicMock(
+            return_value=[
+                {"url": "/hacsfiles/apexcharts-card/apexcharts-card.js"},
+            ]
+        )
+        lovelace.resources.async_load = AsyncMock()
+        hass = MagicMock()
+        hass.data = {"lovelace": lovelace}
+        assert await dash._apexcharts_installed(hass) is True
+
+    async def test_no_resources_means_not_installed(self) -> None:
+        lovelace = MagicMock()
+        lovelace.resources.async_items = MagicMock(return_value=[])
+        lovelace.resources.async_load = AsyncMock()
+        hass = MagicMock()
+        hass.data = {"lovelace": lovelace}
+        assert await dash._apexcharts_installed(hass) is False
+
+    async def test_gracefully_handles_missing_lovelace(self) -> None:
+        hass = MagicMock()
+        hass.data = {}
+        assert await dash._apexcharts_installed(hass) is False
 
 
 class TestDashboardToYaml:

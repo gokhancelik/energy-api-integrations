@@ -83,6 +83,7 @@ def build_provider_view(
     *,
     include_price_curve: bool,
     icon: str = DASHBOARD_ICON,
+    apexcharts_available: bool = True,
 ) -> dict[str, Any] | None:
     """Build a single view (tab) for one provider entry.
 
@@ -123,7 +124,10 @@ def build_provider_view(
         cards.append({"type": "grid", "columns": 2, "square": False, "cards": grid_cards})
 
     if include_price_curve and current is not None and average is not None:
-        cards.append(_price_curve_card(current, average))
+        if apexcharts_available:
+            cards.append(_price_curve_card(current, average))
+        else:
+            cards.append(_builtin_price_curve_card(current, average))
 
     cheapest = _entity_id(entities, "cheapest_3h_block_electricity", "sensor")
     if cheapest is not None:
@@ -258,24 +262,77 @@ def _price_curve_card(current: str, average: str) -> dict[str, Any]:
     }
 
 
+def _builtin_price_curve_card(current: str, average: str) -> dict[str, Any]:
+    """Build a built-in price-curve card (no custom card dependency).
+
+    Renders the recorded history of the price values with Home Assistant's
+    built-in ``history-graph`` card. Used as a fallback when the
+    ``apexcharts-card`` custom card is not installed.
+    """
+    return {
+        "type": "history-graph",
+        "title": "Today's electricity price",
+        "hours_to_show": 24,
+        "refresh_interval": 30,
+        "entities": [
+            {"entity": current, "name": "Price"},
+            {"entity": average, "name": "Average"},
+        ],
+    }
+
+
+async def _apexcharts_installed(hass: HomeAssistant) -> bool:
+    """Return True when the apexcharts-card resource is registered in Lovelace."""
+    lovelace = hass.data.get("lovelace")
+    resources = getattr(lovelace, "resources", None)
+    if resources is None:
+        return False
+    try:
+        load = getattr(resources, "async_load", None)
+        if load is not None:
+            await load()
+        items = resources.async_items()
+    except Exception:  # noqa: BLE001
+        return False
+    for item in items or []:
+        url = item.get("url", "") if isinstance(item, dict) else ""
+        if isinstance(url, str) and "apexcharts" in url.lower():
+            return True
+    return False
+
+
 async def resolve_entities(
     hass: HomeAssistant,
     entry: DynamicEnergyPricesConfigEntry,
 ) -> dict[str, str]:
-    """Resolve real entity IDs for a config entry from the entity registry."""
+    """Resolve real entity IDs for a config entry from the entity registry.
+
+    Entities the user has disabled in the registry are skipped, so a provider
+    with no enabled sensors produces no tab.
+    """
     reg = entity_registry.async_get(hass)
     entities: dict[str, str] = {}
+
+    async_get_entity = getattr(reg, "async_get", None)
+
+    def _enabled(entity_id: str) -> bool:
+        if async_get_entity is None:
+            return True
+        registry_entry = async_get_entity(entity_id)
+        if registry_entry is None:
+            return True
+        return getattr(registry_entry, "disabled_by", None) is None
 
     for key in _SENSOR_KEYS:
         unique_id = f"{DOMAIN}_{entry.entry_id}_{key}"
         entity_id = reg.async_get_entity_id("sensor", DOMAIN, unique_id)
-        if entity_id is not None:
+        if entity_id is not None and _enabled(entity_id):
             entities[key] = entity_id
 
     for key in _BINARY_KEYS:
         unique_id = f"{DOMAIN}_{entry.entry_id}_{key}"
         entity_id = reg.async_get_entity_id("binary_sensor", DOMAIN, unique_id)
-        if entity_id is not None:
+        if entity_id is not None and _enabled(entity_id):
             entities[key] = entity_id
 
     return entities
@@ -298,6 +355,8 @@ async def build_dashboard_config(
     views: list[dict[str, Any]] = []
     skipped: list[str] = []
 
+    apexcharts_available = await _apexcharts_installed(hass)
+
     for entry in entries:
         provider_id = entry.data.get(CONF_PROVIDER)
         provider_cls = PROVIDER_REGISTRY.get(provider_id) if provider_id else None
@@ -309,6 +368,7 @@ async def build_dashboard_config(
             provider_name,
             entities,
             include_price_curve=include_price_curve,
+            apexcharts_available=apexcharts_available,
         )
         if view is None:
             skipped.append(provider_name)

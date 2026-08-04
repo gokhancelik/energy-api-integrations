@@ -63,6 +63,12 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes-file AGENTS.md
 
 ## Changelog
 
+### v0.23.0
+
+- **Hide tabs for disabled providers:** `resolve_entities` now respects the entity registry `disabled_by` flag, so a provider whose sensors are all disabled produces no tab (existing tabs still render for enabled providers).
+- **Built-in price-curve fallback:** the optional price curve used the third-party `apexcharts-card`. It now auto-detects (via the Lovelace resources list) whether apexcharts-card is installed and, when it isn't, renders a built-in `history-graph` card instead — so the curve never breaks if the custom card is absent.
+- Tabs remain labelled with the provider display name.
+
 ### v0.22.1
 
 - **Fix dashboard install crash (v0.21.0):** `save_dashboard` used `dashboards.async_get_dashboard(...)`, which doesn't exist — in Home Assistant `hass.data["lovelace"].dashboards` is a plain `dict` of `url_path → LovelaceConfig`. It now saves straight into the existing dashboard when present, and otherwise creates a storage-mode dashboard (registers the sidebar panel via `frontend`, persists the entry to the `lovelace_dashboards` store, and saves the config) mirroring how HA's own Lovelace component does it. Internal components are imported lazily with a graceful fallback to `examples/dashboard.yaml` guidance.

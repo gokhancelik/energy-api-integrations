@@ -4,7 +4,7 @@
       "init": {
         "data": {
           "threshold": "Price threshold (EUR/kWh, leave empty to use today's average)",
-          "include_price_curve": "Include 'Today's price curve' card (requires the apexcharts-card custom card)",
+          "include_price_curve": "Include 'Today's price curve' card (uses apexcharts-card when installed, otherwise the built-in chart)",
           "install_dashboard": "Install or update the Energy Prices dashboard"
         }
       }

@@ -253,10 +253,12 @@ prefix-replacing:
 
 If you run multiple config entries (e.g. EnergyZero electricity + Frank
 Energie gas), installing merges every entry into one dashboard with a tab per
-provider. The price-curve card is optional and off by default: enable *Include
-'Today's price curve' card* in the options when you have
-[`apexcharts-card`](https://github.com/RomRider/apexcharts-card) installed
-(**HACS > Frontend**).
+provider (only tabs for providers whose sensors are enabled are shown). The
+price-curve card is optional and off by default: enable *Include 'Today's
+price curve' card* in the options. It uses the
+[`apexcharts-card`](https://github.com/RomRider/apexcharts-card) custom card
+(**HACS > Frontend**) when that's installed; otherwise it automatically falls
+back to Home Assistant's built-in chart card, so the curve always works.
 
 If your Lovelace is in YAML mode the automatic install isn't possible; the
 integration logs a warning and you can fall back to the static example below.
