@@ -49,10 +49,11 @@ pytest tests/ -k "not config_flow and not coordinator and not init"  # skip HA-f
 
 ## Release
 
-**Release every change automatically.** After any commit that warrants a new
-version (feature, fix, or version bump), do the full flow — bump version,
-commit, tag, push, and create the GitHub release — without waiting to be
-asked. Steps:
+**Release automatically, but only when a change warrants a new version.** Not
+every push gets a release — only changes that need one (a finished feature,
+a bug fix, or a requested version bump). When such a commit lands, do the full
+flow — bump version, commit, tag, push, and create the GitHub release —
+without waiting to be asked. Steps:
 
 ```bash
 # 1. Bump version in manifest.json, then:
