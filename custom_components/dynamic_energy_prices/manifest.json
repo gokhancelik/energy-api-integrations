@@ -3,6 +3,7 @@
   "name": "Dynamic Energy Prices",
   "codeowners": ["@gokhancelik"],
   "config_flow": true,
+  "dependencies": ["lovelace"],
   "documentation": "https://github.com/gokhancelik/energy-api-integrations",
   "integration_type": "service",
   "iot_class": "cloud_polling",
