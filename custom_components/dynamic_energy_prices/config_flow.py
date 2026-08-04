@@ -14,9 +14,10 @@ from .const import (
     CONF_INSTALL_DASHBOARD,
     CONF_PROVIDER,
     CONF_THRESHOLD,
+    CONF_UNINSTALL_DASHBOARD,
     DOMAIN,
 )
-from .dashboard import install_dashboard
+from .dashboard import install_dashboard, uninstall_dashboard
 from .providers import PROVIDER_REGISTRY, ProviderConnectionError, ProviderResponseError
 
 
@@ -147,10 +148,13 @@ class DynamicEnergyPricesOptionsFlowHandler(config_entries.OptionsFlow):
         """Manage the options."""
         if user_input is not None:
             install = user_input.pop(CONF_INSTALL_DASHBOARD, False)
+            uninstall = user_input.pop(CONF_UNINSTALL_DASHBOARD, False)
             data = {
                 k: v for k, v in user_input.items() if v is not None
             }
-            if install:
+            if uninstall:
+                await uninstall_dashboard(self.hass)
+            elif install:
                 await install_dashboard(self.hass)
             return self.async_create_entry(
                 title="",
@@ -178,6 +182,10 @@ class DynamicEnergyPricesOptionsFlowHandler(config_entries.OptionsFlow):
                 ): bool,
                 vol.Optional(
                     CONF_INSTALL_DASHBOARD,
+                    default=False,
+                ): bool,
+                vol.Optional(
+                    CONF_UNINSTALL_DASHBOARD,
                     default=False,
                 ): bool,
             }

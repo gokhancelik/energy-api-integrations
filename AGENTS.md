@@ -63,6 +63,10 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes-file AGENTS.md
 
 ## Changelog
 
+### v0.24.0
+
+- **Uninstall dashboard option:** users can now remove the Energy Prices dashboard from the options flow (*Uninstall the Energy Prices dashboard*) or via the new `dynamic_energy_prices.uninstall_dashboard` service. It removes the dashboard entry, its sidebar panel, and its config.
+
 ### v0.23.0
 
 - **Hide tabs for disabled providers:** `resolve_entities` now respects the entity registry `disabled_by` flag, so a provider whose sensors are all disabled produces no tab (existing tabs still render for enabled providers).

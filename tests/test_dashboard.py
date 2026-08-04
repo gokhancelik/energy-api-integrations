@@ -414,6 +414,49 @@ class TestApexchartsDetection:
         assert await dash._apexcharts_installed(hass) is False
 
 
+class TestUninstallDashboard:
+    async def test_uninstalls_existing_dashboard(self) -> None:
+        existing = MagicMock()
+        existing.async_delete = AsyncMock()
+        lovelace = MagicMock()
+        lovelace.dashboards = {dash.DASHBOARD_URL_PATH: existing}
+
+        fake_store = MagicMock()
+        fake_store.async_load = AsyncMock(return_value={"items": [{"url_path": "energy-prices"}]})
+        fake_store.async_save = AsyncMock()
+        store_cls = MagicMock(return_value=fake_store)
+
+        ll_frontend = MagicMock()
+
+        hass = MagicMock()
+        hass.data = {"lovelace": lovelace}
+
+        with (
+            patch.object(dash, "_INTERNAL_IMPORTS_OK", True),
+            patch.object(dash, "_ll_frontend", ll_frontend),
+            patch.object(dash, "_ll_storage", type("S", (), {"Store": store_cls})),
+        ):
+            ok = await dash.uninstall_dashboard(hass)
+
+        assert ok is True
+        ll_frontend.async_remove_panel.assert_called_once_with(hass, "energy-prices")
+        fake_store.async_save.assert_awaited_once()
+        assert dash.DASHBOARD_URL_PATH not in lovelace.dashboards
+        existing.async_delete.assert_awaited_once()
+
+    async def test_not_installed_returns_false(self) -> None:
+        lovelace = MagicMock()
+        lovelace.dashboards = {}
+        hass = MagicMock()
+        hass.data = {"lovelace": lovelace}
+        assert await dash.uninstall_dashboard(hass) is False
+
+    async def test_missing_lovelace_returns_false(self) -> None:
+        hass = MagicMock()
+        hass.data = {}
+        assert await dash.uninstall_dashboard(hass) is False
+
+
 class TestDashboardToYaml:
     def test_dumps_config(self) -> None:
         config = {"title": "Energy Prices", "views": [{"title": "Essent", "cards": []}]}

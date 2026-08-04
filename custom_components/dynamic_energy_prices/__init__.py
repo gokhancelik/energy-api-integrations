@@ -11,9 +11,10 @@ from .const import (
     DOMAIN,
     DynamicEnergyPricesConfigEntry,
     SERVICE_INSTALL_DASHBOARD,
+    SERVICE_UNINSTALL_DASHBOARD,
 )
 from .coordinator import DynamicPriceCoordinator
-from .dashboard import install_dashboard
+from .dashboard import install_dashboard, uninstall_dashboard
 
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
@@ -24,6 +25,14 @@ async def _async_install_dashboard_service(
 ) -> None:
     """Install or update the Energy Prices dashboard."""
     await install_dashboard(hass)
+
+
+async def _async_uninstall_dashboard_service(
+    hass: HomeAssistant,
+    call: ServiceCall,
+) -> None:
+    """Remove the Energy Prices dashboard."""
+    await uninstall_dashboard(hass)
 
 
 async def async_setup_entry(
@@ -41,6 +50,12 @@ async def async_setup_entry(
         DOMAIN,
         SERVICE_INSTALL_DASHBOARD,
         _async_install_dashboard_service,
+        schema=vol.Schema({}),
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_UNINSTALL_DASHBOARD,
+        _async_uninstall_dashboard_service,
         schema=vol.Schema({}),
     )
 

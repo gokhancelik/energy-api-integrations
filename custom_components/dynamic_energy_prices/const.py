@@ -21,6 +21,7 @@ CONF_COUNTRY = "country"
 CONF_THRESHOLD = "threshold"
 CONF_INCLUDE_PRICE_CURVE = "include_price_curve"
 CONF_INSTALL_DASHBOARD = "install_dashboard"
+CONF_UNINSTALL_DASHBOARD = "uninstall_dashboard"
 
 DEFAULT_SCAN_INTERVAL_MINUTES = 60
 DEFAULT_CURRENCY = "EUR"
@@ -29,6 +30,7 @@ DEFAULT_UNIT_GAS = "EUR/m³"
 
 SERVICE_FORCE_UPDATE = "force_update"
 SERVICE_INSTALL_DASHBOARD = "install_dashboard"
+SERVICE_UNINSTALL_DASHBOARD = "uninstall_dashboard"
 
 ATTR_CURRENT_PRICE = "current_price"
 ATTR_NEXT_PRICE = "next_price"

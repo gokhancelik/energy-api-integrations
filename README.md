@@ -251,6 +251,10 @@ prefix-replacing:
 - **Service:** call `dynamic_energy_prices.install_dashboard` at any time to
   re-create or update it (for example from a script or automation).
 
+To remove it again, tick *Uninstall the Energy Prices dashboard* in the same
+options flow (or call `dynamic_energy_prices.uninstall_dashboard`). This
+removes the dashboard, its sidebar panel, and its config.
+
 If you run multiple config entries (e.g. EnergyZero electricity + Frank
 Energie gas), installing merges every entry into one dashboard with a tab per
 provider (only tabs for providers whose sensors are enabled are shown). The

@@ -5,7 +5,8 @@
         "data": {
           "threshold": "Price threshold (EUR/kWh, leave empty to use today's average)",
           "include_price_curve": "Include 'Today's price curve' card (uses apexcharts-card when installed, otherwise the built-in chart)",
-          "install_dashboard": "Install or update the Energy Prices dashboard"
+          "install_dashboard": "Install or update the Energy Prices dashboard",
+          "uninstall_dashboard": "Uninstall the Energy Prices dashboard"
         }
       }
     }
@@ -45,6 +46,10 @@
     "install_dashboard": {
       "name": "Install dashboard",
       "description": "Install or update the Energy Prices Lovelace dashboard for all configured entries."
+    },
+    "uninstall_dashboard": {
+      "name": "Uninstall dashboard",
+      "description": "Remove the Energy Prices Lovelace dashboard and its panel."
     }
   },
   "entity": {

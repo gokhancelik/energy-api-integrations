@@ -10,3 +10,6 @@ force_update:
 install_dashboard:
   name: Install dashboard
   description: Install or update the Energy Prices Lovelace dashboard for all configured entries.
+uninstall_dashboard:
+  name: Uninstall dashboard
+  description: Remove the Energy Prices Lovelace dashboard and its panel.

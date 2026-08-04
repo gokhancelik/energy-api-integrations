@@ -504,3 +504,50 @@ async def install_dashboard(hass: HomeAssistant) -> dict[str, Any]:
 
     result["installed"] = await save_dashboard(hass, config)
     return result
+
+
+async def uninstall_dashboard(hass: HomeAssistant) -> bool:
+    """Remove the Energy Prices dashboard entry, panel, and its config.
+
+    Returns True on success, or False when it isn't installed / can't be
+    removed so callers can log the outcome.
+    """
+    lovelace = hass.data.get("lovelace")
+    dashboards = getattr(lovelace, "dashboards", None)
+    if not isinstance(dashboards, dict):
+        _LOGGER.warning("Lovelace is not available; cannot uninstall the dashboard.")
+        return False
+
+    if DASHBOARD_URL_PATH not in dashboards:
+        _LOGGER.info("The %s dashboard is not installed.", DASHBOARD_TITLE)
+        return False
+
+    if not _INTERNAL_IMPORTS_OK or _ll_frontend is None or _ll_storage is None:
+        _LOGGER.warning("Could not load Lovelace internals to uninstall the dashboard.")
+        return False
+
+    try:
+        # Remove the sidebar panel.
+        _ll_frontend.async_remove_panel(hass, DASHBOARD_URL_PATH)
+
+        # Remove the dashboard entry from the persistent collection store.
+        store = _ll_storage.Store(hass, 1, "lovelace_dashboards")
+        data = await store.async_load() or {"items": []}
+        data.setdefault("items", [])
+        data["items"] = [
+            item
+            for item in data["items"]
+            if item.get("url_path") != DASHBOARD_URL_PATH
+        ]
+        await store.async_save(data)
+
+        # Remove the in-memory entry and delete its config storage.
+        dashboard = dashboards.pop(DASHBOARD_URL_PATH, None)
+        if dashboard is not None and hasattr(dashboard, "async_delete"):
+            await dashboard.async_delete()
+    except Exception:  # noqa: BLE001
+        _LOGGER.exception("Failed to uninstall the %s dashboard.", DASHBOARD_TITLE)
+        return False
+
+    _LOGGER.info("Uninstalled the %s dashboard.", DASHBOARD_TITLE)
+    return True
