@@ -506,6 +506,29 @@ async def install_dashboard(hass: HomeAssistant) -> dict[str, Any]:
     return result
 
 
+def is_dashboard_installed(hass: HomeAssistant) -> bool:
+    """Return True when the Energy Prices dashboard is present in Lovelace."""
+    lovelace = hass.data.get("lovelace")
+    dashboards = getattr(lovelace, "dashboards", None)
+    if not isinstance(dashboards, dict):
+        return False
+    return DASHBOARD_URL_PATH in dashboards
+
+
+async def rebuild_installed_dashboard(hass: HomeAssistant) -> bool:
+    """Rebuild the dashboard after an upgrade, but only if it exists.
+
+    Keeps an already-installed dashboard current with new cards (e.g. the
+    built-in price-curve fallback) on every Home Assistant start, while never
+    creating a dashboard for users who didn't opt in.
+    """
+    if not is_dashboard_installed(hass):
+        return False
+    # Rebuild a fresh config so new/updated cards are picked up.
+    result = await install_dashboard(hass)
+    return bool(result.get("installed"))
+
+
 async def uninstall_dashboard(hass: HomeAssistant) -> bool:
     """Remove the Energy Prices dashboard entry, panel, and its config.
 

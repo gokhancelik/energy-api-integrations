@@ -414,6 +414,40 @@ class TestApexchartsDetection:
         assert await dash._apexcharts_installed(hass) is False
 
 
+class TestRebuildDashboard:
+    def test_is_installed_when_present(self) -> None:
+        lovelace = MagicMock()
+        lovelace.dashboards = {dash.DASHBOARD_URL_PATH: MagicMock()}
+        hass = MagicMock()
+        hass.data = {"lovelace": lovelace}
+        assert dash.is_dashboard_installed(hass) is True
+
+    def test_not_installed_when_missing(self) -> None:
+        lovelace = MagicMock()
+        lovelace.dashboards = {}
+        hass = MagicMock()
+        hass.data = {"lovelace": lovelace}
+        assert dash.is_dashboard_installed(hass) is False
+
+    async def test_rebuild_only_when_installed(self) -> None:
+        lovelace = MagicMock()
+        lovelace.dashboards = {dash.DASHBOARD_URL_PATH: MagicMock()}
+        hass = MagicMock()
+        hass.data = {"lovelace": lovelace}
+        with patch.object(dash, "install_dashboard", AsyncMock(return_value={"installed": True})) as mock_install:
+            assert await dash.rebuild_installed_dashboard(hass) is True
+            mock_install.assert_awaited_once_with(hass)
+
+    async def test_rebuild_skips_when_not_installed(self) -> None:
+        lovelace = MagicMock()
+        lovelace.dashboards = {}
+        hass = MagicMock()
+        hass.data = {"lovelace": lovelace}
+        with patch.object(dash, "install_dashboard", AsyncMock()) as mock_install:
+            assert await dash.rebuild_installed_dashboard(hass) is False
+        mock_install.assert_not_awaited()
+
+
 class TestUninstallDashboard:
     async def test_uninstalls_existing_dashboard(self) -> None:
         existing = MagicMock()

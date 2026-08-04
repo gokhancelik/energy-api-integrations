@@ -14,7 +14,7 @@ from .const import (
     SERVICE_UNINSTALL_DASHBOARD,
 )
 from .coordinator import DynamicPriceCoordinator
-from .dashboard import install_dashboard, uninstall_dashboard
+from .dashboard import install_dashboard, rebuild_installed_dashboard, uninstall_dashboard
 
 PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR]
 
@@ -45,6 +45,8 @@ async def async_setup_entry(
     entry.runtime_data = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    await rebuild_installed_dashboard(hass)
 
     hass.services.async_register(
         DOMAIN,

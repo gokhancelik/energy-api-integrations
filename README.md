@@ -255,6 +255,11 @@ To remove it again, tick *Uninstall the Energy Prices dashboard* in the same
 options flow (or call `dynamic_energy_prices.uninstall_dashboard`). This
 removes the dashboard, its sidebar panel, and its config.
 
+Once installed, the dashboard is automatically rebuilt on every Home Assistant
+start (after an upgrade or restart) so new cards — like the built-in
+price-curve fallback — are picked up without re-running the install. It only
+refreshes if you already installed it; it never creates one for you.
+
 If you run multiple config entries (e.g. EnergyZero electricity + Frank
 Energie gas), installing merges every entry into one dashboard with a tab per
 provider (only tabs for providers whose sensors are enabled are shown). The

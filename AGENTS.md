@@ -55,13 +55,31 @@ git add custom_components/dynamic_energy_prices/manifest.json
 git commit -m "Bump version to X.Y.Z"
 git tag vX.Y.Z
 git push && git push origin vX.Y.Z
-gh release create vX.Y.Z --title "vX.Y.Z" --notes-file AGENTS.md
 ```
 
+**Release notes must contain ONLY the current version's changelog section** from AGENTS.md — never paste the whole file. Extract the section between `### vX.Y.Z` and the next `### v` into a temp notes file, then:
+
+```powershell
+$content = Get-Content -LiteralPath 'AGENTS.md' -Raw
+$hdr = '### vX.Y.Z'
+$start = $content.IndexOf($hdr)
+$rest = $content.Substring($start + $hdr.Length)
+$m = [regex]::Match($rest, '(?ms)^\s*### v\d')
+$end = if ($m.Success) { $start + $hdr.Length + $m.Index } else { $content.Length }
+$notes = $content.Substring($start, $end - $start).Trim()
+Set-Content -LiteralPath "C:\Users\gokha\AppData\Local\Temp\opencode\notes_vX.Y.Z.md" -Value $notes
+gh release create vX.Y.Z --title "vX.Y.Z" --notes-file "C:\Users\gokha\AppData\Local\Temp\opencode\notes_vX.Y.Z.md"
+```
+
+- To edit an existing release's notes: `gh release edit vX.Y.Z --notes-file <file>` (used in Aug 2026 to strip the AGENTS.md dump out of v0.18.0–v0.23.0).
 - Token auth for HTTPS git: `git -c "http.extraheader=Authorization: basic $(..." push`
 - GitHub PAT format for git: username = `x-oauth-basic`, password = PAT
 
 ## Changelog
+
+### v0.25.0
+
+- **Auto-rebuild installed dashboard on setup:** if the Energy Prices dashboard already exists, `async_setup_entry` now rebuilds it on every HA start/upgrade so new or changed cards (like the built-in price-curve fallback) are reflected without re-running the install. It never creates a dashboard for users who didn't opt in (`rebuild_installed_dashboard` only refreshes when `is_dashboard_installed`).
 
 ### v0.24.0
 
