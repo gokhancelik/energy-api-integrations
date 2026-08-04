@@ -49,15 +49,22 @@ pytest tests/ -k "not config_flow and not coordinator and not init"  # skip HA-f
 
 ## Release
 
+**Release every change automatically.** After any commit that warrants a new
+version (feature, fix, or version bump), do the full flow — bump version,
+commit, tag, push, and create the GitHub release — without waiting to be
+asked. Steps:
+
 ```bash
-# Bump version, then:
+# 1. Bump version in manifest.json, then:
 git add custom_components/dynamic_energy_prices/manifest.json
 git commit -m "Bump version to X.Y.Z"
 git tag vX.Y.Z
 git push && git push origin vX.Y.Z
 ```
 
-**Release notes must contain ONLY the current version's changelog section** from AGENTS.md — never paste the whole file. Extract the section between `### vX.Y.Z` and the next `### v` into a temp notes file, then:
+**2. Release notes must contain ONLY the current version's changelog section**
+from AGENTS.md — never paste the whole file. Extract the section between
+`### vX.Y.Z` and the next `### v` into a temp notes file, then:
 
 ```powershell
 $content = Get-Content -LiteralPath 'AGENTS.md' -Raw
