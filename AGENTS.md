@@ -63,6 +63,12 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes-file AGENTS.md
 
 ## Changelog
 
+### v0.22.0
+
+- **Restore full multi-day `hourly_prices` curve (fixes #2):** v0.17 split Essent's multi-day API response per-date, so `hourly_prices` on `current_electricity_price` shrank from 72 entries (yesterday+today+tomorrow, as in v0.16) to 24. It now spans all available days again for every provider: **yesterday+today+tomorrow** for Essent, **today+tomorrow** for EnergyZero/Eneco/Frank.
+  - The value/computation sensors (`current`, `next`, `average`, cheapest block) intentionally stay **today-only** and stable (the v0.20.0 cheapest-block guarantee is preserved).
+  - Implemented via a new `coordinator.all_electricity_prices` merged series + a `provides_yesterday_data` provider capability flag (True only on Essent, so other providers make no extra API calls).
+
 ### v0.21.0
 
 - **Auto-installable, provider-aware dashboard:** The integration can now build and install a Lovelace dashboard at runtime (`dashboard.py`), resolving each configured entry's real entity IDs from the entity registry (so renames are respected) and emitting only the cards for the sensors a given provider/tariff actually creates.

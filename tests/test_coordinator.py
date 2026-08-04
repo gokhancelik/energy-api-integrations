@@ -166,9 +166,12 @@ async def test_coordinator_tomorrow_data_populated(hass: Any) -> None:
         coordinator = DynamicPriceCoordinator(hass, entry)
         await coordinator._async_update_data()
 
-        mock_fetch_tomorrow.assert_called_once()
+        # tomorrow + yesterday (Essent provides multi-day data)
+        mock_fetch_tomorrow.assert_called()
         assert coordinator.tomorrow_data is not None
         assert coordinator.tomorrow_data.electricity.prices[0].total_price == 0.2
+        assert coordinator._yesterday_data is not None
+        assert len(coordinator.all_electricity_prices) == 3
 
 
 @pytest.mark.asyncio

@@ -48,6 +48,8 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
         self.provider: PriceProvider = provider_cls(entry.data, session=session)
         self._last_successful_data: ProviderPrices | None = None
         self._tomorrow_data: ProviderPrices | None = None
+        self._yesterday_data: ProviderPrices | None = None
+        self._all_electricity_prices: list = []
         self._last_update_time: datetime | None = None
         self._consecutive_failures = 0
         self._hourly_sync_unsub: Callable[[], None] | None = None
@@ -92,6 +94,25 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
         except (ProviderConnectionError, ProviderResponseError):
             self._tomorrow_data = None
 
+        self._yesterday_data = None
+        if getattr(self.provider, "provides_yesterday_data", False):
+            yesterday_str = (
+                datetime.now(timezone.utc) - timedelta(days=1)
+            ).strftime("%Y-%m-%d")
+            try:
+                async with asyncio.timeout(15):
+                    self._yesterday_data = (
+                        await self.provider.async_fetch_prices_for_date(
+                            yesterday_str
+                        )
+                    )
+            except (ProviderConnectionError, ProviderResponseError):
+                self._yesterday_data = None
+
+        self._all_electricity_prices = self._merge_all_electricity_prices(
+            data, self._yesterday_data, self._tomorrow_data
+        )
+
         return data
 
     async def _handle_failure(self, err: Exception) -> None:
@@ -133,6 +154,31 @@ class DynamicPriceCoordinator(DataUpdateCoordinator[ProviderPrices]):
     def last_update_time(self) -> datetime | None:
         """Return the timestamp of the last successful update."""
         return self._last_update_time
+
+    @staticmethod
+    def _merge_all_electricity_prices(
+        today: ProviderPrices | None,
+        yesterday: ProviderPrices | None,
+        tomorrow: ProviderPrices | None,
+    ) -> list:
+        """Merge electricity prices from all available days, sorted by start.
+
+        Includes yesterday + today + tomorrow (when available) so automations
+        can schedule across midnight. Only reads the electricity series; value
+        sensors keep using today's data separately.
+        """
+        merged: list = []
+        for source in (yesterday, today, tomorrow):
+            if source is None or source.electricity is None:
+                continue
+            merged.extend(source.electricity.prices)
+        merged.sort(key=lambda point: point.start)
+        return merged
+
+    @property
+    def all_electricity_prices(self) -> list:
+        """Return merged electricity prices across all available days."""
+        return list(self._all_electricity_prices)
 
     @callback
     def _schedule_next_hourly_sync(self) -> None:

@@ -119,7 +119,11 @@ The `current_electricity_market_price` sensor can be used as the
 
 The `current_electricity_price` sensor includes:
 - `price_breakdown` — `market_price`, `supplier_markup`, `energy_tax` components
-- `hourly_prices` — list of `{start, end, price}` for all 24 hours of the day.
+- `hourly_prices` — list of `{start, end, price}` for all hours the provider
+  exposes. Includes **yesterday + today + tomorrow** for Essent (72 entries)
+  and **today + tomorrow** for EnergyZero, Eneco, and Frank Energie (48
+  entries), so automations can schedule loads across midnight. Note that `start`
+  is a `HH:MM` time so hour labels repeat across the included days.
   Useful for custom Lovelace cards or Grafana.
 
 The `cheapest_3h_block_electricity` sensor includes:
@@ -296,8 +300,9 @@ successful fetch.
   threshold (defaults to the day's average price)
 - Diagnostics sensors showing the last update time and next scheduled update
 - Force‑update service to trigger an immediate refresh
-- `hourly_prices` attribute on `current_electricity_price` with the full 24-hour
-  price curve
+- `hourly_prices` attribute on `current_electricity_price` spanning all
+  available days (yesterday + today + tomorrow for Essent), for scheduling
+  across midnight
 - Multi‑provider support: run multiple config entries simultaneously
   (e.g., EnergyZero for electricity + Frank Energie for gas)
 

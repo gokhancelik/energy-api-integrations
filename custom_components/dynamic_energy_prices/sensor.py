@@ -50,6 +50,7 @@ class DynamicEnergySensorDescription(SensorEntityDescription):
     value_fn: Callable[[ProviderPrices], StateType | None]
     coordinator_value_fn: Callable[[DynamicPriceCoordinator], StateType | None] | None = None
     extra_attrs_fn: Callable[[ProviderPrices, str], dict[str, Any] | None] | None = None
+    coordinator_extra_attrs_fn: Callable[[DynamicPriceCoordinator, str], dict[str, Any] | None] | None = None
     available_fn: Callable[[ProviderPrices], bool] | None = None
     energy_type: str = "electricity"
     use_tomorrow_data: bool = False
@@ -243,6 +244,37 @@ def _current_price_extra_attrs(
     return data
 
 
+def _current_price_coord_extra_attrs(
+    coordinator: DynamicPriceCoordinator, provider_id: str
+) -> dict[str, Any] | None:
+    """Return current electricity price attrs with the full multi-day curve.
+
+    The ``hourly_prices`` attribute spans all available days (yesterday +
+    today + tomorrow where the provider provides them) so automations can
+    schedule across midnight, while the price value itself stays today-based.
+    """
+    prices = coordinator.data
+    series = _electricity_series(prices)
+    if series is None:
+        return None
+    current = find_current_price(series.prices)
+    if current is None:
+        return None
+    data: dict[str, Any] = {
+        ATTR_PROVIDER: provider_id,
+        ATTR_PRICE_BREAKDOWN: current.breakdown,
+        "hourly_prices": [
+            {
+                "start": p.start.strftime("%H:%M"),
+                "end": p.end.strftime("%H:%M"),
+                "price": p.total_price,
+            }
+            for p in coordinator.all_electricity_prices
+        ],
+    }
+    return data
+
+
 def _gas_available(prices: ProviderPrices) -> bool:
     return prices.gas is not None and len(prices.gas.prices) > 0
 
@@ -254,7 +286,7 @@ ELECTRICITY_SENSORS: tuple[DynamicEnergySensorDescription, ...] = (
         name="Current electricity price",
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=_current_price_value,
-        extra_attrs_fn=_current_price_extra_attrs,
+        coordinator_extra_attrs_fn=_current_price_coord_extra_attrs,
     ),
     DynamicEnergySensorDescription(
         key="next_electricity_price",
@@ -565,6 +597,10 @@ class DynamicPriceSensor(DynamicPriceEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
         """Return the state attributes."""
+        if self.entity_description.coordinator_extra_attrs_fn:
+            return self.entity_description.coordinator_extra_attrs_fn(
+                self.coordinator, self._provider_id
+            )
         prices = self._get_prices()
         if prices is None:
             return None

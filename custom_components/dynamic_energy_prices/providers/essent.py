@@ -36,6 +36,7 @@ class EssentPriceProvider(PriceProvider):
 
     provider_id = "essent"
     display_name = "Essent"
+    provides_yesterday_data = True
 
     def __init__(
         self,

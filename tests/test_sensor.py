@@ -468,6 +468,7 @@ class TestDynamicPriceSensorClass:
     def test_extra_state_attributes_with_data(self, mock_provider_prices: Any) -> None:
         coordinator = MagicMock()
         coordinator.data = mock_provider_prices
+        coordinator.all_electricity_prices = mock_provider_prices.electricity.prices
         coordinator.tomorrow_data = None
         coordinator.entry = MagicMock()
         coordinator.entry.entry_id = "test_entry"
@@ -487,6 +488,26 @@ class TestDynamicPriceSensorClass:
         assert "start" in attrs["hourly_prices"][0]
         assert "end" in attrs["hourly_prices"][0]
         assert "price" in attrs["hourly_prices"][0]
+
+    def test_extra_state_attributes_include_tomorrow_in_curve(self, mock_provider_prices: Any) -> None:
+        """The hourly_prices curve spans all available days (yesterday+tomorrow)."""
+        coordinator = MagicMock()
+        coordinator.data = mock_provider_prices
+        coordinator.all_electricity_prices = list(mock_provider_prices.electricity.prices) * 3
+        coordinator.tomorrow_data = None
+        coordinator.entry = MagicMock()
+        coordinator.entry.entry_id = "test_entry"
+        coordinator.last_update_success = True
+
+        sensor = DynamicPriceSensor(
+            coordinator,
+            ELECTRICITY_SENSORS[0],
+            "test_provider",
+            "Test Provider",
+        )
+        attrs = sensor.extra_state_attributes
+        assert attrs is not None
+        assert len(attrs["hourly_prices"]) == 72
 
     def test_available_false_when_coordinator_unavailable(self) -> None:
         coordinator = MagicMock()

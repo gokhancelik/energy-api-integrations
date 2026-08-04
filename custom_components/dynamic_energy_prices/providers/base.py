@@ -58,6 +58,7 @@ class PriceProvider(ABC):
 
     provider_id: str = ""
     display_name: str = ""
+    provides_yesterday_data: bool = False
 
     def __init__(
         self,
