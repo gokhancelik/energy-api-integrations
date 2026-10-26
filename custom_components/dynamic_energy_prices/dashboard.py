@@ -14,6 +14,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry
 
 from .const import (
+    CONF_INCLUDE_PRICE_CURVE,
     CONF_PROVIDER,
     DOMAIN,
     DynamicEnergyPricesConfigEntry,
@@ -80,6 +81,7 @@ def build_provider_view(
     provider_name: str,
     entities: dict[str, str],
     *,
+    include_price_curve: bool = False,
     icon: str = DASHBOARD_ICON,
 ) -> dict[str, Any] | None:
     """Build a single view (tab) for one provider entry.
@@ -119,6 +121,9 @@ def build_provider_view(
         )
     if grid_cards:
         cards.append({"type": "grid", "columns": 2, "square": False, "cards": grid_cards})
+
+    if include_price_curve and current is not None and average is not None:
+        cards.append(_price_curve_card(current, average))
 
     cheapest = _entity_id(entities, "cheapest_3h_block_electricity", "sensor")
     if cheapest is not None:
@@ -208,6 +213,25 @@ def _slugify(value: str) -> str:
     return slug or "provider"
 
 
+def _price_curve_card(current: str, average: str) -> dict[str, Any]:
+    """Build a price-curve card using Home Assistant's built-in history graph.
+
+    No custom frontend resource is required. The graph shows the recorded
+    price history for the last 24 hours (plus the day's average as a flat
+    reference line).
+    """
+    return {
+        "type": "history-graph",
+        "title": "Electricity price (last 24h)",
+        "hours_to_show": 24,
+        "refresh_interval": 30,
+        "entities": [
+            {"entity": current, "name": "Price"},
+            {"entity": average, "name": "Average"},
+        ],
+    }
+
+
 async def resolve_entities(
     hass: HomeAssistant,
     entry: DynamicEnergyPricesConfigEntry,
@@ -268,7 +292,12 @@ async def build_dashboard_config(
         provider_name = provider_cls.display_name if provider_cls else entry.title
 
         entities = await resolve_entities(hass, entry)
-        view = build_provider_view(provider_name, entities)
+        include_price_curve = bool(entry.options.get(CONF_INCLUDE_PRICE_CURVE, False))
+        view = build_provider_view(
+            provider_name,
+            entities,
+            include_price_curve=include_price_curve,
+        )
         if view is None:
             skipped.append(provider_name)
             continue

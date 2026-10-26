@@ -235,9 +235,11 @@ automation:
 
 A ready-to-use Lovelace dashboard is provided for the integration. It shows the
 current and next price, today's average, a cheap-electricity indicator, the
-cheapest 3-hour block, tomorrow's preview, and gas prices. Cards are generated
-only for the sensors your provider/tariff actually creates, and use each
-configured entry's real entity IDs (respecting any renames you've made).
+cheapest 3-hour block, tomorrow's preview, and gas prices. It can also show an
+optional electricity price history chart using Home Assistant's built-in
+`history-graph` card (no custom frontend resources). Cards are generated only
+for the sensors your provider/tariff actually creates, and use each configured
+entry's real entity IDs (respecting any renames you've made).
 
 #### Auto-install (recommended)
 
@@ -249,6 +251,10 @@ prefix-replacing:
   and submit. The dashboard appears as *Energy Prices* in the sidebar.
 - **Service:** call `dynamic_energy_prices.install_dashboard` at any time to
   re-create or update it (for example from a script or automation).
+
+Tick *Include 'Electricity price (last 24h)' chart card* in the same options
+flow to add the built-in price history graph. It shows the last 24 hours for
+the current price plus the day's average as a reference line.
 
 To remove it again, tick *Uninstall the Energy Prices dashboard* in the same
 options flow (or call `dynamic_energy_prices.uninstall_dashboard`). This

@@ -91,9 +91,33 @@ class TestBuildProviderView:
         assert "Tomorrow" in titles
         assert "Cheapest 3-hour block" in titles
 
-    def test_no_price_curve_card(self) -> None:
+    def test_price_curve_hidden_by_default(self) -> None:
         view = dash.build_provider_view("Essent", _full_entities())
         assert _cards_of_type(view, "custom:apexcharts-card") == []
+        assert _cards_of_type(view, "history-graph") == []
+
+    def test_price_curve_uses_builtin_history_graph(self) -> None:
+        view = dash.build_provider_view(
+            "Essent",
+            _full_entities(),
+            include_price_curve=True,
+        )
+        assert _cards_of_type(view, "custom:apexcharts-card") == []
+        history = _cards_of_type(view, "history-graph")
+        assert len(history) == 1
+        assert history[0]["hours_to_show"] == 24
+        assert history[0]["title"] == "Electricity price (last 24h)"
+
+    def test_no_price_curve_without_electricity(self) -> None:
+        entities = {
+            "current_gas_price": _sensor("current_gas_price"),
+            "next_gas_price": _sensor("next_gas_price"),
+        }
+        view = dash.build_provider_view(
+            "Essent",
+            entities,
+            include_price_curve=True,
+        )
         assert _cards_of_type(view, "history-graph") == []
 
     def test_gas_only_entry(self) -> None:
@@ -218,6 +242,18 @@ class TestBuildDashboardConfig:
         assert len(views) == 2
         assert views[0]["title"] == "Essent"
         assert views[1]["title"] == "Eneco"
+
+    async def test_includes_builtin_curve_when_option_enabled(self) -> None:
+        entry = _make_entry(
+            "entry_1", "Essent", "essent", options={"include_price_curve": True}
+        )
+        hass = MagicMock()
+        hass.config_entries.async_entries.return_value = [entry]
+        fake_registry = FakeRegistry(_registry_for([entry]))
+        with patch.object(dash.entity_registry, "async_get", return_value=fake_registry):
+            config, _ = await dash.build_dashboard_config(hass)
+        assert config is not None
+        assert _cards_of_type(config["views"][0], "history-graph")
 
     async def test_skips_entries_without_sensors(self) -> None:
         entry = _make_entry("empty", "Empty", "essent")

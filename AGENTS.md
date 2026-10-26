@@ -85,6 +85,10 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes-file "C:\Users\gokha\AppData\L
 
 ## Changelog
 
+### v0.26.1
+
+- **Restore the price-history chart with the built-in card:** the optional chart is back, now rendered with Home Assistant's built-in `history-graph` instead of `apexcharts-card` (no custom frontend resource needed). It shows the current price for the last 24 hours plus the day's average as a reference line. The `include_price_curve` option returns; existing entries that had it enabled get the chart on the next dashboard rebuild.
+
 ### v0.26.0
 
 - **Remove the price-curve (apexcharts) card:** the optional "Today's electricity price" chart mixed the multi-day `hourly_prices` attribute onto a single day, so yesterday's and today's hours overlapped and showed misleading values. The card and its `include_price_curve` option are gone; the dashboard now contains only reliable built-in cards, and an existing installed dashboard drops the chart on the next start/rebuild.

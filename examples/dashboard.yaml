@@ -48,6 +48,17 @@ views:
             name: Cheap now?
             icon: mdi:cash-check
 
+      # --- Electricity price history (built-in card) ---------------------
+      - type: history-graph
+        title: Electricity price (last 24h)
+        hours_to_show: 24
+        refresh_interval: 30
+        entities:
+          - entity: sensor.essent_current_electricity_price
+            name: Price
+          - entity: sensor.essent_average_electricity_price
+            name: Average
+
       # --- Planning: cheapest block + tomorrow preview ------------------
       - type: entities
         title: Cheapest 3-hour block
