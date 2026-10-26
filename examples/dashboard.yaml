@@ -13,11 +13,8 @@
 # Settings > Devices & Services > Dynamic Energy Prices > Entities for
 # your exact entity IDs.
 #
-# Everything except the "Today's price curve" card uses only Home
-# Assistant's built-in card types. The price-curve card needs the
-# `apexcharts-card` custom card (install via HACS > Frontend). If you'd
-# rather not add that dependency, delete that one card — the rest of the
-# dashboard works without it.
+# Every card uses only Home Assistant's built-in card types, so no custom
+# frontend resources are required.
 #
 # Some rows are only relevant for certain providers/tariffs (gas, or
 # tomorrow's prices — only available for EnergyZero, Eneco, and Frank
@@ -50,47 +47,6 @@ views:
             entity: binary_sensor.essent_cheap_electricity
             name: Cheap now?
             icon: mdi:cash-check
-
-      # --- Today's price curve (needs apexcharts-card, see note above) --
-      - type: custom:apexcharts-card
-        header:
-          show: true
-          title: Today's electricity price
-        graph_span: 24h
-        span:
-          start: day
-        now:
-          show: true
-          label: Now
-        yaxis:
-          - decimals: 3
-        series:
-          - entity: sensor.essent_current_electricity_price
-            name: Price
-            type: column
-            color: var(--primary-color)
-            data_generator: |
-              return entity.attributes.hourly_prices.map((p) => {
-                const [h, m] = p.start.split(':').map(Number);
-                const d = new Date();
-                d.setHours(h, m, 0, 0);
-                return [d.getTime(), p.price];
-              });
-          - entity: sensor.essent_average_electricity_price
-            name: Average
-            type: line
-            color: var(--secondary-text-color)
-            curve: straight
-            data_generator: |
-              const curve = hass.states['sensor.essent_current_electricity_price']
-                .attributes.hourly_prices;
-              const avg = parseFloat(entity.state);
-              return curve.map((p) => {
-                const [h, m] = p.start.split(':').map(Number);
-                const d = new Date();
-                d.setHours(h, m, 0, 0);
-                return [d.getTime(), avg];
-              });
 
       # --- Planning: cheapest block + tomorrow preview ------------------
       - type: entities

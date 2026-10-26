@@ -85,6 +85,10 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes-file "C:\Users\gokha\AppData\L
 
 ## Changelog
 
+### v0.26.0
+
+- **Remove the price-curve (apexcharts) card:** the optional "Today's electricity price" chart mixed the multi-day `hourly_prices` attribute onto a single day, so yesterday's and today's hours overlapped and showed misleading values. The card and its `include_price_curve` option are gone; the dashboard now contains only reliable built-in cards, and an existing installed dashboard drops the chart on the next start/rebuild.
+
 ### v0.25.0
 
 - **Auto-rebuild installed dashboard on setup:** if the Energy Prices dashboard already exists, `async_setup_entry` now rebuilds it on every HA start/upgrade so new or changed cards (like the built-in price-curve fallback) are reflected without re-running the install. It never creates a dashboard for users who didn't opt in (`rebuild_installed_dashboard` only refreshes when `is_dashboard_installed`).

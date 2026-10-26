@@ -14,7 +14,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry
 
 from .const import (
-    CONF_INCLUDE_PRICE_CURVE,
     CONF_PROVIDER,
     DOMAIN,
     DynamicEnergyPricesConfigEntry,
@@ -81,9 +80,7 @@ def build_provider_view(
     provider_name: str,
     entities: dict[str, str],
     *,
-    include_price_curve: bool,
     icon: str = DASHBOARD_ICON,
-    apexcharts_available: bool = True,
 ) -> dict[str, Any] | None:
     """Build a single view (tab) for one provider entry.
 
@@ -122,12 +119,6 @@ def build_provider_view(
         )
     if grid_cards:
         cards.append({"type": "grid", "columns": 2, "square": False, "cards": grid_cards})
-
-    if include_price_curve and current is not None and average is not None:
-        if apexcharts_available:
-            cards.append(_price_curve_card(current, average))
-        else:
-            cards.append(_builtin_price_curve_card(current, average))
 
     cheapest = _entity_id(entities, "cheapest_3h_block_electricity", "sensor")
     if cheapest is not None:
@@ -217,90 +208,6 @@ def _slugify(value: str) -> str:
     return slug or "provider"
 
 
-def _price_curve_card(current: str, average: str) -> dict[str, Any]:
-    """Build the apexcharts-card price-curve card."""
-    return {
-        "type": "custom:apexcharts-card",
-        "header": {"show": True, "title": "Today's electricity price"},
-        "graph_span": "24h",
-        "span": {"start": "day"},
-        "now": {"show": True, "label": "Now"},
-        "yaxis": [{"decimals": 3}],
-        "series": [
-            {
-                "entity": current,
-                "name": "Price",
-                "type": "column",
-                "color": "var(--primary-color)",
-                "data_generator": "return entity.attributes.hourly_prices.map((p) => {\n"
-                'const [h, m] = p.start.split(":").map(Number);\n'
-                "const d = new Date();\n"
-                "d.setHours(h, m, 0, 0);\n"
-                "return [d.getTime(), p.price];\n"
-                "});",
-            },
-            {
-                "entity": average,
-                "name": "Average",
-                "type": "line",
-                "color": "var(--secondary-text-color)",
-                "curve": "straight",
-                "data_generator": (
-                    'const curve = hass.states["'
-                    + current
-                    + '"].attributes.hourly_prices;\n'
-                    "const avg = parseFloat(entity.state);\n"
-                    "return curve.map((p) => {\n"
-                    'const [h, m] = p.start.split(":").map(Number);\n'
-                    "const d = new Date();\n"
-                    "d.setHours(h, m, 0, 0);\n"
-                    "return [d.getTime(), avg];\n"
-                    "});"
-                ),
-            },
-        ],
-    }
-
-
-def _builtin_price_curve_card(current: str, average: str) -> dict[str, Any]:
-    """Build a built-in price-curve card (no custom card dependency).
-
-    Renders the recorded history of the price values with Home Assistant's
-    built-in ``history-graph`` card. Used as a fallback when the
-    ``apexcharts-card`` custom card is not installed.
-    """
-    return {
-        "type": "history-graph",
-        "title": "Today's electricity price",
-        "hours_to_show": 24,
-        "refresh_interval": 30,
-        "entities": [
-            {"entity": current, "name": "Price"},
-            {"entity": average, "name": "Average"},
-        ],
-    }
-
-
-async def _apexcharts_installed(hass: HomeAssistant) -> bool:
-    """Return True when the apexcharts-card resource is registered in Lovelace."""
-    lovelace = hass.data.get("lovelace")
-    resources = getattr(lovelace, "resources", None)
-    if resources is None:
-        return False
-    try:
-        load = getattr(resources, "async_load", None)
-        if load is not None:
-            await load()
-        items = resources.async_items()
-    except Exception:  # noqa: BLE001
-        return False
-    for item in items or []:
-        url = item.get("url", "") if isinstance(item, dict) else ""
-        if isinstance(url, str) and "apexcharts" in url.lower():
-            return True
-    return False
-
-
 async def resolve_entities(
     hass: HomeAssistant,
     entry: DynamicEnergyPricesConfigEntry,
@@ -355,21 +262,13 @@ async def build_dashboard_config(
     views: list[dict[str, Any]] = []
     skipped: list[str] = []
 
-    apexcharts_available = await _apexcharts_installed(hass)
-
     for entry in entries:
         provider_id = entry.data.get(CONF_PROVIDER)
         provider_cls = PROVIDER_REGISTRY.get(provider_id) if provider_id else None
         provider_name = provider_cls.display_name if provider_cls else entry.title
 
         entities = await resolve_entities(hass, entry)
-        include_price_curve = bool(entry.options.get(CONF_INCLUDE_PRICE_CURVE, False))
-        view = build_provider_view(
-            provider_name,
-            entities,
-            include_price_curve=include_price_curve,
-            apexcharts_available=apexcharts_available,
-        )
+        view = build_provider_view(provider_name, entities)
         if view is None:
             skipped.append(provider_name)
             continue
@@ -518,9 +417,9 @@ def is_dashboard_installed(hass: HomeAssistant) -> bool:
 async def rebuild_installed_dashboard(hass: HomeAssistant) -> bool:
     """Rebuild the dashboard after an upgrade, but only if it exists.
 
-    Keeps an already-installed dashboard current with new cards (e.g. the
-    built-in price-curve fallback) on every Home Assistant start, while never
-    creating a dashboard for users who didn't opt in.
+    Keeps an already-installed dashboard current with new cards on every Home
+    Assistant start, while never creating a dashboard for users who didn't opt
+    in.
     """
     if not is_dashboard_installed(hass):
         return False

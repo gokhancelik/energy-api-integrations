@@ -19,7 +19,6 @@ DOMAIN = "dynamic_energy_prices"
 CONF_PROVIDER = "provider"
 CONF_COUNTRY = "country"
 CONF_THRESHOLD = "threshold"
-CONF_INCLUDE_PRICE_CURVE = "include_price_curve"
 CONF_INSTALL_DASHBOARD = "install_dashboard"
 CONF_UNINSTALL_DASHBOARD = "uninstall_dashboard"
 

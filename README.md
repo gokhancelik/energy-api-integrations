@@ -234,11 +234,10 @@ automation:
 ### Example dashboard
 
 A ready-to-use Lovelace dashboard is provided for the integration. It shows the
-current and next price, today's average, a cheap-electricity indicator, a
-24-hour price curve, the cheapest 3‑hour block, tomorrow's preview, and gas
-prices. Cards are generated only for the sensors your provider/tariff actually
-creates, and use each configured entry's real entity IDs (respecting any
-renames you've made).
+current and next price, today's average, a cheap-electricity indicator, the
+cheapest 3-hour block, tomorrow's preview, and gas prices. Cards are generated
+only for the sensors your provider/tariff actually creates, and use each
+configured entry's real entity IDs (respecting any renames you've made).
 
 #### Auto-install (recommended)
 
@@ -256,18 +255,13 @@ options flow (or call `dynamic_energy_prices.uninstall_dashboard`). This
 removes the dashboard, its sidebar panel, and its config.
 
 Once installed, the dashboard is automatically rebuilt on every Home Assistant
-start (after an upgrade or restart) so new cards — like the built-in
-price-curve fallback — are picked up without re-running the install. It only
-refreshes if you already installed it; it never creates one for you.
+start (after an upgrade or restart) so new cards are picked up without
+re-running the install. It only refreshes if you already installed it; it never
+creates one for you.
 
 If you run multiple config entries (e.g. EnergyZero electricity + Frank
 Energie gas), installing merges every entry into one dashboard with a tab per
-provider (only tabs for providers whose sensors are enabled are shown). The
-price-curve card is optional and off by default: enable *Include 'Today's
-price curve' card* in the options. It uses the
-[`apexcharts-card`](https://github.com/RomRider/apexcharts-card) custom card
-(**HACS > Frontend**) when that's installed; otherwise it automatically falls
-back to Home Assistant's built-in chart card, so the curve always works.
+provider (only tabs for providers whose sensors are enabled are shown).
 
 If your Lovelace is in YAML mode the automatic install isn't possible; the
 integration logs a warning and you can fall back to the static example below.

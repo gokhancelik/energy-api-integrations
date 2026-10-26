@@ -10,7 +10,6 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import aiohttp_client
 from .const import (
     CONF_COUNTRY,
-    CONF_INCLUDE_PRICE_CURVE,
     CONF_INSTALL_DASHBOARD,
     CONF_PROVIDER,
     CONF_THRESHOLD,
@@ -162,9 +161,6 @@ class DynamicEnergyPricesOptionsFlowHandler(config_entries.OptionsFlow):
             )
 
         current_threshold = self._config_entry.options.get(CONF_THRESHOLD)
-        current_include_curve = self._config_entry.options.get(
-            CONF_INCLUDE_PRICE_CURVE, False
-        )
 
         schema = vol.Schema(
             {
@@ -176,10 +172,6 @@ class DynamicEnergyPricesOptionsFlowHandler(config_entries.OptionsFlow):
                     None,
                     vol.All(vol.Coerce(float), vol.Range(min=0)),
                 ),
-                vol.Optional(
-                    CONF_INCLUDE_PRICE_CURVE,
-                    default=current_include_curve,
-                ): bool,
                 vol.Optional(
                     CONF_INSTALL_DASHBOARD,
                     default=False,

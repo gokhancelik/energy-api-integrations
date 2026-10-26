@@ -63,26 +63,21 @@ def _cards_of_type(view: dict, card_type: str) -> list[dict]:
 
 class TestBuildProviderView:
     def test_electricity_only_no_gas_or_tomorrow(self) -> None:
-        view = dash.build_provider_view(
-            "Essent",
-            _electricity_only_entities(),
-            include_price_curve=False,
-        )
+        view = dash.build_provider_view("Essent", _electricity_only_entities())
         assert view is not None
         titles = {c.get("title") for c in view["cards"]}
         assert "Gas" not in titles
         assert "Tomorrow" not in titles
-        assert _cards_of_type(view, "custom:apexcharts-card") == []
         grid = _cards_of_type(view, "grid")
         assert grid
 
     def test_no_sensors_returns_none(self) -> None:
-        view = dash.build_provider_view("Essent", {}, include_price_curve=False)
+        view = dash.build_provider_view("Essent", {})
         assert view is None
 
     def test_uses_resolved_entity_ids(self) -> None:
         entities = _full_entities()
-        view = dash.build_provider_view("Essent", entities, include_price_curve=False)
+        view = dash.build_provider_view("Essent", entities)
         flat: list[dict] = []
         _walk(view["cards"], flat)
         referenced = {c["entity"] for c in flat if c.get("entity")}
@@ -90,61 +85,26 @@ class TestBuildProviderView:
             assert entity_id in referenced
 
     def test_full_set_has_gas_and_tomorrow_and_cheapest(self) -> None:
-        view = dash.build_provider_view(
-            "Essent",
-            _full_entities(),
-            include_price_curve=False,
-        )
+        view = dash.build_provider_view("Essent", _full_entities())
         titles = {c.get("title") for c in view["cards"]}
         assert "Gas" in titles
         assert "Tomorrow" in titles
         assert "Cheapest 3-hour block" in titles
 
-    def test_price_curve_only_when_requested_and_electricity_present(self) -> None:
-        view = dash.build_provider_view(
-            "Essent",
-            _electricity_only_entities(),
-            include_price_curve=True,
-        )
-        curves = _cards_of_type(view, "custom:apexcharts-card")
-        assert len(curves) == 1
-
-    def test_builtin_curve_used_when_apexcharts_unavailable(self) -> None:
-        view = dash.build_provider_view(
-            "Essent",
-            _electricity_only_entities(),
-            include_price_curve=True,
-            apexcharts_available=False,
-        )
+    def test_no_price_curve_card(self) -> None:
+        view = dash.build_provider_view("Essent", _full_entities())
         assert _cards_of_type(view, "custom:apexcharts-card") == []
-        history = _cards_of_type(view, "history-graph")
-        assert len(history) == 1
-        assert history[0]["hours_to_show"] == 24
-
-    def test_no_price_curve_without_electricity(self) -> None:
-        entities = {
-            "current_gas_price": _sensor("current_gas_price"),
-            "next_gas_price": _sensor("next_gas_price"),
-        }
-        view = dash.build_provider_view(
-            "Essent",
-            entities,
-            include_price_curve=True,
-            apexcharts_available=False,
-        )
         assert _cards_of_type(view, "history-graph") == []
-        assert _cards_of_type(view, "custom:apexcharts-card") == []
 
     def test_gas_only_entry(self) -> None:
         entities = {
             "current_gas_price": _sensor("current_gas_price"),
             "next_gas_price": _sensor("next_gas_price"),
         }
-        view = dash.build_provider_view("Essent", entities, include_price_curve=True)
+        view = dash.build_provider_view("Essent", entities)
         assert view is not None
         titles = {c.get("title") for c in view["cards"]}
         assert "Gas" in titles
-        assert _cards_of_type(view, "custom:apexcharts-card") == []
 
     def test_slugify_provider_name(self) -> None:
         assert dash._slugify("Frank Energie") == "frank-energie"
@@ -237,7 +197,7 @@ class TestResolveEntities:
         hass = MagicMock()
         with patch.object(dash.entity_registry, "async_get", return_value=fake_registry):
             entities = await dash.resolve_entities(hass, entry)
-        assert dash.build_provider_view("Essent", entities, include_price_curve=False) is None
+        assert dash.build_provider_view("Essent", entities) is None
 
 
 class TestBuildDashboardConfig:
@@ -385,33 +345,6 @@ class TestInstallDashboard:
             hass.data = {}
             result = await dash.install_dashboard(hass)
         assert result["installed"] is False
-
-
-class TestApexchartsDetection:
-    async def test_detects_apexcharts_resource(self) -> None:
-        lovelace = MagicMock()
-        lovelace.resources.async_items = MagicMock(
-            return_value=[
-                {"url": "/hacsfiles/apexcharts-card/apexcharts-card.js"},
-            ]
-        )
-        lovelace.resources.async_load = AsyncMock()
-        hass = MagicMock()
-        hass.data = {"lovelace": lovelace}
-        assert await dash._apexcharts_installed(hass) is True
-
-    async def test_no_resources_means_not_installed(self) -> None:
-        lovelace = MagicMock()
-        lovelace.resources.async_items = MagicMock(return_value=[])
-        lovelace.resources.async_load = AsyncMock()
-        hass = MagicMock()
-        hass.data = {"lovelace": lovelace}
-        assert await dash._apexcharts_installed(hass) is False
-
-    async def test_gracefully_handles_missing_lovelace(self) -> None:
-        hass = MagicMock()
-        hass.data = {}
-        assert await dash._apexcharts_installed(hass) is False
 
 
 class TestRebuildDashboard:
