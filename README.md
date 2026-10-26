@@ -119,12 +119,14 @@ The `current_electricity_market_price` sensor can be used as the
 
 The `current_electricity_price` sensor includes:
 - `price_breakdown` — `market_price`, `supplier_markup`, `energy_tax` components
-- `hourly_prices` — list of `{start, end, price}` for all hours the provider
-  exposes. Includes **yesterday + today + tomorrow** for Essent (72 entries)
-  and **today + tomorrow** for EnergyZero, Eneco, and Frank Energie (48
-  entries), so automations can schedule loads across midnight. Note that `start`
-  is a `HH:MM` time so hour labels repeat across the included days.
-  Useful for custom Lovelace cards or Grafana.
+- `hourly_prices` — list of `{start, end, start_iso, end_iso, price}` for all
+  hours the provider exposes. Includes **yesterday + today + tomorrow** for
+  Essent (72 entries) and **today + tomorrow** for EnergyZero, Eneco, and Frank
+  Energie (48 entries), so automations can schedule loads across midnight. The
+  `start`/`end` fields are `HH:MM` (hour labels repeat across days) while
+  `start_iso`/`end_iso` keep the full date and timezone, which the bundled
+  price chart uses to place upcoming hours correctly. Useful for custom
+  Lovelace cards or Grafana.
 
 The `cheapest_3h_block_electricity` sensor includes:
 - `end_time` — end time of the cheapest block
@@ -236,10 +238,12 @@ automation:
 A ready-to-use Lovelace dashboard is provided for the integration. It shows the
 current and next price, today's average, a cheap-electricity indicator, the
 cheapest 3-hour block, tomorrow's preview, and gas prices. It can also show an
-optional electricity price history chart using Home Assistant's built-in
-`history-graph` card (no custom frontend resources). Cards are generated only
-for the sensors your provider/tariff actually creates, and use each configured
-entry's real entity IDs (respecting any renames you've made).
+optional electricity price chart with today's hours and tomorrow's upcoming
+hours (with past and upcoming prices colour-coded and today's average as a
+reference line). The chart is bundled with the integration and registered
+automatically, so no extra frontend resource is required. Cards are generated
+only for the sensors your provider/tariff actually creates, and use each
+configured entry's real entity IDs (respecting any renames you've made).
 
 #### Auto-install (recommended)
 
@@ -252,9 +256,10 @@ prefix-replacing:
 - **Service:** call `dynamic_energy_prices.install_dashboard` at any time to
   re-create or update it (for example from a script or automation).
 
-Tick *Include 'Electricity price (last 24h)' chart card* in the same options
-flow to add the built-in price history graph. It shows the last 24 hours for
-the current price plus the day's average as a reference line.
+Tick *Include 'Electricity prices' chart card* in the same options flow to add
+the price chart. It shows today's hourly prices (including the hours already
+past) plus tomorrow's prices as soon as they are available, with the current
+hour highlighted and today's average as a reference line.
 
 To remove it again, tick *Uninstall the Energy Prices dashboard* in the same
 options flow (or call `dynamic_energy_prices.uninstall_dashboard`). This
@@ -314,6 +319,8 @@ successful fetch.
 - `hourly_prices` attribute on `current_electricity_price` spanning all
   available days (yesterday + today + tomorrow for Essent), for scheduling
   across midnight
+- Bundled electricity price chart showing today's hours plus tomorrow's
+  upcoming prices (with `start_iso`/`end_iso` fields for date-aware rendering)
 - Multi‑provider support: run multiple config entries simultaneously
   (e.g., EnergyZero for electricity + Frank Energie for gas)
 

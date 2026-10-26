@@ -487,6 +487,8 @@ class TestDynamicPriceSensorClass:
         assert len(attrs["hourly_prices"]) == 24
         assert "start" in attrs["hourly_prices"][0]
         assert "end" in attrs["hourly_prices"][0]
+        assert "start_iso" in attrs["hourly_prices"][0]
+        assert "end_iso" in attrs["hourly_prices"][0]
         assert "price" in attrs["hourly_prices"][0]
 
     def test_extra_state_attributes_include_tomorrow_in_curve(self, mock_provider_prices: Any) -> None:
@@ -816,8 +818,11 @@ class TestHourlyPricesExtra:
         assert len(result) == 24
         assert "start" in result[0]
         assert "end" in result[0]
+        assert "start_iso" in result[0]
+        assert "end_iso" in result[0]
         assert "price" in result[0]
         assert isinstance(result[0]["price"], float)
+        assert len(result[0]["start_iso"]) > len(result[0]["start"])
 
     def test_none_for_no_data(self) -> None:
         from custom_components.dynamic_energy_prices.sensor import _hourly_prices_extra

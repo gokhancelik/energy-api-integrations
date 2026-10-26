@@ -7,6 +7,7 @@
 - Add a provider: 1 file in `providers/` + 1 import in `providers/__init__.py`, no other files touched
 - Vendored API clients in-repo (no upstream PyPI dependency)
 - Alias providers (e.g. Eneco → EnergyZero) subclass the parent provider, override only `provider_id` + `display_name`
+- **Bundled chart card:** `frontend/dynamic-energy-prices-chart.js` is served and registered by `frontend_loader.py` (via `frontend.add_extra_js_url`). The optional dashboard price chart uses `custom:dynamic-energy-prices-chart`; `hourly_prices` includes `start_iso`/`end_iso` so past + future days are placed correctly.
 - **Hourly sync timer:** coordinator fires `async_update_listeners()` at each local `:00` hour boundary, so sensor state changes (`last_changed`) align with actual price slot transitions, not with the randomized coordinator refresh offset.
 
 ## Providers
@@ -84,6 +85,11 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes-file "C:\Users\gokha\AppData\L
 - GitHub PAT format for git: username = `x-oauth-basic`, password = PAT
 
 ## Changelog
+
+### v0.27.0
+
+- **Future prices in the electricity price graph:** the optional dashboard chart now shows today's hours (past + upcoming) **and tomorrow's** prices as soon as the provider publishes them, instead of only recorded history. It is rendered by a small chart card bundled with the integration (`custom:dynamic-energy-prices-chart`), served and registered automatically at setup — no third-party frontend card to install. Past bars are muted, the current hour is highlighted, upcoming hours use the primary colour, and today's average is a dashed reference line. When the bundled card cannot be registered, the dashboard falls back to the built-in `history-graph` card.
+- `hourly_prices` entries now also expose `start_iso` / `end_iso` (full date + timezone) alongside the existing `start` / `end` (`HH:MM`) and `price`, so multi-day prices are placed on the correct day. Existing templates using `start`/`end` are unaffected.
 
 ### v0.26.1
 

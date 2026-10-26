@@ -19,6 +19,7 @@ from .const import (
     DOMAIN,
     DynamicEnergyPricesConfigEntry,
 )
+from .frontend_loader import CARD_TAG, is_card_registered
 from .providers import PROVIDER_REGISTRY
 
 _LOGGER = logging.getLogger(__name__)
@@ -82,6 +83,7 @@ def build_provider_view(
     entities: dict[str, str],
     *,
     include_price_curve: bool = False,
+    price_chart_available: bool = True,
     icon: str = DASHBOARD_ICON,
 ) -> dict[str, Any] | None:
     """Build a single view (tab) for one provider entry.
@@ -123,7 +125,13 @@ def build_provider_view(
         cards.append({"type": "grid", "columns": 2, "square": False, "cards": grid_cards})
 
     if include_price_curve and current is not None and average is not None:
-        cards.append(_price_curve_card(current, average))
+        cards.append(
+            _price_curve_card(
+                current,
+                average,
+                price_chart_available=price_chart_available,
+            )
+        )
 
     cheapest = _entity_id(entities, "cheapest_3h_block_electricity", "sensor")
     if cheapest is not None:
@@ -213,13 +221,25 @@ def _slugify(value: str) -> str:
     return slug or "provider"
 
 
-def _price_curve_card(current: str, average: str) -> dict[str, Any]:
-    """Build a price-curve card using Home Assistant's built-in history graph.
+def _price_curve_card(
+    current: str,
+    average: str,
+    *,
+    price_chart_available: bool = True,
+) -> dict[str, Any]:
+    """Build the electricity price chart card.
 
-    No custom frontend resource is required. The graph shows the recorded
-    price history for the last 24 hours (plus the day's average as a flat
-    reference line).
+    The bundled card plots today's hours plus tomorrow's, so upcoming prices
+    are visible. When it isn't available it falls back to the built-in
+    ``history-graph`` card, which can only show recorded history.
     """
+    if price_chart_available:
+        return {
+            "type": f"custom:{CARD_TAG}",
+            "entity": current,
+            "average_entity": average,
+            "title": "Electricity prices",
+        }
     return {
         "type": "history-graph",
         "title": "Electricity price (last 24h)",
@@ -285,6 +305,7 @@ async def build_dashboard_config(
     entries = hass.config_entries.async_entries(DOMAIN)
     views: list[dict[str, Any]] = []
     skipped: list[str] = []
+    price_chart_available = is_card_registered(hass)
 
     for entry in entries:
         provider_id = entry.data.get(CONF_PROVIDER)
@@ -297,6 +318,7 @@ async def build_dashboard_config(
             provider_name,
             entities,
             include_price_curve=include_price_curve,
+            price_chart_available=price_chart_available,
         )
         if view is None:
             skipped.append(provider_name)

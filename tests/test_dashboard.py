@@ -93,20 +93,33 @@ class TestBuildProviderView:
 
     def test_price_curve_hidden_by_default(self) -> None:
         view = dash.build_provider_view("Essent", _full_entities())
-        assert _cards_of_type(view, "custom:apexcharts-card") == []
+        assert _cards_of_type(view, "custom:dynamic-energy-prices-chart") == []
         assert _cards_of_type(view, "history-graph") == []
 
-    def test_price_curve_uses_builtin_history_graph(self) -> None:
+    def test_price_curve_uses_bundled_chart(self) -> None:
         view = dash.build_provider_view(
             "Essent",
             _full_entities(),
             include_price_curve=True,
         )
-        assert _cards_of_type(view, "custom:apexcharts-card") == []
+        assert _cards_of_type(view, "history-graph") == []
+        charts = _cards_of_type(view, "custom:dynamic-energy-prices-chart")
+        assert len(charts) == 1
+        assert charts[0]["entity"] == _sensor("current_electricity_price")
+        assert charts[0]["average_entity"] == _sensor("average_electricity_price")
+        assert charts[0]["title"] == "Electricity prices"
+
+    def test_price_curve_falls_back_to_history_graph(self) -> None:
+        view = dash.build_provider_view(
+            "Essent",
+            _full_entities(),
+            include_price_curve=True,
+            price_chart_available=False,
+        )
+        assert _cards_of_type(view, "custom:dynamic-energy-prices-chart") == []
         history = _cards_of_type(view, "history-graph")
         assert len(history) == 1
         assert history[0]["hours_to_show"] == 24
-        assert history[0]["title"] == "Electricity price (last 24h)"
 
     def test_no_price_curve_without_electricity(self) -> None:
         entities = {
@@ -119,6 +132,7 @@ class TestBuildProviderView:
             include_price_curve=True,
         )
         assert _cards_of_type(view, "history-graph") == []
+        assert _cards_of_type(view, "custom:dynamic-energy-prices-chart") == []
 
     def test_gas_only_entry(self) -> None:
         entities = {
@@ -243,14 +257,34 @@ class TestBuildDashboardConfig:
         assert views[0]["title"] == "Essent"
         assert views[1]["title"] == "Eneco"
 
-    async def test_includes_builtin_curve_when_option_enabled(self) -> None:
+    async def test_includes_price_chart_when_option_enabled(self) -> None:
         entry = _make_entry(
             "entry_1", "Essent", "essent", options={"include_price_curve": True}
         )
         hass = MagicMock()
         hass.config_entries.async_entries.return_value = [entry]
         fake_registry = FakeRegistry(_registry_for([entry]))
-        with patch.object(dash.entity_registry, "async_get", return_value=fake_registry):
+        with (
+            patch.object(dash.entity_registry, "async_get", return_value=fake_registry),
+            patch.object(dash, "is_card_registered", return_value=True),
+        ):
+            config, _ = await dash.build_dashboard_config(hass)
+        assert config is not None
+        assert _cards_of_type(
+            config["views"][0], "custom:dynamic-energy-prices-chart"
+        )
+
+    async def test_uses_history_graph_when_chart_unavailable(self) -> None:
+        entry = _make_entry(
+            "entry_1", "Essent", "essent", options={"include_price_curve": True}
+        )
+        hass = MagicMock()
+        hass.config_entries.async_entries.return_value = [entry]
+        fake_registry = FakeRegistry(_registry_for([entry]))
+        with (
+            patch.object(dash.entity_registry, "async_get", return_value=fake_registry),
+            patch.object(dash, "is_card_registered", return_value=False),
+        ):
             config, _ = await dash.build_dashboard_config(hass)
         assert config is not None
         assert _cards_of_type(config["views"][0], "history-graph")

@@ -4,7 +4,7 @@
       "init": {
         "data": {
           "threshold": "Price threshold (EUR/kWh, leave empty to use today's average)",
-          "include_price_curve": "Include 'Electricity price (last 24h)' chart card (built-in history graph)",
+          "include_price_curve": "Include 'Electricity prices' chart card (today and tomorrow, including upcoming hours)",
           "install_dashboard": "Install or update the Energy Prices dashboard",
           "uninstall_dashboard": "Uninstall the Energy Prices dashboard"
         }

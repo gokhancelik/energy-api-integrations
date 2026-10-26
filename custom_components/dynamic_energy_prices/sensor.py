@@ -152,19 +152,31 @@ def _future_prices(prices: list[PricePoint]) -> list[PricePoint]:
     return [p for p in prices if p.end > now]
 
 
+def _price_points_attr(points: list[PricePoint]) -> list[dict[str, Any]]:
+    """Serialize price points for the dashboard chart and automations.
+
+    ``start``/``end`` keep the historical ``HH:MM`` format for existing
+    templates, while ``start_iso``/``end_iso`` preserve the date so the chart
+    can place multi-day prices (yesterday, today, tomorrow) correctly.
+    """
+    return [
+        {
+            "start": p.start.strftime("%H:%M"),
+            "end": p.end.strftime("%H:%M"),
+            "start_iso": p.start.isoformat(),
+            "end_iso": p.end.isoformat(),
+            "price": p.total_price,
+        }
+        for p in points
+    ]
+
+
 def _hourly_prices_extra(prices: ProviderPrices) -> list[dict[str, Any]] | None:
     """Extract hourly electricity prices as a list of {time, price} dicts."""
     series = _electricity_series(prices)
     if series is None:
         return None
-    return [
-        {
-            "start": p.start.strftime("%H:%M"),
-            "end": p.end.strftime("%H:%M"),
-            "price": p.total_price,
-        }
-        for p in series.prices
-    ]
+    return _price_points_attr(series.prices)
 
 
 def _cheapest_block_value(prices: ProviderPrices) -> datetime | None:
@@ -232,14 +244,7 @@ def _current_price_extra_attrs(
     data: dict[str, Any] = {
         ATTR_PROVIDER: provider_id,
         ATTR_PRICE_BREAKDOWN: current.breakdown,
-        "hourly_prices": [
-            {
-                "start": p.start.strftime("%H:%M"),
-                "end": p.end.strftime("%H:%M"),
-                "price": p.total_price,
-            }
-            for p in series.prices
-        ],
+        "hourly_prices": _price_points_attr(series.prices),
     }
     return data
 
@@ -263,14 +268,7 @@ def _current_price_coord_extra_attrs(
     data: dict[str, Any] = {
         ATTR_PROVIDER: provider_id,
         ATTR_PRICE_BREAKDOWN: current.breakdown,
-        "hourly_prices": [
-            {
-                "start": p.start.strftime("%H:%M"),
-                "end": p.end.strftime("%H:%M"),
-                "price": p.total_price,
-            }
-            for p in coordinator.all_electricity_prices
-        ],
+        "hourly_prices": _price_points_attr(coordinator.all_electricity_prices),
     }
     return data
 

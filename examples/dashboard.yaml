@@ -13,8 +13,9 @@
 # Settings > Devices & Services > Dynamic Energy Prices > Entities for
 # your exact entity IDs.
 #
-# Every card uses only Home Assistant's built-in card types, so no custom
-# frontend resources are required.
+# Every card uses Home Assistant's built-in card types plus the price chart
+# bundled with this integration (loaded automatically - no extra frontend
+# resource to install).
 #
 # Some rows are only relevant for certain providers/tariffs (gas, or
 # tomorrow's prices — only available for EnergyZero, Eneco, and Frank
@@ -48,16 +49,12 @@ views:
             name: Cheap now?
             icon: mdi:cash-check
 
-      # --- Electricity price history (built-in card) ---------------------
-      - type: history-graph
-        title: Electricity price (last 24h)
-        hours_to_show: 24
-        refresh_interval: 30
-        entities:
-          - entity: sensor.essent_current_electricity_price
-            name: Price
-          - entity: sensor.essent_average_electricity_price
-            name: Average
+      # --- Electricity prices (today + tomorrow) -------------------------
+      # Upcoming hours appear as soon as the provider publishes them.
+      - type: custom:dynamic-energy-prices-chart
+        title: Electricity prices
+        entity: sensor.essent_current_electricity_price
+        average_entity: sensor.essent_average_electricity_price
 
       # --- Planning: cheapest block + tomorrow preview ------------------
       - type: entities
