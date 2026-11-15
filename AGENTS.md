@@ -86,6 +86,10 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes-file "C:\Users\gokha\AppData\L
 
 ## Changelog
 
+### v0.27.1
+
+- **Fix "Unknown error" when setting up Frank Energie (fixes #3):** Frank's GraphQL API now returns `perUnit` as a unit label (`"KWH"`/`"M3"`) instead of a numeric total, so parsing crashed with `ValueError`. The total price is now the sum of `marketPrice`, `marketPriceTax`, `sourcingMarkupPrice` and `energyTaxPrice`. Malformed entries raise `ProviderResponseError` (shown as "invalid response") and the config flow has a message for the generic `unknown` error.
+
 ### v0.27.0
 
 - **Future prices in the electricity price graph:** the optional dashboard chart now shows today's hours (past + upcoming) **and tomorrow's** prices as soon as the provider publishes them, instead of only recorded history. It is rendered by a small chart card bundled with the integration (`custom:dynamic-energy-prices-chart`), served and registered automatically at setup — no third-party frontend card to install. Past bars are muted, the current hour is highlighted, upcoming hours use the primary colour, and today's average is a dashed reference line. When the bundled card cannot be registered, the dashboard falls back to the built-in `history-graph` card.

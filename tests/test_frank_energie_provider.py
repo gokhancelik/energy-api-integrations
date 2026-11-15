@@ -34,7 +34,7 @@ MOCK_MARKET_PRICES_RESPONSE: dict = {
                     "marketPriceTax": 0.01053,
                     "sourcingMarkupPrice": 0.00850,
                     "energyTaxPrice": 0.11533,
-                    "perUnit": 0.18448,
+                    "perUnit": "KWH",
                 },
                 {
                     "from": "2026-06-17T01:00:00.000Z",
@@ -43,7 +43,7 @@ MOCK_MARKET_PRICES_RESPONSE: dict = {
                     "marketPriceTax": 0.00959,
                     "sourcingMarkupPrice": 0.00850,
                     "energyTaxPrice": 0.11533,
-                    "perUnit": 0.17909,
+                    "perUnit": "KWH",
                 },
             ],
             "gasPrices": [
@@ -54,7 +54,7 @@ MOCK_MARKET_PRICES_RESPONSE: dict = {
                     "marketPriceTax": 0.06729,
                     "sourcingMarkupPrice": 0.04500,
                     "energyTaxPrice": 0.59253,
-                    "perUnit": 1.02527,
+                    "perUnit": "M3",
                 },
             ],
         }
@@ -102,7 +102,7 @@ async def test_successful_fetch_electricity_only(
                         "from": "2026-06-17T00:00:00.000Z",
                         "till": "2026-06-17T01:00:00.000Z",
                         "marketPrice": 0.05,
-                        "perUnit": 0.18,
+                        "perUnit": "KWH",
                     },
                 ],
                 "gasPrices": [],
@@ -285,3 +285,43 @@ async def test_nl_default_no_country_header(mock_aiohttp_session: Any) -> None:
     _, kwargs = mock_aiohttp_session.post.call_args
     headers = kwargs.get("headers", {})
     assert "x-country" not in headers
+
+
+@pytest.mark.asyncio
+async def test_total_price_is_sum_of_components(
+    provider: FrankEnergiePriceProvider, mock_aiohttp_session: Any
+) -> None:
+    """perUnit is a unit label; the total is the sum of the price components."""
+    resp = mock_http_response(json_data=MOCK_MARKET_PRICES_RESPONSE)
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
+
+    prices = await provider.async_fetch_prices()
+
+    assert prices.electricity.prices[0].total_price == pytest.approx(0.18448)
+    assert prices.gas.prices[0].total_price == pytest.approx(1.02527)
+
+
+@pytest.mark.asyncio
+async def test_malformed_entry_raises_response_error(
+    provider: FrankEnergiePriceProvider, mock_aiohttp_session: Any
+) -> None:
+    """A non-numeric price component raises ProviderResponseError."""
+    mock_data = {
+        "data": {
+            "marketPrices": {
+                "electricityPrices": [
+                    {
+                        "from": "2026-06-17T00:00:00.000Z",
+                        "till": "2026-06-17T01:00:00.000Z",
+                        "marketPrice": "abc",
+                        "perUnit": "KWH",
+                    },
+                ],
+            }
+        }
+    }
+    resp = mock_http_response(json_data=mock_data)
+    mock_aiohttp_session.post.return_value.__aenter__.return_value = resp
+
+    with pytest.raises(ProviderResponseError):
+        await provider.async_fetch_prices()

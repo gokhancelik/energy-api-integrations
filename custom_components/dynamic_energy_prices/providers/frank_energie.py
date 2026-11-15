@@ -26,6 +26,14 @@ REQUEST_TIMEOUT = 10
 COUNTRY_NL = "NL"
 COUNTRY_BE = "BE"
 
+# The API returns the price as separate components; ``perUnit`` is only a unit label.
+PRICE_COMPONENTS = (
+    "marketPrice",
+    "marketPriceTax",
+    "sourcingMarkupPrice",
+    "energyTaxPrice",
+)
+
 MARKET_PRICES_QUERY = """
 query MarketPrices($date: String!) {
   marketPrices(date: $date) {
@@ -173,33 +181,32 @@ class FrankEnergiePriceProvider(PriceProvider):
         for entry in raw_prices:
             from_str = entry.get("from")
             till_str = entry.get("till")
-            per_unit = entry.get("perUnit")
 
-            if not from_str or not till_str or per_unit is None:
+            if not from_str or not till_str or entry.get("marketPrice") is None:
                 continue
 
-            start = datetime.fromisoformat(
-                from_str.replace("Z", "+00:00")
-            )
-            end = datetime.fromisoformat(
-                till_str.replace("Z", "+00:00")
-            )
+            try:
+                start = datetime.fromisoformat(from_str.replace("Z", "+00:00"))
+                end = datetime.fromisoformat(till_str.replace("Z", "+00:00"))
+                components = {
+                    key: float(entry.get(key) or 0) for key in PRICE_COMPONENTS
+                }
+            except (ValueError, TypeError) as err:
+                raise ProviderResponseError(
+                    f"Invalid price entry from Frank Energie API: {err}"
+                ) from err
 
-            breakdown = {}
-            if "marketPrice" in entry:
-                breakdown[BREAKDOWN_MARKET_PRICE] = float(entry["marketPrice"])
-            if "sourcingMarkupPrice" in entry:
-                breakdown[BREAKDOWN_SUPPLIER_MARKUP] = float(
-                    entry["sourcingMarkupPrice"]
-                )
-            if "energyTaxPrice" in entry:
-                breakdown[BREAKDOWN_ENERGY_TAX] = float(entry["energyTaxPrice"])
+            breakdown = {
+                BREAKDOWN_MARKET_PRICE: components["marketPrice"],
+                BREAKDOWN_SUPPLIER_MARKUP: components["sourcingMarkupPrice"],
+                BREAKDOWN_ENERGY_TAX: components["energyTaxPrice"],
+            }
 
             prices.append(
                 PricePoint(
                     start=start,
                     end=end,
-                    total_price=float(per_unit),
+                    total_price=sum(components.values()),
                     currency="EUR",
                     breakdown=breakdown,
                 )

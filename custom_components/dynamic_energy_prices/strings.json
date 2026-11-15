@@ -26,7 +26,8 @@
     },
     "error": {
       "cannot_connect": "Failed to connect to the energy provider. Please check your connection and try again.",
-      "invalid_response": "Received an unexpected response from the energy provider. Please try again later."
+      "invalid_response": "Received an unexpected response from the energy provider. Please try again later.",
+      "unknown": "Unexpected error. Please check the logs for details."
     },
     "abort": {
       "already_configured": "This provider is already configured."
